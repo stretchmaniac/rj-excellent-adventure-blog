@@ -1,0 +1,16 @@
+.root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: Helvetica, sans-serif;
+}
+
+.explorer-editor-parent {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    min-height:0;
+}

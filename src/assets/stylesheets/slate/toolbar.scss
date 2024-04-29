@@ -1,0 +1,31 @@
+.toolbar-root {
+    width: 100%;
+    border-bottom: .5px solid rgba(0,0,0,.5);
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    height: 25px;
+    display: flex;
+}
+
+.icon-button {
+    background-color: white;
+    border: none;
+    border-radius: 4px;
+}
+
+.icon-button:hover {
+    background-color: rgba(0,0,0,.2)
+}
+
+.react-icons {
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+}
+
+.react-icon-small {
+    vertical-align: middle;
+    width: 16px;
+    height: 16px;
+    padding: 2px;
+}

@@ -1,0 +1,41 @@
+.page-list-nothing-parent {
+    display: flex;
+    justify-content: center;
+    padding: 5px 0px 5px 0px;
+}
+
+.page-list-something-parent {
+    overflow-y: auto;
+}
+
+.page-list-nothing-span {
+    display: block;
+    color: rgba(0,0,0,.2);
+    font-style: italic
+}
+
+.page-list-entry {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    margin: 2px;
+    cursor: pointer;
+    border: 1px solid white;
+    border-left: 3px solid white;
+    padding-left: 5px;
+}
+
+.page-list-entry-selected {
+    border: 1px solid black;
+    border-left: 3px solid green;
+}
+
+.page-list-entry-title {
+    font-size: 15px;
+    font-style: bold;
+}
+
+.page-list-entry-date {
+    font-size: 10px;
+    color: rgba(0,0,0,.5)
+}

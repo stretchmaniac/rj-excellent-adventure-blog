@@ -1,0 +1,19 @@
+.toggle-active {
+    background-color: rgba(0,0,0,.1);
+    border: 1px solid rgba(0,0,0,.15);
+}
+
+.toggle-inactive {
+    background-color: white;
+    border: 1px solid transparent;
+}
+
+.toggle-button {
+    border-radius: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-right: 1px;
+    height: 25px;
+    width: 25px;
+    cursor: pointer;
+}

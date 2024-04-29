@@ -1,0 +1,25 @@
+.toggle-button-group-parent {
+    width: calc(100% - 10px);
+    display: flex;
+    flex-direction: row;
+    margin: 5px;
+}
+
+.toggle-button-group-parent button {
+    flex-grow: 1;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.toggle-button-group-parent button:hover{
+    background-color: rgba(0,0,0,.2);
+}
+
+.toggle-button-active {
+    background-color: rgba(0,0,0,.3);
+}
+
+.toggle-button-inactive {
+    background-color: rgba(0,0,0,.1);
+}

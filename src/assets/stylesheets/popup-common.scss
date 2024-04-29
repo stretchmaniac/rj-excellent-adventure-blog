@@ -1,0 +1,56 @@
+.popup-fullscreen {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,.3);
+}
+
+.popup-root {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.popup-header {
+    font-size: 20px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(0,0,0,.3);
+    padding: 5px;
+}
+
+.popup-buttons {
+    float: right; 
+}
+
+.popup-button {
+    margin-left: 5px;
+    padding: 3px;
+    cursor: pointer;
+}
+
+.popup-continue {
+    border: 1px solid black;
+    border-radius: 3px;
+    background-color: rgb(103, 168, 103);
+    color: white;
+}
+
+.popup-continue:hover {
+    background-color: rgb(77, 125, 77);
+}
+
+.popup-cancel {
+    border: none;
+    color: rgba(0,0,0,.5);
+    background-color: transparent;
+}
+
+.popup-cancel:hover {
+    color: black;
+}

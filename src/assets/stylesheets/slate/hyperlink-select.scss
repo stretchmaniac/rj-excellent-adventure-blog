@@ -1,0 +1,40 @@
+.insert-hyperlink-input-row {
+    display: flex;
+    flex-direction: column;
+    margin: 3px;
+}
+
+.insert-hyperlink-checkbox-row {
+    flex-direction: row;
+}
+
+.insert-hyperlink-parent {
+    padding: 2px;
+    display: flex;
+    flex-direction: column;
+}
+
+.insert-hyperlink-label {
+    font-size: small;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.insert-hyperlink-internal-search {
+    box-sizing: border-box;
+}
+
+.insert-hyperlink-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin: 3px;
+}
+
+.insert-hyperlink-no-pages {
+    font-size: small;
+    margin-left: 5px;
+    color: gray;
+}

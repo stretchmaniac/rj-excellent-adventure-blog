@@ -1,0 +1,33 @@
+.menu-background {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: transparent;
+    z-index: 1;
+}
+
+.menu-root {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid rgba(0,0,0,.3);
+    position: absolute;
+    z-index: 1;
+}
+
+.option-row {
+    cursor: pointer;
+    padding: 1px 4px 1px 4px;
+}
+
+.option-row-selected {
+    cursor: pointer;
+    padding: 1px 4px 1px 4px;
+    background-color: rgba(0,0,255,.1);
+}
+
+.option-row:hover {
+    background-color: rgba(0,0,0,.1);
+}
