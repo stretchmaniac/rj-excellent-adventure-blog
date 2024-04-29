@@ -24,3 +24,11 @@ To run, from the same `rj-excellent-adventure` folder run
 npm run dev
 ```
 This will serve the application to `localhost`. Navigate to [http://localhost:8080/](http://localhost:8080/) with your favorite web browser.
+
+Stylistic Changes
+---
+Basic stylistic changes to blog posts can be made in 
+```
+src/assets/stylesheets/slate/rendered-element.scss
+```
+Changes here will apply **globally** to all blog posts.
