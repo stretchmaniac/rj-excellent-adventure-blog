@@ -39,7 +39,7 @@ export function emptyBlogPostWithTitleDate(title: string, date: Date) : Page {
         children: [{text: date.toDateString(), fontSize: 'x-small'}]
     }, {
         type: 'paragraph',
-        children: [{text: ''}]
+        children: [{text: 'Gustav is back!'}]
     }]
     return p
 }
@@ -60,7 +60,7 @@ export function emptyStaticPageWithTitleDate(title: string, date: Date): Page {
         children: [{text: title}]
     }, {
         type: 'paragraph',
-        children: [{text: ''}]
+        children: [{text: 'A static page!'}]
     }]
     return p
 }

@@ -101,9 +101,9 @@ export default function PageDesign(props: PageDesignProps) {
               ReactEditor.focus(editor)
             }}/>
           <Editable 
+            className="slate-editable"
             renderLeaf={renderLeaf}
             renderElement={renderEl}
-            onMouseMove={e => e.preventDefault()}
             spellCheck
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
