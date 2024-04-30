@@ -17,7 +17,7 @@ export default function PageEditor(props: PageEditorProps){
             <div className="page-editor-nonempty">
                 <div className="page-editor-tabs">
                     <ToggleButtonGroup 
-                        options={['Design', 'Images/Files', 'Settings']}
+                        options={['Design', 'Settings']}
                         selected={tab}
                         onChange={i => setTab(i)}/>
                 </div>
@@ -34,7 +34,7 @@ export default function PageEditor(props: PageEditorProps){
                             design: d
                         })}/>
                 : ''}
-                {tab === 2 ? 
+                {tab === 1 ? 
                     <PageSettings 
                         page={page}
                         editPage={newPage => props.onPageEdit(newPage)}
