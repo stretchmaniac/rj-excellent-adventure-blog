@@ -1,4 +1,5 @@
 import { Page } from '../types/PageType'
+import { getReadableDateString } from './date';
 
 let currentID = 0;
 export function nextID(): string {
@@ -27,17 +28,29 @@ export function emptyBlogPost(): Page {
     }
 }
 
+export function fixedBlogHeader(title: string, date: Date) {
+    return [
+        {
+            type: 'h1',
+            readOnly: true,
+            children: [{text: title}]
+        },{
+            type: 'paragraph',
+            readOnly: true,
+            children: [{text: getReadableDateString(date), fontSize: 'small'}]
+        }, {
+            type: 'paragraph',
+            readOnly: true,
+            children: [{text: ''}]  
+        }
+    ]
+}
+
 export function emptyBlogPostWithTitleDate(title: string, date: Date) : Page {
     const p = emptyBlogPost()
     p.title = title
     p.date = date
-    p.design = [{
-        type: 'h1',
-        children: [{text: title}]
-    },{
-        type: 'paragraph',
-        children: [{text: date.toDateString(), fontSize: 'x-small'}]
-    }, {
+    p.design = [...fixedBlogHeader(title, date),{
         type: 'paragraph',
         children: [{text: 'Gustav is back!'}]
     }]

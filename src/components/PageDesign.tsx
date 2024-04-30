@@ -10,6 +10,7 @@ import RenderedElement from './slate/RenderedElement'
 import ClickToExitPopup, { ClickToExitPopupProps } from './ClickToExitPopup'
 import { Page } from '../types/PageType'
 import { Link } from '../types/link'
+import { fixedBlogHeader } from '../tools/empty-page'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -62,9 +63,11 @@ export default function PageDesign(props: PageDesignProps) {
     })
 
     const rootRef = React.useRef<HTMLDivElement>(null)
+    if(props.isBlogPost){
+      maintainFixedHeader(editor, props.pageTitle, props.pageDate)
+    }
 
-    // pageID to get uncontrolled editor to update when page switches
-    return <div className="page-design-root" ref={rootRef} key={props.pageID}>
+    return <div className="page-design-root" ref={rootRef}>
       <ClickToExitPopup {...clickPopupState} />
       <Slate editor={editor} initialValue={props.designStruct}>
           <Toolbar getFormatState={getFormatState} 
@@ -108,6 +111,62 @@ export default function PageDesign(props: PageDesignProps) {
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
     </div>
+}
+
+function maintainFixedHeader(editor: Editor, title: string, date: Date){
+  const exp = fixedBlogHeader(title, date)
+  // check if first children match exp
+  let matches = true
+  for(let i = 0; i < exp.length; i++){
+    if(i >= editor.children.length){
+      matches = false 
+      break
+    }
+    const expEl = exp[i]
+    const actEl = editor.children[i]
+    if(!compareElRecursive(expEl, actEl)){
+      matches = false
+      break
+    }
+  }
+
+  if(!matches){
+    // delete all existing readOnly elements and insert exp
+    editor.removeNodes({
+      at: [],
+      match: (n, p) => (n as any).readOnly
+    })
+    if(editor.children.length === 0){
+      editor.insertNodes({type: 'paragraph', children:[{text:''}]}, {at: [0]})
+    }
+    editor.insertNodes(exp as any, {at: [0]})
+  }
+
+  return matches
+}
+
+function compareElRecursive(el1: any, el2: any): boolean {
+  for(const key in el1){
+    if(key !== 'children' && el1[key] !== el2[key]){
+      return false
+    }
+  }
+  if('children' in el1 && !('children' in el2) ||
+      'children' in el2 && !('children' in el1)){
+    return false
+  }
+  if(!('children' in el1)){
+    return true
+  }
+  if(el1.children.length !== el2.children.length){
+    return false
+  }
+  for(let i = 0; i < el1.children.length; i++){
+    if(!compareElRecursive(el1.children[i], el2.children[i])){
+      return false
+    }
+  }
+  return true
 }
 
 function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
@@ -672,6 +731,9 @@ function setList(editor: Editor, list: string){
 export type PageDesignProps = {
   allPages: Array<Page>
   pageID: string
+  pageTitle: string 
+  pageDate: Date
+  isBlogPost: boolean
   designStruct: any[]
   onChange: (design: any[]) => void
 }

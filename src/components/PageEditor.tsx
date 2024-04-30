@@ -26,6 +26,9 @@ export default function PageEditor(props: PageEditorProps){
                         allPages={props.allPages}
                         designStruct={page.design}
                         pageID={page.id}
+                        pageTitle={page.title}
+                        pageDate={page.date}
+                        isBlogPost={page.isBlogPost}
                         onChange={d => props.onPageEdit({
                             ...page,
                             design: d
