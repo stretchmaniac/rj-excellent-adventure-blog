@@ -61,6 +61,7 @@ export default function Explorer(props: ExplorerProps) {
                 })}
                 />
         : ''}
+        <div style={{height: '10px'}}></div>
         <PageList pages={applicablePages}
             selected={selectedPage}
             selectPage={(index) => {
@@ -74,6 +75,7 @@ export default function Explorer(props: ExplorerProps) {
         { explorerState.mode == EXPLORER_MODE.SEARCH_RESULTS ? '' :
             <div style={{display:'flex', justifyContent: 'center'}}>
                 <button
+                    className="add-post-button"
                     onClick={() => {
                         props.showNewPageDialog(explorerState.postTabSelected, p => {
                             if(p == null){ return; }

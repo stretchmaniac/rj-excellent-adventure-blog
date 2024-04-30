@@ -13,8 +13,14 @@ export default function PageSettings(props: PageSettingsProps) {
     }
     return <div className='page-settings-root'>
         <div className='input-row'>
+            <ToggleButtonGroup
+                options={['Blog Post', 'Static Page']}
+                selected={props.page.isBlogPost ? 0 : 1}
+                onChange={i => props.editPage({...props.page, isBlogPost: i === 0})} />
+        </div>
+        <div className='input-row'>
             <span className='input-label'>
-                Page title: 
+                Page title
             </span>
             <input value={props.page.title} 
                 onChange={e => props.editPage({...props.page, title: e.target.value})}
@@ -22,7 +28,7 @@ export default function PageSettings(props: PageSettingsProps) {
         </div>
         <div className='input-row'>
             <span className='input-label'>
-                Page date (sort order): 
+                Page date (sort order)
             </span>
             <input type="date" value={dateStr}
                 onChange={e => {
@@ -32,15 +38,6 @@ export default function PageSettings(props: PageSettingsProps) {
                         date: new Date(Number.parseInt(yyyy), Number.parseInt(mm) - 1, Number.parseInt(dd))
                     })
                 }}/> 
-        </div>
-        <div className='input-row'>
-            <span className='input-label'>
-                Page type:
-            </span>
-            <ToggleButtonGroup
-                options={['Blog Post', 'Static Page']}
-                selected={props.page.isBlogPost ? 0 : 1}
-                onChange={i => props.editPage({...props.page, isBlogPost: i === 0})} />
         </div>
         {props.page.isBlogPost ? 
             <React.Fragment>

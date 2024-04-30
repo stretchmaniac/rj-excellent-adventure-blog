@@ -1,25 +1,28 @@
 .toggle-button-group-parent {
-    width: calc(100% - 10px);
     display: flex;
     flex-direction: row;
-    margin: 5px;
+    background-color: transparent;
 }
 
 .toggle-button-group-parent button {
-    flex-grow: 1;
-    border: none;
+    border-top: none;
+    border-right: none;
+    border-left: none;
     padding: 5px;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 .toggle-button-group-parent button:hover{
-    background-color: rgba(0,0,0,.2);
+    background-color: rgb(245, 245, 245);
 }
 
 .toggle-button-active {
-    background-color: rgba(0,0,0,.3);
+    background-color: white;
+    border-bottom: 3px solid rgb(221, 180, 243);
 }
 
 .toggle-button-inactive {
-    background-color: rgba(0,0,0,.1);
+    background-color: white;
+    border-bottom: 1px solid rgba(0,0,0,.5);
 }

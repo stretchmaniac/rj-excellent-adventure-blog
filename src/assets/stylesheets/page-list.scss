@@ -1,17 +1,28 @@
+$bc: rgb(206, 206, 206);
+
 .page-list-nothing-parent {
     display: flex;
     justify-content: center;
     padding: 5px 0px 5px 0px;
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 5px;
 }
 
 .page-list-something-parent {
     overflow-y: auto;
+    width: 100%;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .page-list-nothing-span {
     display: block;
     color: rgba(0,0,0,.2);
-    font-style: italic
+    font-style: italic;
+    font-size: small;
 }
 
 .page-list-entry {
@@ -20,19 +31,24 @@
     justify-content: left;
     margin: 2px;
     cursor: pointer;
-    border: 1px solid white;
-    border-left: 3px solid white;
-    padding-left: 5px;
+    padding: 5px;
+    background-color: white;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 2px;
+    border-bottom: 1px solid rgb(230,230,230);
 }
 
 .page-list-entry-selected {
-    border: 1px solid black;
-    border-left: 3px solid green;
+    background-color: rgb(233, 216, 243);
 }
 
 .page-list-entry-title {
     font-size: 15px;
     font-style: bold;
+    max-width: 300px;
 }
 
 .page-list-entry-date {

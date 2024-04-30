@@ -4,7 +4,7 @@ import '../assets/stylesheets/page-list.scss'
 export default function PageList(props: PageListProps){
     if(props.pages.length === 0){
         return <div className="page-list-nothing-parent">
-            <span className="page-list-nothing-span">nothing to show</span>
+            <span className="page-list-nothing-span">no pages</span>
         </div>
     }
     return <div className='page-list-something-parent'>
