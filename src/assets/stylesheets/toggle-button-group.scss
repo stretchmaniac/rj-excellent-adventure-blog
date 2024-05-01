@@ -14,11 +14,11 @@
 }
 
 .toggle-button-group-parent button:hover{
-    background-color: rgb(245, 245, 245);
+    border-bottom:3px solid rgb(221, 180, 243);
 }
 
 .toggle-button-active {
-    background-color: white;
+    background-color: rgb(236, 212, 250);
     border-bottom: 3px solid rgb(221, 180, 243);
 }
 
