@@ -1,7 +1,7 @@
-import React, { TextareaHTMLAttributes } from 'react'
+import React from 'react'
 import { Editor, createEditor, Node, Transforms, Path, Range, Point } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementProps } from 'slate-react'
-import { BaseEditor, Descendant, Ancestor } from 'slate'
+import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import './../assets/stylesheets/page-design.scss'
 import Toolbar, { FormatState } from './slate/Toolbar'
@@ -70,7 +70,7 @@ export default function PageDesign(props: PageDesignProps) {
 
     return <div className="page-design-root" ref={rootRef}>
       <ClickToExitPopup {...clickPopupState} />
-      <Slate editor={editor} initialValue={props.designStruct}>
+      <Slate editor={editor} initialValue={props.designStruct} key={''+props.pageID}>
           <Toolbar getFormatState={getFormatState} 
             allPages={props.allPages}
             getSelectedText={getSelectedText}
