@@ -5,12 +5,12 @@ import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
 import { MdDelete, MdOutlineFileUpload } from "react-icons/md";
 import { ImEnlarge2, ImShrink2 } from "react-icons/im";
 import { FaParagraph } from "react-icons/fa6";
-import { RenderElementProps, useFocused, useSelected, useSlateStatic } from "slate-react"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Path, Transforms } from "slate";
 
 export default function MediaChildBox(props: MediaChildProps) {
-    const editor = useSlateStatic()
+    const editor = useSlate()
     const selected = useSelected()
     const focused = useFocused()
     return <div {...props.attributes}
@@ -58,9 +58,19 @@ export default function MediaChildBox(props: MediaChildProps) {
                 disabled={props.media.size === 'small'}>
                 <ImShrink2 className='media-tool-icon-small' />
             </button>
-            <button title='caption' className='media-tool-button'
-                >
+            <button title='caption' 
+                className={(hasCaption(props) ? 'selected ': '') + 'media-tool-button'}
+                onClick={() => {
+                    toggleCaption(editor, props, !hasCaption(props))
+                }}>
                 <FaParagraph className='media-tool-icon-small'/>
+            </button>
+            <button title='parent caption'
+                className={(hasParentCaption(props) ? 'selected ' : '') + 'media-tool-button'}
+                onClick={() => {
+                    toggleParentCaption(editor, props, !hasParentCaption(props))
+                }}>
+                <FaParagraph className='media-tool-icon'/>
             </button>
         </div>}
     </div>
@@ -71,17 +81,38 @@ function insert(editor: Editor, props: MediaChildProps, at: number){
     newMChildren.splice(at, 0, {
         mediaType: '',
         size: props.media.size,
-        caption: '',
         type: 'media-child',
         children: [{text: ''}]
     })
+    replaceMediaChildren(editor, props, newMChildren)
+}
+
+function replaceMediaChildren(editor: Editor, props: MediaChildProps, newChildren: any[]){
     Transforms.removeNodes(editor, {
         at: [],
         match: (n, p) => p.length > 0 && Path.equals(Editor.parent(editor, p)[1], props.parentPath)
     })
-    Transforms.insertNodes(editor, newMChildren as any, {
-        at: [...props.parentPath, 0]
-    })
+    // this copy operation is very important!
+    // slate will only re-render nodes that are updated. 
+    // Since all the images/captions are passed into each MediaChildBox, 
+    // we must trigger a re-render of every child whenever any child changes.
+    // While we removed all the child nodes above, this was apparently not enough
+    // to signal to slate that it should re-render each identical child mounted 
+    // in the insertNodes below. Copying each child does the trick, however.
+    for(let i = 0; i < newChildren.length; i++){
+        newChildren[i] = {...newChildren[i]}
+    }
+
+    if(newChildren.length === 0){
+        // remove the parent node entirely
+        Transforms.removeNodes(editor, {
+            at: props.parentPath
+        })
+    } else {
+        Transforms.insertNodes(editor, newChildren, {
+            at: [...props.parentPath, 0]
+        })
+    }
 }
 
 function insertLeft(editor: Editor, props: MediaChildProps) {
@@ -89,27 +120,83 @@ function insertLeft(editor: Editor, props: MediaChildProps) {
     Transforms.select(editor, [...props.parentPath, props.mediaIndex + 1])
 }
 
+function hasCaption(props: MediaChildProps){
+    const cArr = props.parentNode.children
+    return cArr.length > props.mediaIndex + 1 && 
+        cArr[props.mediaIndex + 1].type === 'media-child-caption'
+}
+
+function hasParentCaption(props: MediaChildProps){
+    const cArr = props.parentNode.children
+    return cArr.length > 0 && cArr[cArr.length - 1].type === 'media-parent-caption'
+}
+
 function insertRight(editor: Editor, props: MediaChildProps) {
-    insert(editor, props, props.mediaIndex + 1)
+    insert(editor, props, props.mediaIndex + (hasCaption(props) ? 2 : 1))
     Transforms.select(editor, [...props.parentPath, props.mediaIndex])
 }
 
 function deleteMedia(editor: Editor, props: MediaChildProps) {
     const newMChildren: Array<MediaChild> = [...props.parentNode.children]
     newMChildren.splice(props.mediaIndex, 1)
-    Transforms.removeNodes(editor, {
-        at: [],
-        match: (n, p) => p.length > 0 && Path.equals(Editor.parent(editor, p)[1], props.parentPath)
-    })
-    Transforms.insertNodes(editor, newMChildren as any, {
-        at: [...props.parentPath, 0]
-    })
+    replaceMediaChildren(editor, props, newMChildren)
 }
 
 function resize(newSize: string, editor: Editor, props: MediaChildProps){
     Transforms.setNodes(editor, {size: newSize} as Partial<Node>, {
         at: [...props.parentPath, props.mediaIndex]
     })
+}
+
+function toggleParentCaption(editor: Editor, props: MediaChildProps, enabled: boolean){
+    const newChildren = [...props.parentNode.children]
+    if(!enabled){
+        // remove caption
+        newChildren.splice(newChildren.length - 1, 1)
+    } else {
+        // add caption
+        newChildren.push({
+            type: 'media-parent-caption',
+            children: [{
+                type: 'paragraph',
+                textAlign: 'center',
+                children: [{text: 'parent caption text', fontSize: 'small', italic: true}]
+            }]
+        })
+    }
+    replaceMediaChildren(editor, props, newChildren)
+    if(!enabled){
+        // keep this child selected
+        Transforms.select(editor, [...props.parentPath, props.mediaIndex])
+    } else {
+        // select parent caption
+        Transforms.select(editor, [...props.parentPath, newChildren.length - 1])
+    }
+}
+
+function toggleCaption(editor: Editor, props: MediaChildProps, enabled: boolean){
+    const newChildren = [...props.parentNode.children]
+    if(!enabled){
+        // remove caption
+        newChildren.splice(props.mediaIndex + 1, 1)
+    } else {
+        // add caption
+        newChildren.splice(props.mediaIndex + 1, 0, {
+            type: 'media-child-caption',
+            children: [{
+                type: 'paragraph',
+                textAlign: 'center',
+                children: [{text: 'caption text', fontSize: 'small', italic: true}]
+            }]
+        })
+    }
+    replaceMediaChildren(editor, props, newChildren)
+    // select media child node if caption is going away, otherwise the caption text
+    if(!enabled){
+        Transforms.select(editor, [...props.parentPath, props.mediaIndex])
+    } else {
+        Transforms.select(editor, [...props.parentPath, props.mediaIndex + 1])
+    }
 }
 
 export type MediaChildProps = {

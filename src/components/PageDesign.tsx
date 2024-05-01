@@ -733,14 +733,18 @@ function setList(editor: Editor, list: string){
 function insertMediaBox(editor: Editor) {
   Transforms.splitNodes(editor)
   // add new media node at root level
+  // the media parent will contain nodes of type "media-child", "media-child-caption", and 
+  // "media-parent-caption".
+  // A "media-child-caption" will always follow a media-child, and gives the caption for 
+  // the immediately previous media-child. The "media-parent-caption", if it exists,
+  // must always be the last child in the media-parent. This is to preserve decent 
+  // ordering in the document, when highlighting for example.
   Transforms.insertNodes(editor, [{
     type: 'media-parent',
-    caption: '',
     children: [{
       type: 'media-child',
       mediaType: '', // image, movie, photosphere
       size: 'medium', // small, medium, large
-      caption: '',
       children: [{text: ''}]
     } as MediaChild]
   }, { // just always put paragraph after images
@@ -753,7 +757,6 @@ export type MediaChild = {
   type: string,
   mediaType: string // empty string, image, movie photosphere
   size: string // small, medium, large
-  caption: string // empty or non-empty
   children: Array<any>
 }
 

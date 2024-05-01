@@ -1,20 +1,20 @@
-import { ReactEditor, RenderElementProps, useSlateStatic } from "slate-react";
+import { ReactEditor, RenderElementProps, useSlate } from "slate-react";
 import './../../assets/stylesheets/slate/rendered-element.scss'
 import { Link } from "../../types/link";
 import { MediaChild } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
+import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor } from "slate";
+import { MediaParent } from "./MediaParent";
 
 export default function RenderedElement(props: RenderElementProps) {
     const el = props.element
     const t = (el as any).type
-    const editor = useSlateStatic()
+    const editor = useSlate()
     const elPath = ReactEditor.findPath(editor, el)
 
     if(t === 'media-parent'){
-        return <div className="media-parent" {...props.attributes} contentEditable={false}>
-            {props.children}
-        </div>
+        return <MediaParent {...props} />
     }
     if(t === 'media-child'){
         const [parent, parentPath] = Editor.parent(editor, elPath)
@@ -26,6 +26,11 @@ export default function RenderedElement(props: RenderElementProps) {
             parentPath={parentPath}>
             {props.children}
         </MediaChildBox>
+    }
+    if(t === 'media-child-caption' || t === 'media-parent-caption'){
+        return <div {...props.attributes}>
+            {props.children}
+        </div>
     }
 
     const textAlign = ('textAlign' in el ? el.textAlign : 'left') as string
