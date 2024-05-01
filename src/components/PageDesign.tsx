@@ -23,10 +23,11 @@ declare module 'slate' {
   }
 }
 
-const withInlines = (editor: Editor) => {
+const withInlinesAndVoids = (editor: Editor) => {
   // we need to manually specify inline elements so that slate doesn't silently 
   // delete them :(
   editor.isInline = el => ['a'].includes(el.type)
+  editor.isVoid = el => ['media-child'].includes(el.type)
   return editor
 }
 
@@ -45,7 +46,7 @@ const withNoEmptyLink = (editor: Editor) => {
 
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
-      const res = withNoEmptyLink(withInlines(withReact(createEditor())))
+      const res = withNoEmptyLink(withInlinesAndVoids(withReact(createEditor())))
       return res
     })
 
@@ -78,6 +79,7 @@ export default function PageDesign(props: PageDesignProps) {
               setBlockFormat(editor, item, f)
             }}
             insertText={text => Transforms.insertText(editor, text)}
+            insertMediaBox={() => insertMediaBox(editor)}
             clickToExitPopupHook={menuOpts => {
               // calculate relative position from menuOpts.position, which is relative to window
               if(rootRef.current){
@@ -726,6 +728,33 @@ function setList(editor: Editor, list: string){
 
     }
   }
+}
+
+function insertMediaBox(editor: Editor) {
+  Transforms.splitNodes(editor)
+  // add new media node at root level
+  Transforms.insertNodes(editor, [{
+    type: 'media-parent',
+    caption: '',
+    children: [{
+      type: 'media-child',
+      mediaType: '', // image, movie, photosphere
+      size: 'medium', // small, medium, large
+      caption: '',
+      children: [{text: ''}]
+    } as MediaChild]
+  }, { // just always put paragraph after images
+    type: 'paragraph',
+    children: [{text: ''}]
+  }] as any[])
+}
+
+export type MediaChild = {
+  type: string,
+  mediaType: string // empty string, image, movie photosphere
+  size: string // small, medium, large
+  caption: string // empty or non-empty
+  children: Array<any>
 }
 
 export type PageDesignProps = {

@@ -1,10 +1,33 @@
-import { RenderElementProps } from "slate-react";
+import { ReactEditor, RenderElementProps, useSlateStatic } from "slate-react";
 import './../../assets/stylesheets/slate/rendered-element.scss'
 import { Link } from "../../types/link";
+import { MediaChild } from "../PageDesign";
+import MediaChildBox from "./MediaChildBox";
+import { Editor } from "slate";
 
 export default function RenderedElement(props: RenderElementProps) {
     const el = props.element
     const t = (el as any).type
+    const editor = useSlateStatic()
+    const elPath = ReactEditor.findPath(editor, el)
+
+    if(t === 'media-parent'){
+        return <div className="media-parent" {...props.attributes} contentEditable={false}>
+            {props.children}
+        </div>
+    }
+    if(t === 'media-child'){
+        const [parent, parentPath] = Editor.parent(editor, elPath)
+        return <MediaChildBox
+            attributes={props.attributes}
+            media={el as MediaChild}
+            mediaIndex={elPath[elPath.length - 1]}
+            parentNode={parent}
+            parentPath={parentPath}>
+            {props.children}
+        </MediaChildBox>
+    }
+
     const textAlign = ('textAlign' in el ? el.textAlign : 'left') as string
     const genericStyle = {
         // jump through hoops to get typescript to accept our types...

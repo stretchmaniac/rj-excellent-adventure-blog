@@ -2,7 +2,7 @@ import './../../assets/stylesheets/slate/toolbar.scss'
 import { BiBold, BiItalic, BiUnderline, BiStrikethrough, BiSolidQuoteAltLeft  } from 'react-icons/bi'
 import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted  } from "react-icons/md";
 import { VscTextSize } from "react-icons/vsc"
-import { FaHouseChimney } from "react-icons/fa6";
+import { FaHouseChimney, FaRegImage } from "react-icons/fa6";
 import { GrTextAlignCenter, GrTextAlignLeft, GrTextAlignRight } from "react-icons/gr";
 import ToggleButton from './ToggleButton'
 import DropDownSelect from './DropDownSelect'
@@ -203,6 +203,12 @@ export default function Toolbar(props: ToolbarProps) {
             })}>
             <MdFormatListNumbered className="react-icons" />
         </ToggleButton>
+        <ToggleButton 
+            title="image/movie/photosphere"
+            active={false}
+            onChange={active => props.insertMediaBox()}>
+            <FaRegImage className="react-icon-small" />
+        </ToggleButton>
     </div>
 }
 
@@ -210,6 +216,7 @@ export type ToolbarProps = {
     allPages: Array<Page>
     getSelectedText: () => string
     insertText: (text: string) => void
+    insertMediaBox: () => void
     getFormatState: () => FormatState
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void
