@@ -1,6 +1,7 @@
 import { getDateInputStr } from '../tools/date'
 import { Page } from '../types/PageType'
 import './../assets/stylesheets/page-settings.scss'
+import './../assets/stylesheets/form-common.scss'
 import ToggleButtonGroup from './ToggleButtonGroup'
 import React from 'react'
 
@@ -22,9 +23,12 @@ export default function PageSettings(props: PageSettingsProps) {
             <span className='input-label'>
                 Page title
             </span>
-            <input value={props.page.title} 
-                onChange={e => props.editPage({...props.page, title: e.target.value})}
-                />
+            <textarea 
+                rows={2}
+                cols={30}
+                className="short-multiline-textarea" 
+                value={props.page.title} 
+                onChange={e => props.editPage({...props.page, title: e.target.value})}/>
         </div>
         <div className='input-row'>
             <span className='input-label'>

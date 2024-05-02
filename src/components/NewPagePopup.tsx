@@ -1,6 +1,7 @@
 import React from 'react'
 import './../assets/stylesheets/new-page-popup.scss'
 import './../assets/stylesheets/popup-common.scss'
+import './../assets/stylesheets/form-common.scss'
 import { getDateInputStr } from '../tools/date'
 
 export function NewPagePopup(props: NewPagePopupProps) {
@@ -12,15 +13,19 @@ export function NewPagePopup(props: NewPagePopupProps) {
                     {props.headerText}
                 </div>
                 <div className='popup-content'>
-                    <label>
-                        Title:
-                        <input value={title} onChange={e => setTitle(e.target.value)}/>
-                    </label>
-                    <br/>
-                    <label>
-                        Date:
+                    <div className='input-row'>
+                        <span className="input-label">Title</span>
+                        <textarea 
+                            rows={2}
+                            cols={30}
+                            className="short-multiline-textarea"
+                            value={title} 
+                            onChange={e => setTitle(e.target.value)}/>
+                    </div>
+                    <div className="input-row">
+                        <span className="input-label">Date</span>
                         <input type="date" value={date} onChange={e => setDate(e.target.value)}/>
-                    </label>
+                    </div>
                 </div>
                 <div className='popup-buttons'>
                     <button 

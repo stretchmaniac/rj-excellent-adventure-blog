@@ -1,5 +1,6 @@
 import { Page } from "../types/PageType"
 import '../assets/stylesheets/page-list.scss'
+import { getReadableDateString } from "../tools/date"
 
 export default function PageList(props: PageListProps){
     if(props.pages.length === 0){
@@ -12,8 +13,10 @@ export default function PageList(props: PageListProps){
             <div className={"page-list-entry" + (i == props.selected ? ' page-list-entry-selected' : '')}
                 onClick={() => props.selectPage(i)}
                 key={i}>
-                <span className="page-list-entry-title">{p.title}</span>
-                <span className="page-list-entry-date">{p.date.toDateString()}</span>
+                {p.title.split('\n').map((line, i) => 
+                    <span className="page-list-entry-title" key={i}>{line}</span>
+                )}
+                <span className="page-list-entry-date">{getReadableDateString(p.date)}</span>
             </div>
         )}
     </div>

@@ -1,0 +1,33 @@
+.input-row {
+    display:flex;
+    flex-direction:column;
+    margin: 5px;
+}
+
+.input-row input {
+    margin: 2px;
+}
+
+.input-row textarea {
+    margin: 2px;
+    font: inherit;
+}
+
+.short-multiline-textarea {
+    resize: none;
+}
+
+.input-row-checkbox {
+    margin: 5px;
+}
+
+.input-label{
+    font-size: small;
+    margin-left: 5px;
+    padding-bottom: 2px;
+}
+
+.input-label-checkbox {
+    font-size: small;
+    margin-left: 5px;
+}
