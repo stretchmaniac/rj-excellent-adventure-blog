@@ -57,7 +57,7 @@ app.post('/set-data', cors(corsOptions), function(req, res){
         .map(dirent => dirent.name)
     const pageMap = {}
     for(const childFolder of childFolderNames){
-        if(fs.existsSync(rootDir+'/'+childFolder+'/'+pageFileName())){
+        if(folderNamePageLike(childFolder) && fs.existsSync(rootDir+'/'+childFolder+'/'+pageFileName())){
             // check for page id
             const pageId = JSON.parse(fs.readFileSync(rootDir+'/'+childFolder+'/'+pageFileName())).id
             const filtered = pages.filter(p => p.id === pageId)
