@@ -1,10 +1,8 @@
 import { Page } from '../types/PageType'
 import { getReadableDateString } from './date';
 
-let currentID = 0;
 export function nextID(): string {
-    currentID++
-    return '' + currentID
+    return '' + crypto.randomUUID()
 }
 
 function emptyPage(): Page {
@@ -26,6 +24,24 @@ export function emptyBlogPost(): Page {
         ...emptyPage(),
         isBlogPost: true
     }
+}
+
+export function sortPages(newPages: Page[]){
+    newPages.sort((a, b) => {
+        if(a.date < b.date){
+            return -1
+        }
+        if(b.date < a.date) {
+            return 1
+        }
+        // sort alphabetically according to title next
+        if(a.title !== b.title){
+            return a.title < b.title ? -1 : 1
+        }
+        // sort by id finally
+        return a.id < b.id ? -1 : 1
+    })
+    return newPages
 }
 
 export function fixedBlogHeader(title: string, date: Date) {

@@ -11,6 +11,7 @@ import ClickToExitPopup, { ClickToExitPopupProps } from './ClickToExitPopup'
 import { Page } from '../types/PageType'
 import { Link } from '../types/link'
 import { fixedBlogHeader } from '../tools/empty-page'
+import { Media } from '../tools/media'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -79,7 +80,7 @@ export default function PageDesign(props: PageDesignProps) {
               setBlockFormat(editor, item, f)
             }}
             insertText={text => Transforms.insertText(editor, text)}
-            insertMediaBox={() => insertMediaBox(editor)}
+            insertMediaBox={() => insertMediaBox(editor, props.pageID)}
             clickToExitPopupHook={menuOpts => {
               // calculate relative position from menuOpts.position, which is relative to window
               if(rootRef.current){
@@ -730,7 +731,7 @@ function setList(editor: Editor, list: string){
   }
 }
 
-function insertMediaBox(editor: Editor) {
+function insertMediaBox(editor: Editor, pageId: string) {
   Transforms.splitNodes(editor)
   // add new media node at root level
   // the media parent will contain nodes of type "media-child", "media-child-caption", and 
@@ -743,7 +744,7 @@ function insertMediaBox(editor: Editor) {
     type: 'media-parent',
     children: [{
       type: 'media-child',
-      mediaType: '', // image, movie, photosphere
+      content: null,
       size: 'medium', // small, medium, large
       children: [{text: ''}]
     } as MediaChild]
@@ -755,7 +756,7 @@ function insertMediaBox(editor: Editor) {
 
 export type MediaChild = {
   type: string,
-  mediaType: string // empty string, image, movie photosphere
+  content: Media | null
   size: string // small, medium, large
   children: Array<any>
 }

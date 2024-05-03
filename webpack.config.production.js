@@ -80,7 +80,7 @@ module.exports = (env, options) =>
             // new CopyPlugin(copyPluginPatterns),
             new MiniCssExtractPlugin({ filename: scssConfig.destFileName }),
             new HtmlWebpackPlugin({
-                template: "./src/index.html",
+                template: "./src/client/index.html",
                 inject: true,
                 minify: false
             }),

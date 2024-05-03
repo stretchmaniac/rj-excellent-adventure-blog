@@ -20,9 +20,12 @@
 }
 
 .media-child {
-    border: 1px dashed rgb(200, 200, 200);
     position: relative;
     cursor: pointer;
+}
+
+.media-child-no-content {
+    border: 1px dashed rgb(200, 200, 200);
 }
 
 .selected {

@@ -8,6 +8,8 @@ import { FaParagraph } from "react-icons/fa6";
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Path, Transforms } from "slate";
+import { chooseFiles } from "../../tools/http";
+import { Media, registerMedia } from "../../tools/media";
 
 export default function MediaChildBox(props: MediaChildProps) {
     const editor = useSlate()
@@ -15,14 +17,20 @@ export default function MediaChildBox(props: MediaChildProps) {
     const focused = useFocused()
     return <div {...props.attributes}
                 contentEditable={false}
-                className={'media-child ' + props.media.size + 
+                className={'media-child' +
+                (props.media.content === null ? ' media-child-no-content ' + props.media.size : '') +
                 (selected && focused ? ' media-child-selected' : '')}
                 onMouseDown={e => {
                     e.preventDefault()
                     e.stopPropagation()
                 }}>
         {props.children}
-        {props.media.mediaType === '' && <BiImageAdd className="missing-media-icon"/>}
+        {props.media.content === null && <BiImageAdd className="missing-media-icon"/>}
+        {props.media.content !== null && <img
+            className={props.media.size + '-box'}
+            crossOrigin="anonymous"
+            src={props.media.content.stableRelativePath}
+            />}
         {selected && focused && <div className='media-toolbar'>
             <button title='add left' className='media-tool-button'
                 onClick={(e) => {
@@ -41,7 +49,8 @@ export default function MediaChildBox(props: MediaChildProps) {
                 onClick={(e) => deleteMedia(editor, props)}>
                 <MdDelete className='media-tool-icon'/>
             </button>
-            <button title='choose file' className='media-tool-button'>
+            <button title='choose file' className='media-tool-button'
+                onClick={() => chooseFile(editor, props)}>
                 <MdOutlineFileUpload className='media-tool-icon'/>
             </button>
             <button title='bigger' className='media-tool-button'
@@ -76,10 +85,28 @@ export default function MediaChildBox(props: MediaChildProps) {
     </div>
 }
 
+function chooseFile(editor: Editor, props: MediaChildProps){
+    chooseFiles(false).then(files => {
+        const chosenFileName = files[0]
+        registerMedia(chosenFileName).then(media => {
+            editContent(editor, props, media)
+        })
+    })
+}
+
+function editContent(editor: Editor, props: MediaChildProps, newContent: Media){
+    const cArr: MediaChild[] = [...props.parentNode.children]
+    cArr[props.mediaIndex] = {
+        ...cArr[props.mediaIndex],
+        content: newContent
+    }
+    replaceMediaChildren(editor, props, cArr)
+}
+
 function insert(editor: Editor, props: MediaChildProps, at: number){
     const newMChildren: Array<MediaChild> = [...props.parentNode.children]
     newMChildren.splice(at, 0, {
-        mediaType: '',
+        content: null,
         size: props.media.size,
         type: 'media-child',
         children: [{text: ''}]

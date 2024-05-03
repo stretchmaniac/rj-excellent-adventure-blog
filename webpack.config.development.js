@@ -71,7 +71,7 @@ module.exports = (env, options) =>
         },
         plugins: [
             new HtmlWebpackPlugin({
-                template: "./src/index.html",
+                template: "./src/client/index.html",
                 inject: true,
                 minify: false
             }),

@@ -6,14 +6,14 @@ const outputConfig = {
 
 // Entry points
 const entryConfig = [
-    "./src/App.ts"
+    "./src/client/App.ts"
 ];
 
 
 // Copy files from src to dist
 const copyPluginPatterns = {
     patterns: [
-        { from: "./src/assets/images", to: "images" }
+        { from: "./src/client/assets/images", to: "images" }
     ]
 };
 
