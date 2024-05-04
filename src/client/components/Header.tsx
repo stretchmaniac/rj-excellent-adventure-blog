@@ -1,3 +1,4 @@
+import { WaitingPopup } from '../Main';
 import { chooseFolder } from '../tools/http';
 import { BlogConfig } from '../types/blog-config'
 import './../assets/stylesheets/header.scss'
@@ -23,7 +24,12 @@ export function Header(props: HeaderProps) {
 }
 
 function chooseMirrorFolder(props: HeaderProps){
+    props.setWaitingPopup({
+        popupOpen: true,
+        message: 'Please use system dialog to select folder.'
+    })
     chooseFolder().then(folder => {
+        props.setWaitingPopup({popupOpen: false, message: ''})
         if(folder.trim().length === 0){
             // we cancelled the folder selection
             return
@@ -49,6 +55,7 @@ function chooseMirrorFolder(props: HeaderProps){
 
 export type HeaderProps = {
     showUnsavedLoadPopup: (callback: (choice:string) => void) => void
+    setWaitingPopup: (popup: WaitingPopup) => void
     config: BlogConfig
     setConfig: (c: BlogConfig, mergeBehavior: string) => void
 }

@@ -10,6 +10,7 @@ import ConfirmPopup from './components/ConfirmPopup'
 import { BlogConfig } from './types/blog-config'
 import { UnsavedLoadPopup } from './components/UnsavedLoadPopup'
 import { loadData, mergeData, setData, setMirrorDirectory } from './tools/http'
+import { WaitingPopup } from './components/WaitingPopup'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -29,6 +30,11 @@ type ConfirmPopup = {
 type UnsavedLoadPopup = {
     popupOpen: boolean,
     popupCallback: (choice: string) => void // "merge", "load"
+}
+
+export type WaitingPopup = {
+    popupOpen: boolean,
+    message: string
 }
 
 export function Main() {
@@ -117,12 +123,17 @@ export function Main() {
         popupOpen: false,
         popupCallback: choice => {}
     })
+    const [waitingPopup, setWaitingPopup] = React.useState<WaitingPopup>({
+        popupOpen: false,
+        message: ''
+    })
 
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
 
     return <div className="root">
         <Header config={config} setConfig={setConfigWithSideEffects}
+            setWaitingPopup={setWaitingPopup}
             showUnsavedLoadPopup={callback => {
                 if(pages.length === 0){
                     // if we have made no changes, skip the dialog screen 
@@ -186,6 +197,7 @@ export function Main() {
                 })}
             />
         </div>
+        {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
         {newPagePopup.popupOpen ? 
             <NewPagePopup 
