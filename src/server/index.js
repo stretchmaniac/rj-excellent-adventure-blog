@@ -25,14 +25,19 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
         return
     }
     const info = JSON.parse(req.body)
-    const srcPath = info.path 
-    const ext = srcPath.substring(srcPath.indexOf(".") + 1)
+    const srcPath = info.path
+    const parts = srcPath.split(/(\/|\\)/g)
+    const last = parts[parts.length - 1]
+    const split = last.split('.')
+    const ext = split[split.length - 1]
+    const name = split.slice(0, split.length - 1).join('.')
     // check if media folder exists
     if(!fs.existsSync(rootDir + '/media')){
         fs.mkdirSync(rootDir + '/media')
     }
+    
     // save to media folder, return path
-    const newPath = 'media/' + randomUUID() + '.' + ext
+    const newPath = 'media/' + name + '_' + randomUUID() + '.' + ext
     fs.copyFileSync(srcPath, rootDir + '/' + newPath)
     res.send(JSON.stringify({success: true, path: newPath}))
 })
