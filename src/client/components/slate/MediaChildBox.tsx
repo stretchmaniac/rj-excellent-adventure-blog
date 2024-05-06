@@ -165,7 +165,7 @@ function insertRight(editor: Editor, props: MediaChildProps) {
 
 function deleteMedia(editor: Editor, props: MediaChildProps) {
     const newMChildren: Array<MediaChild> = [...props.parentNode.children]
-    newMChildren.splice(props.mediaIndex, 1)
+    newMChildren.splice(props.mediaIndex, 1 + (hasCaption(props) ? 1 : 0))
     replaceMediaChildren(editor, props, newMChildren)
 }
 
