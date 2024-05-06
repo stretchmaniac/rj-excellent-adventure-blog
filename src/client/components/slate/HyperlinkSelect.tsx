@@ -110,7 +110,7 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
                     const isHome = internalPages[internalSelected].id === '-1:home'
                     const link: Link = internal ? {
                         isHomePageLink: isHome, 
-                        page: isHome ? null : internalPages[internalSelected]
+                        pageId: isHome ? null : internalPages[internalSelected].id
                     } : {
                         url: urlText
                     }
