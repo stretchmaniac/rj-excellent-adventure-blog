@@ -13,11 +13,13 @@ export default function PageSettings(props: PageSettingsProps) {
         dateStr = getDateInputStr(date)
     }
     return <div className='page-settings-root'>
-        <div className='input-row'>
-            <ToggleButtonGroup
-                options={['Blog Post', 'Static Page']}
-                selected={props.page.isBlogPost ? 0 : 1}
-                onChange={i => props.editPage({...props.page, isBlogPost: i === 0})} />
+        <div className='input-row-checkbox'>
+            <input type="checkbox" checked={!props.page.isBlogPost}
+                onChange={e => props.editPage({...props.page, isBlogPost: !e.target.checked})}
+                />
+            <span className='input-label-checkbox'>
+                Static page (default blog post)
+            </span>
         </div>
         <div className='input-row'>
             <span className='input-label'>
