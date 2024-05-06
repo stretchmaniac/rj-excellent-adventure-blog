@@ -25,6 +25,15 @@ npm run dev
 ```
 This will serve the application to `localhost`. Navigate to [http://localhost:8080/](http://localhost:8080/) with your favorite web browser.
 
+Powershell
+---
+This project makes use of windows powershell scripts, in particular to access microsoft's native file browser. The scripts can be found in the `src/server` folder, and you can run them independently via `.\src\server\openFile.ps1` in a powershell console window.
+In order to give permission for powershell to run certain commands, you'll need to run the following command in an administrator powershell window
+```
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+This needs to be done only once.
+
 Stylistic Changes
 ---
 Basic stylistic changes to blog posts can be made in 
