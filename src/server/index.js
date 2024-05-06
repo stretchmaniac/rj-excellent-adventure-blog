@@ -19,6 +19,34 @@ app.use(cors(corsOptions))
 console.log('starting server on port ' + port)
 let rootDir = null
 
+app.post('/media-cleanup', cors(corsOptions), function(req, res){
+    if(rootDir === null){
+        res.send(JSON.stringify({success: true}))
+        return
+    }
+    // check for media folder 
+    if(!fs.existsSync(rootDir + '/media')){
+        // no need for clean-up if there is no media folder
+        res.send(JSON.stringify({success: true}))
+        return
+    }
+
+    // get referenced file names from request body
+    const referenced = JSON.parse(req.body).referencedPaths
+    // delete anything in media folder that isn't in referenced but conforms to 
+    // uuid structure
+    const fNames = fs.readdirSync(rootDir + '/media', { withFileTypes: true })
+        .filter(dirent => !dirent.isDirectory())
+        .map(dirent => dirent.name)
+    for(let f of fNames){
+        if(f.match(/_.*-.*-.*-.*\./g) && referenced.indexOf(f) === -1){
+            console.log('removing media:', rootDir + '/media/' + f)
+            fs.unlinkSync(rootDir + '/media/' + f)
+        }
+    }
+    res.send(JSON.stringify({success: true}))
+})
+
 app.post('/copy-resource', cors(corsOptions), function(req, res){
     if(rootDir === null){
         res.send(JSON.stringify({success: false, reason: 'No mirror directory set'}))

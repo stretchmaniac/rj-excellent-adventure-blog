@@ -6,6 +6,7 @@ $theme-color: rgb(188, 188, 255);
     justify-content: space-between;
     padding: 5px;
     border-bottom: 1px solid rgba(0,0,0,.1);
+    z-index: 1;
 }
 
 .header-title {
@@ -17,6 +18,10 @@ $theme-color: rgb(188, 188, 255);
     display: flex;
     flex-grow: 1;
     justify-content: flex-end;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 }
 
 .header-button {
@@ -25,8 +30,31 @@ $theme-color: rgb(188, 188, 255);
     cursor: pointer;
 }
 
+.header-icon-button {
+    border-radius: 5px;
+    padding-top: 4px;
+    padding-bottom: 3px;
+}
+
+.gone {
+    width: 0px;
+    height: 0px;
+    overflow: hidden;
+}
+
+.div-divider {
+    border-left: .5px solid rgb(100,100,100);
+    margin-left: 10px;
+    margin-right: 10px;
+    height: 15px;
+}
+
 .header-button:hover {
     background-color: rgba(0,0,0,.1);
+}
+
+.header-button-selected {
+    background-color: rgba(0,0,0,.2);
 }
 
 .header-button-span {
@@ -40,4 +68,15 @@ $theme-color: rgb(188, 188, 255);
     height: 20px;
     color: red;
     margin-left: 5px;
+}
+
+.tools-menu-root {
+    position: absolute;
+    top: 35px;
+    right: 0px;
+    background-color: white;
+}
+
+.tool-menu-option {
+    padding: 4px;
 }

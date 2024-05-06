@@ -44,6 +44,32 @@ export function sortPages(newPages: Page[]){
     return newPages
 }
 
+export function getAllReferencedMediaNames(pages: Page[]){
+    let res: string[] = []
+    for(let p of pages){
+        getAllRefMedia(res, p)
+    }
+    return res
+}
+
+function getAllRefMedia(workingList: string[], obj: any){
+    // look for any string with value containing "http://localhost:\d{4}/media/.*"
+    const r = /http:\/\/localhost:\d{4}(\/|\\)media(\/|\\)/
+    for(let key in obj){
+        if(typeof obj[key] === 'object'){
+            getAllRefMedia(workingList, obj[key])
+        } else if(Array.isArray(obj[key])){
+            for(let el of obj[key]){
+                getAllRefMedia(workingList, el)
+            }
+        } else if(typeof obj[key] === 'string' && obj[key].match(r)){
+            // don't include localhost part
+            const spl = obj[key].split(r) // splits on all capturing groups
+            workingList.push(spl[spl.length - 1])
+        }
+    }
+}
+
 export function fixedBlogHeader(title: string, date: Date) {
     return [
         {

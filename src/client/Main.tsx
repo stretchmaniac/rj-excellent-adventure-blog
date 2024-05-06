@@ -133,6 +133,7 @@ export function Main() {
 
     return <div className="root">
         <Header config={config} setConfig={setConfigWithSideEffects}
+            pages={pages}
             setWaitingPopup={setWaitingPopup}
             showUnsavedLoadPopup={callback => {
                 if(pages.length === 0){

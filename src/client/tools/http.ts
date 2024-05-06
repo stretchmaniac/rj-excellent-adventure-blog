@@ -1,6 +1,25 @@
 import { BlogState } from "../types/blog-state"
 import { sortPages } from "./empty-page"
 
+export function cleanupMedia(referencedMediaNames: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/media-cleanup', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({referencedPaths: referencedMediaNames})
+        })
+        .then(response => response.text())
+        .then(data => resolve())
+        .then(error => {
+            console.log('Error performing media cleanup')
+            resolve()
+        })
+    })
+}
+
 export function chooseFiles(multiple: boolean): Promise<string[]> {
     const queryParams = '?multiple=' + multiple
     return new Promise((resolve, reject) => {
