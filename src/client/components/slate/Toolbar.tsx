@@ -2,7 +2,7 @@ import './../../assets/stylesheets/slate/toolbar.scss'
 import { BiBold, BiItalic, BiUnderline, BiStrikethrough, BiSolidQuoteAltLeft  } from 'react-icons/bi'
 import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted  } from "react-icons/md";
 import { VscTextSize } from "react-icons/vsc"
-import { FaHouseChimney, FaRegImage } from "react-icons/fa6";
+import { FaHouseChimney, FaRegImage, FaRegImages } from "react-icons/fa6";
 import { GrTextAlignCenter, GrTextAlignLeft, GrTextAlignRight } from "react-icons/gr";
 import ToggleButton from './ToggleButton'
 import DropDownSelect from './DropDownSelect'
@@ -14,6 +14,8 @@ import { Link } from '../../types/link';
 import { useSlate } from 'slate-react';
 import { selectionCompatibleWithLink } from '../PageDesign';
 import { Editor, Transforms } from 'slate';
+import { Media, registerMedia } from '../../tools/media';
+import { chooseFiles } from '../../tools/http';
 
 export default function Toolbar(props: ToolbarProps) {
     const editor = useSlate()
@@ -209,6 +211,19 @@ export default function Toolbar(props: ToolbarProps) {
             onChange={active => props.insertMediaBox()}>
             <FaRegImage className="react-icon-small" />
         </ToggleButton>
+        <ToggleButton
+            title="multi image/movie/photosphere"
+            active={false}
+            onChange={active => {
+                chooseFiles(true).then(files => {
+                    const mediaPromises = files.map(f => registerMedia(f))
+                    Promise.allSettled(mediaPromises).then(results => {
+                        props.bulkInsertMedia([...results].map(r => (r as any).value))
+                    })
+                })
+            }}>
+            <FaRegImages className='react-icons' />
+        </ToggleButton>
     </div>
 }
 
@@ -217,6 +232,7 @@ export type ToolbarProps = {
     getSelectedText: () => string
     insertText: (text: string) => void
     insertMediaBox: () => void
+    bulkInsertMedia: (media: Media[]) => void
     getFormatState: () => FormatState
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void

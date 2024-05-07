@@ -184,7 +184,7 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
 app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
-    const child = spawn('powershell.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)])
+    const child = spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)])
 
     let consoleOut = ''
     child.stdout.setEncoding('utf-8')
@@ -195,7 +195,7 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
 
     child.on('close', () => {
         res.type('txt')
-        res.send(consoleOut)
+        res.send(consoleOut.trim())
     })
 })
 

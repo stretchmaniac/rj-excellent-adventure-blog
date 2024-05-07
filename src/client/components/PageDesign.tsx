@@ -81,6 +81,7 @@ export default function PageDesign(props: PageDesignProps) {
             }}
             insertText={text => Transforms.insertText(editor, text)}
             insertMediaBox={() => insertMediaBox(editor, props.pageID)}
+            bulkInsertMedia={media => bulkInsertMedia(editor, media)}
             clickToExitPopupHook={menuOpts => {
               // calculate relative position from menuOpts.position, which is relative to window
               if(rootRef.current){
@@ -752,6 +753,27 @@ function insertMediaBox(editor: Editor, pageId: string) {
     type: 'paragraph',
     children: [{text: ''}]
   }] as any[])
+}
+
+function bulkInsertMedia(editor: Editor, media: Media[]) {
+  Transforms.splitNodes(editor)
+  const nodes = []
+  for(let m of media){
+    nodes.push({
+      type: 'media-parent',
+      children: [{
+        type: 'media-child',
+        content: m,
+        size: 'medium',
+        children: [{text: ''}]
+      } as MediaChild]
+    })
+    nodes.push({
+      type: 'paragraph',
+      children: [{text: ''}]
+    })
+  }
+  Transforms.insertNodes(editor, nodes as any)
 }
 
 export type MediaChild = {

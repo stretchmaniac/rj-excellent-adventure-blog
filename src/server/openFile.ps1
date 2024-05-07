@@ -2,10 +2,6 @@ param(
     [bool] $multiselect
 )
 
-Add-Type -AssemblyName System.windows.forms | Out-Null;
-$f = New-Object System.Windows.Forms.OpenFileDialog;
-$f.Filter = 'Media Files (*.jpg, *.jpeg, *.png, *.mp4, *.gif)|*.jpg;*.jpeg;*.png;*.mp4;*.gif|All files (*.*)|*.*';
-$f.AutoUpgradeEnabled = $true;
-$f.Multiselect = $multiselect;
-$f.ShowDialog() | Out-Null;
-$f.FileNames
+Unblock-File -Path .\src\server\file-dialog-in-selected-order.dll
+Add-Type -Path .\src\server\file-dialog-in-selected-order.dll
+$f = New-Object file_dialog_in_selected_order.MainForm -ArgumentList $multiselect
