@@ -87,6 +87,10 @@ export default function MediaChildBox(props: MediaChildProps) {
 
 function chooseFile(editor: Editor, props: MediaChildProps){
     chooseFiles(false).then(files => {
+        if(files.length === 0){
+            // no files chosen
+            return
+        }
         const chosenFileName = files[0]
         registerMedia(chosenFileName).then(media => {
             editContent(editor, props, media)

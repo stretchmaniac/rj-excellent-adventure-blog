@@ -30,7 +30,7 @@ export function chooseFiles(multiple: boolean): Promise<string[]> {
                 "Content-Type": 'text/plain'
             }
         }).then(response => response.text())
-        .then(data => resolve(data.split('\n').map(s => s.trim())))
+        .then(data => resolve(data.split('\n').map(s => s.trim()).filter(s => s.length > 0)))
         .then(error => {
             console.log('Error accessing files', error)
             resolve([])
