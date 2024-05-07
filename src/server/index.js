@@ -150,6 +150,11 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
     rootDir = req.body.trim()
     if(!rootDir || rootDir === ''){
         rootDir = null
+        res.send({success: false, reason: 'Provided root directory is empty'})
+        return
+    }
+    if(!fs.existsSync(rootDir)){
+        res.send({success: false, reason: 'Directory does not exit'})
         return
     }
     const serve = rootDir.replaceAll("\\", "/")
@@ -157,7 +162,7 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
     // serve files from rootDir
     app.use('/media', express.static(serve + '/media'))
 
-    res.send()
+    res.send({success: true})
 })
 
 

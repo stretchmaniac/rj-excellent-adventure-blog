@@ -49,7 +49,10 @@ export function Main() {
         if(newConfig.localSaveFolder !== null){
             localStorage.setItem('localSaveFolder', newConfig.localSaveFolder)
             // load pages, merge, etc.
-            setMirrorDirectory(newConfig.localSaveFolder).then(() => {
+            setMirrorDirectory(newConfig.localSaveFolder).then((success) => {
+                if(!success){
+                    return
+                }
                 mergeData({
                     pages: mergeBehavior === 'merge' ? pages : [],
                     config: newConfig

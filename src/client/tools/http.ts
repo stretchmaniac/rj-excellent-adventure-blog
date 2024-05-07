@@ -74,7 +74,8 @@ export function chooseFolder(): Promise<string> {
     })
 }
 
-export function setMirrorDirectory(dir: string): Promise<void> {
+// result is whether setting root directory was success or not
+export function setMirrorDirectory(dir: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/set-root-directory', {
             method: 'POST',
@@ -85,10 +86,13 @@ export function setMirrorDirectory(dir: string): Promise<void> {
             body: dir
         })
         .then(response => response.text())
-        .then(data => resolve())
+        .then(data => {
+            const res = JSON.parse(data)
+            resolve(res.success)
+        })
         .then(error => {
             console.log('Error setting mirror directory!', error)
-            resolve()
+            resolve(false)
         })
     })
 }
