@@ -1,6 +1,6 @@
 import React from "react"
 import './../../assets/stylesheets/slate/toggle-button.scss'
-import EmojiPicker from 'emoji-picker-react';
+import EmojiPicker, { EmojiStyle } from 'emoji-picker-react';
 
 export default function EmojiSelect(props: EmojiSelectProps){
     const [awaitingMenu, setAwaitingMenu] = React.useState(false)
@@ -24,7 +24,8 @@ export default function EmojiSelect(props: EmojiSelectProps){
                 onCancel: () => setAwaitingMenu(false),
                 contents: <div onClick={(e) => e.stopPropagation()}>
                     <EmojiPicker 
-                        onEmojiClick={emoji => props.onSelect(emoji.emoji)}/>
+                        onEmojiClick={emoji => props.onSelect(emoji.emoji)}
+                        emojiStyle={EmojiStyle.NATIVE}/>
                 </div>
             })
         }}>
