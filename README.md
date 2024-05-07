@@ -28,6 +28,13 @@ This will serve the application to `localhost`. Navigate to [http://localhost:80
 Powershell
 ---
 This project makes use of windows powershell scripts, in particular to access microsoft's native file browser. The scripts can be found in the `src/server` folder, and you can run them independently via `.\src\server\openFile.ps1` in a powershell console window.
+
+You'll need to install a modern version of powershell, since the powershell.exe found on windows 11 actually points to a [legacy version](https://stackoverflow.com/questions/60124810/what-is-the-difference-between-pwsh-and-powershell-integrated-console-on-vs), and the modified multi-select file picker found from [here](https://stackoverflow.com/questions/18956836/openfiledialog-load-files-in-the-same-order-as-the-user-selected-them/77423151#77423151) requires more modern .NET. Installation instructions can be found here (the `winget` option works great with just a few (legacy) powershell commands):
+ - https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4
+
+ After installation, you'll need to add `pwsh.exe` to your PATH environment variable. Search "environment variable" in the windows search bar to find the relevant control panel entry. The actual executable `pwsh.exe` can be found in the `C:\Program Files\PowerShell\7` folder, which should be the folder added to PATH.
+
+
 In order to give permission for powershell to run certain commands, you'll need to run the following command in an administrator powershell window
 ```
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
