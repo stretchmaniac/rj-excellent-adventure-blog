@@ -189,7 +189,7 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
 app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
-    const child = spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)])
+    const child = spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '1'])
 
     let consoleOut = ''
     child.stdout.setEncoding('utf-8')
