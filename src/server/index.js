@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const spawn = require('child_process').spawn;
+const spawnSync = require('child_process').spawnSync;
 const fs = require('fs');
 const { randomUUID } = require('crypto');
 
@@ -167,7 +167,7 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
 
 
 app.get('/choose-folder', cors(corsOptions), function(req, res){
-    const child = spawn('powershell.exe', ['-Command', './src/server/openFolder.ps1'])
+    const child = spawnSync('powershell.exe', ['-Command', './src/server/openFolder.ps1'])
 
     let consoleOut = ''
     child.stdout.setEncoding('utf-8')
@@ -189,7 +189,7 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
 app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
-    const child = spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '1'])
+    const child = spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)])
 
     let consoleOut = ''
     child.stdout.setEncoding('utf-8')
@@ -206,7 +206,7 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
 
 app.listen(port)
 
-spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '1'])
+spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '1'])
 
 function getRootPageDirs(){
 
