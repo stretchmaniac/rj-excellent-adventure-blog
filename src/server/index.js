@@ -206,6 +206,8 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
 
 app.listen(port)
 
+spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '1'])
+
 function getRootPageDirs(){
 
 }
