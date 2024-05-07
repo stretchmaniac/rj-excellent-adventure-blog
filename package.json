@@ -17,6 +17,7 @@
         "react-icons": "5.1.0",
         "slate": "0.102.0",
         "slate-react": "0.102.0",
+        "slate-history": "0.100.0",
         "emoji-picker-react": "4.9.2",
         "express": "4.19.2",
         "cors": "2.8.5"

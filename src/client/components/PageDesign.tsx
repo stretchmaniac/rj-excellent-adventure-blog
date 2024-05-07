@@ -3,6 +3,7 @@ import { Editor, createEditor, Node, Transforms, Path, Range, Point } from 'slat
 import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementProps } from 'slate-react'
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
+import { withHistory } from 'slate-history'
 import './../assets/stylesheets/page-design.scss'
 import Toolbar, { FormatState } from './slate/Toolbar'
 import RenderedLeaf from './slate/RenderedLeaf'
@@ -47,7 +48,7 @@ const withNoEmptyLink = (editor: Editor) => {
 
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
-      const res = withNoEmptyLink(withInlinesAndVoids(withReact(createEditor())))
+      const res = withNoEmptyLink(withInlinesAndVoids(withReact(withHistory(createEditor()))))
       return res
     })
 
