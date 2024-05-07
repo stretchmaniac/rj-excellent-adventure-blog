@@ -47,6 +47,8 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
         title: 'Home Page',
         date: new Date(),
         isBlogPost: false,
+        linkedFromHeader: false,
+        headerSortOrder: '0',
         summaryText: '',
         autoSummary: false,
         familyPrivate: false,

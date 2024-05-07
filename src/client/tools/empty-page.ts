@@ -14,6 +14,8 @@ function emptyPage(): Page {
         summaryText: '',
         date: new Date(),
         isBlogPost: true,
+        linkedFromHeader: false,
+        headerSortOrder: '0',
         familyPrivate: false,
         design: []
     }

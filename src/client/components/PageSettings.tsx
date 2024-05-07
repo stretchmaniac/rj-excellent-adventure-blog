@@ -21,6 +21,21 @@ export default function PageSettings(props: PageSettingsProps) {
                 Static page (default blog post)
             </span>
         </div>
+        {!props.page.isBlogPost && <div className='input-row-checkbox'>
+            <input type="checkbox" checked={props.page.linkedFromHeader}
+                onChange={e => props.editPage({...props.page, linkedFromHeader: e.target.checked})}
+                />
+            <span className='input-label-checkbox'>
+                Linked from home page
+            </span>
+        </div>}
+        {!props.page.isBlogPost && props.page.linkedFromHeader && <div className='input-row'>
+            <span className='input-label'>
+                Main page header sort order (number)
+            </span>
+            <input value={props.page.headerSortOrder} 
+                onChange={e => props.editPage({...props.page, headerSortOrder: e.target.value})} />
+        </div>}
         <div className='input-row'>
             <span className='input-label'>
                 Page title
