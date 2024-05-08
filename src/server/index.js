@@ -19,6 +19,29 @@ app.use(cors(corsOptions))
 console.log('starting server on port ' + port)
 let rootDir = null
 
+app.post('/serve-preview', cors(corsOptions), function(req, res){
+    if(rootDir === null){
+        res.send(JSON.stringify({success: false, reason: 'Mirror directory has not been set'}))
+        return
+    }
+    // if there is no preview folder in root directory, create one
+    if(!fs.existsSync(rootDir + '/preview')){
+        fs.mkdirSync(rootDir + '/preview')
+    }
+    const data = JSON.parse(req.body)
+    // write html files, css files, and js files to preview directory
+    fs.writeFileSync(rootDir + '/preview/index.html', data.homeHtml)
+    fs.writeFileSync(rootDir + '/preview/index.css', data.homeCss)
+    fs.writeFileSync(rootDir + '/preview/index.js', data.homeJs)
+    // TODO pages
+
+    res.send(JSON.stringify({success: true}))
+})
+
+app.get('/preview', cors(corsOptions), function(req, res){
+    res.sendFile(rootDir + '/preview/index.html')
+})
+
 app.post('/media-cleanup', cors(corsOptions), function(req, res){
     if(rootDir === null){
         res.send(JSON.stringify({success: true}))
@@ -161,6 +184,7 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
     console.log('setting root directory', serve)
     // serve files from rootDir
     app.use('/media', express.static(serve + '/media'))
+    app.use('/preview', express.static(serve + '/preview'))
 
     res.send({success: true})
 })

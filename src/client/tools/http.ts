@@ -1,5 +1,25 @@
 import { BlogState } from "../types/blog-state"
 import { sortPages } from "./empty-page"
+import { GeneratedPreview } from "./preview"
+
+export function setPreview(preview: GeneratedPreview): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/serve-preview', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify(preview)
+        })
+        .then(response => response.text())
+        .then(data => resolve())
+        .then(error => {
+            console.log('Error loading preview', error)
+            reject()
+        })
+    })
+}
 
 export function cleanupMedia(referencedMediaNames: string[]): Promise<void> {
     return new Promise((resolve, reject) => {

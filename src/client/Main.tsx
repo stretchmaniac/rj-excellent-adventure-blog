@@ -9,8 +9,9 @@ import { emptyBlogPostWithTitleDate, emptyStaticPageWithTitleDate, sortPages } f
 import ConfirmPopup from './components/ConfirmPopup'
 import { BlogConfig } from './types/blog-config'
 import { UnsavedLoadPopup } from './components/UnsavedLoadPopup'
-import { loadData, mergeData, setData, setMirrorDirectory } from './tools/http'
+import { loadData, mergeData, setData, setMirrorDirectory, setPreview } from './tools/http'
 import { WaitingPopup } from './components/WaitingPopup'
+import { makePreview } from './tools/preview'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -134,6 +135,13 @@ export function Main() {
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
 
+    function showPreview(pageSource: Page | null){
+        setPreview(makePreview(pages)).then(() => {
+            // open new tab at localhost:3000/preview/index.html
+            window.open('http://localhost:3000/preview/index.html', '_blank')
+        })
+    }
+
     return <div className="root">
         <Header config={config} setConfig={setConfigWithSideEffects}
             pages={pages}
@@ -172,6 +180,7 @@ export function Main() {
             <PageEditor 
                 page={selectedPage}
                 allPages={pages}
+                previewHook={() => showPreview(selectedPage)}
                 onPageEdit={p => {
                     const newPages = []
                     for(let i = 0; i < selectedPageIndex; i++){

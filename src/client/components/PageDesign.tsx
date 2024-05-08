@@ -83,6 +83,7 @@ export default function PageDesign(props: PageDesignProps) {
             insertText={text => Transforms.insertText(editor, text)}
             insertMediaBox={() => insertMediaBox(editor, props.pageID)}
             bulkInsertMedia={media => bulkInsertMedia(editor, media)}
+            previewHook={props.previewHook}
             clickToExitPopupHook={menuOpts => {
               // calculate relative position from menuOpts.position, which is relative to window
               if(rootRef.current){
@@ -792,4 +793,5 @@ export type PageDesignProps = {
   isBlogPost: boolean
   designStruct: any[]
   onChange: (design: any[]) => void
+  previewHook: () => void
 }

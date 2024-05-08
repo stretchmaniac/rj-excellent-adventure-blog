@@ -29,6 +29,7 @@ export default function PageEditor(props: PageEditorProps){
                         pageTitle={page.title}
                         pageDate={page.date}
                         isBlogPost={page.isBlogPost}
+                        previewHook={props.previewHook}
                         onChange={d => props.onPageEdit({
                             ...page,
                             design: d
@@ -51,5 +52,6 @@ export type PageEditorProps = {
     allPages: Array<Page>
     onPageEdit: (newPage: Page) => void
     deletePage: () => void
+    previewHook: () => void
     showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

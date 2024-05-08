@@ -224,6 +224,9 @@ export default function Toolbar(props: ToolbarProps) {
             }}>
             <FaRegImages className='react-icons' />
         </ToggleButton>
+        <div className='toolbar-right-side'>
+            <button onClick={() => props.previewHook()}>Preview</button>
+        </div>
     </div>
 }
 
@@ -237,6 +240,7 @@ export type ToolbarProps = {
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void
     clickToExitPopupHook: (menuOpts: {position: Array<number>, contents: React.ReactNode, onCancel: () => void, disableClickToClose?: boolean}) => void
+    previewHook: () => void
 }
 
 export type FormatState = {
