@@ -1,5 +1,6 @@
 import { Page } from "../types/PageType";
 import { getReadableDateString } from "./date";
+import { getSummaryText } from "./empty-page";
 
 export type GeneratedPreview = {
     homeHtml: string,
@@ -28,7 +29,7 @@ const INITIAL_POSTS = Math.min(MAX_POSTS, 8);
 const LOAD_POST_NUM = 3;
 const pageTitles=[${blogPosts.map(p => makeStringLiteral(p.title)).join(',')}];
 const pageDates = [${blogPosts.map(p => makeStringLiteral(getReadableDateString(p.date))).join(',')}];
-const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getPageSummary(p))).join(',')}];
+const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getSummaryText(p))).join(',')}];
 
 function populatePageRows(maxPages){
     // this is a live HTMLCollection, so adding more rows will automatically update this list
@@ -378,11 +379,6 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
     </div>
 </div>
 `
-}
-
-function getPageSummary(page: Page){
-    const s = `Our travel day good weather's streak held up once again as we journeyed further north along the Appalachian mountains. Our campground was fairly remote and the roads leading to it were twisty, but that's the way it is in these parts. Fortunately, we only had a couple of hours drive this time.`
-    return s
 }
 
 function staticLinkHtml(pages: Page[]){
