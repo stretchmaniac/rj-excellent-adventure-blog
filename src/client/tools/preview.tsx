@@ -11,14 +11,87 @@ export function makePreview(pages: Page[]): GeneratedPreview {
     return {
         homeHtml: homePageHtml(pages),
         homeCss: homePageCss(),
-        homeJs: homePageJs()
+        homeJs: homePageJs(pages)
     }
 }
 
-function homePageJs(): string {
-    return `
+function makeStringLiteral(s: string){
+    return "'" + s.replace(/'/g, "\\'") + "'";
+}
 
-    `;
+function homePageJs(pages: Page[]): string {
+    const blogPosts = pages.filter(p => p.isBlogPost)
+    const numBlogPosts = blogPosts.length
+    return `
+const MAX_POSTS = ${numBlogPosts};
+const INITIAL_POSTS = Math.min(MAX_POSTS, 8);
+const LOAD_POST_NUM = 3;
+const pageTitles=[${blogPosts.map(p => makeStringLiteral(p.title)).join(',')}];
+const pageDates = [${blogPosts.map(p => makeStringLiteral(getReadableDateString(p.date))).join(',')}];
+const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getPageSummary(p))).join(',')}];
+
+function populatePageRows(maxPages){
+    // this is a live HTMLCollection, so adding more rows will automatically update this list
+    const pageRowDivs = document.getElementsByClassName('home-post-row');
+    // add more rows if necessary
+    while(pageRowDivs.length < maxPages){
+        // copy the last page row and append after
+        const existing = pageRowDivs[pageRowDivs.length - 1];
+        const rowDiv = existing.cloneNode(true); // true for recursive
+        existing.parentElement.appendChild(rowDiv);
+    }
+
+    let index = 0;
+    for(let el of pageRowDivs){
+        // remove content from all page rows
+        removeTextContent(el);
+        const tContainer = el.querySelector('.home-post-text-container');
+        const tInter = el.querySelector('.home-post-text-intermediate');
+
+        // add .home-post-text-container-grow class to .home-post-text-container for measuring purposes
+        tContainer.classList.add('home-post-text-container-grow');
+        tContainer.style.width = null;
+        tInter.style.width = null;
+
+        // measure .home-post-text-container while empty 
+        // and apply these dimensions to .home-post-text-intermediate
+        // -1 since clientWidth rounds to nearest pixel, if over by 1px can cause overflow wrap in parent
+        // flexbox
+        const w = tContainer.clientWidth - 1;
+
+        // set widths, remove grow class
+        tInter.style.width = w + 'px';
+        tContainer.classList.remove('home-post-text-container-grow');
+        tContainer.style.width = w + 'px';
+
+        // reset text content
+        setTextContent(el, index);
+        index++;
+    }
+
+}
+
+function removeTextContent(pageRow){
+    const title = pageRow.querySelector('.home-post-title');
+    const date = pageRow.querySelector('.home-post-date');
+    const summary = pageRow.querySelector('.home-post-summary');
+    for(let el of [title, date, summary]){
+        el.textContent = '';
+    }
+}
+
+function setTextContent(pageRow, pageIndex){
+    const title = pageRow.querySelector('.home-post-title');
+    title.textContent = pageTitles[pageIndex];
+    const date = pageRow.querySelector('.home-post-date');
+    date.textContent = pageDates[pageIndex];
+    const summary = pageRow.querySelector('.home-post-summary');
+    summary.textContent = pageSummaries[pageIndex];
+}
+
+window.onload = () => populatePageRows(INITIAL_POSTS);
+window.onresize = () => populatePageRows(0);
+`;
 }
 
 function homePageCss(): string {
@@ -117,11 +190,13 @@ body {
     position:absolute;
 }
 
-.home-post-text-container {
+.home-post-text-container-grow {
     flex-grow: 1.3;
+}
+
+.home-post-text-container {
     min-width: 50%;
     position: relative;
-    display: flow-root;
 }
 
 .home-post-title {
@@ -155,6 +230,14 @@ body {
     margin-top: 30px;
     text-decoration: none;
 }
+
+.post-root {
+    width: 80%;
+}
+
+.post-root .home-post-row {
+    margin-top: 60px;
+}
 `
 }
 
@@ -186,8 +269,11 @@ function homePageHtml(pages: Page[]): string {
                     </div>
                 </div>
                 <div class="first-post">
-                    ${pages.length === 0 ? '' : homePostRow(pages[0], '#25a186', 'white', 1)}
+                    ${pages.length === 0 ? '' : homePostRow('#25a186', 'white', 1)}
                 </div>
+            </div>
+            <div class="post-root">
+                ${pages.length > 1 ? homePostRow('white', '#25a186', 1) : 0}
             </div>
         </div>
     </main>
@@ -196,17 +282,17 @@ function homePageHtml(pages: Page[]): string {
 </html>`
 }
 
-function homePostRow(page: Page, backgroundColor: string, textColor: string, imageScaling: number): string{
+function homePostRow(backgroundColor: string, textColor: string, imageScaling: number): string{
     return `
 <div class="home-post-row" style="background-color: ${backgroundColor}; color: ${textColor};">
     <div class="home-post-image-container">
         <img class="home-post-image" src="https://i.pinimg.com/originals/e1/60/8e/e1608eff46f97e2b1f6f9b40ae698dff.jpg"/>
     </div>
-    <div class="home-post-text-container">
+    <div class="home-post-text-container home-post-text-container-grow">
         <div class="home-post-text-intermediate">
-            <div class="home-post-title">${page.title}</div>
-            <div class="home-post-date">${getReadableDateString(page.date)}</div>
-            <div class="home-post-summary">${getPageSummary(page)}</div>
+            <div class="home-post-title"></div>
+            <div class="home-post-date"></div>
+            <div class="home-post-summary"></div>
             <div class="home-post-link-row">
                 <a href="#" class="home-post-read-more" style="color: ${textColor}">READ MORE</a>
             </div>
@@ -217,7 +303,7 @@ function homePostRow(page: Page, backgroundColor: string, textColor: string, ima
 }
 
 function getPageSummary(page: Page){
-    return `Our travel day good weather streak held up once again as we journeyed further north along the Appalachian mountains. Our campground was fairly remote and the roads leading to it were twisty, but that's the way it is in these parts. Fortunately, we only had a couple of hours drive this time.`
+    return `Our travel day good weather's streak held up once again as we journeyed further north along the Appalachian mountains. Our campground was fairly remote and the roads leading to it were twisty, but that's the way it is in these parts. Fortunately, we only had a couple of hours drive this time.`
 }
 
 function staticLinkHtml(pages: Page[]){
