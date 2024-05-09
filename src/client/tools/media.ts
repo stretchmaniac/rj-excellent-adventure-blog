@@ -29,3 +29,13 @@ export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Med
         })
     })
 }
+
+export function hasImageExt(fileName: string): boolean {
+    const exts = ['.png', '.jpg', '.jpeg', '.bmp']
+    for(const ext of exts){
+        if(fileName.endsWith(ext)){
+            return true
+        }
+    }
+    return false
+}

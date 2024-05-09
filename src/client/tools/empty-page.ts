@@ -1,5 +1,6 @@
 import { Page } from '../types/PageType'
 import { getReadableDateString } from './date';
+import { Media, hasImageExt } from './media';
 
 export function nextID(): string {
     return '' + crypto.randomUUID()
@@ -12,6 +13,8 @@ function emptyPage(): Page {
         title: 'Untitled',
         autoSummary: true,
         summaryText: '',
+        autoSummaryImg: true,
+        summaryImg: null, 
         date: new Date(),
         isBlogPost: true,
         linkedFromHeader: false,
@@ -70,6 +73,44 @@ function getAllRefMedia(workingList: string[], obj: any){
             workingList.push(spl[spl.length - 1])
         }
     }
+}
+
+export function getSummaryText(page: Page): string{
+    if(!page.autoSummary){
+        return page.summaryText
+    }
+    // generate auto summary; find first non-empty paragraph at the root level
+    for(const obj of page.design.slice(2)){ // first two elements are header, date
+        if(obj.type === 'paragraph'){
+            // check if paragraph is empty
+            if(obj.children && obj.children.length > 0 && obj.children[0].text && obj.children[0].text.trim().length > 0){
+                return obj.children[0].text.trim()
+            }
+        }
+    }
+    return ''
+}
+
+export function getSummaryImg(page: Page): Media | null {
+    if(!page.autoSummaryImg){
+        return page.summaryImg
+    }
+    // generate auto image; find first non-empty media box at root level
+    for(const obj of page.design){
+        if(obj.type === 'media-parent'){
+            // check children
+            for(const child of obj.children){
+                if(child.type === 'media-child' && child.content !== null){
+                    // check extension on content
+                    const m = child.content as Media
+                    if(hasImageExt(m.stableRelativePath)){
+                        return m
+                    }
+                }
+            }
+        }
+    }
+    return null
 }
 
 export function fixedBlogHeader(title: string, date: Date) {

@@ -51,6 +51,8 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
         headerSortOrder: '0',
         summaryText: '',
         autoSummary: false,
+        autoSummaryImg: false,
+        summaryImg: null,
         familyPrivate: false,
         design: []
     })

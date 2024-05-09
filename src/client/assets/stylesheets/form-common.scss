@@ -4,13 +4,32 @@
     margin: 5px;
 }
 
+.sub-input-row{
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
+    padding-left: 25px;
+}
+
 .input-row input {
     margin: 2px;
 }
 
-.input-row textarea {
+.input-row textarea, .sub-input-row textarea {
     margin: 2px;
     font: inherit;
+    font-size: 15px;
+    resize: vertical;
+    width: 400px;
+    height: 200px;
+}
+
+.input-row img, .sub-input-row img {
+    max-width: 300px;
+}
+
+.input-row button, .sub-input-row button {
+    margin-bottom: 4px;
 }
 
 .short-multiline-textarea {

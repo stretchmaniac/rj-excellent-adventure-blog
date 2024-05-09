@@ -4,6 +4,7 @@
     background-color: white;
     padding: 5px;
     align-items: flex-start;
+    overflow-y: auto;
 }
 
 .delete-button {
@@ -17,4 +18,11 @@
 
 .delete-button:hover {
     background-color: rgb(178, 60, 60);
+}
+
+.text-preview-block {
+    font-size: 15px;
+    max-width: 500px;
+    padding: 5px;
+    background-color: rgba(0,0,0,.1);
 }
