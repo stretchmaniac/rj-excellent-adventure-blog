@@ -133,9 +133,37 @@ window.onscroll = () => {
 
 function homePageCss(): string {
     return `
+
+@media screen and (max-width: 600px) {
+    .header-box {
+        width: 100%;
+        margin-top: 0;
+    }
+
+    .post-root {
+        width: 100%;
+    }
+
+    .top-button {
+        left: -50px !important; // remove top button for small screens
+    }
+}
+
+@media screen and (min-width: 601px) {
+    .header-box {
+        width: 95%;
+        margin-top: 18px;
+    }
+
+    .post-root {
+        width: 80%;
+    }
+}
+
 body {
     background-color: rgb(50, 50, 50);
     font-family: sans-serif;
+    margin: 0;
 }
 
 .root {
@@ -147,8 +175,6 @@ body {
 
 .header-box {
     background-color: white;
-    width: 95%;
-    margin-top: 10px;
 }
 
 .header {
@@ -270,7 +296,6 @@ body {
 }
 
 .post-root {
-    width: 80%;
     margin-bottom: 30px;
 }
 
