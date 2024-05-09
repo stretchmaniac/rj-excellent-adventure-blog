@@ -113,7 +113,7 @@ function infiniteScrollCheck(){
         const last = pageRowDivs[pageRowDivs.length - 1];
         const last2 = pageRowDivs[pageRowDivs.length - 2];
 
-        if(!elOutOfView(last) || !elOutOfView(last2)){
+        if((!elOutOfView(last) || !elOutOfView(last2)) && pageRowDivs.length < MAX_POSTS){
             // load more
             populatePageRows(Math.min(MAX_POSTS, pageRowDivs.length + LOAD_POST_NUM));
         }
