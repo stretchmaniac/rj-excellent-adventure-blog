@@ -68,7 +68,6 @@ function populatePageRows(maxPages){
         setTextContent(el, index);
         index++;
     }
-
 }
 
 function removeTextContent(pageRow){
@@ -89,8 +88,46 @@ function setTextContent(pageRow, pageIndex){
     summary.textContent = pageSummaries[pageIndex];
 }
 
-window.onload = () => populatePageRows(INITIAL_POSTS);
+function elOutOfView(el){
+    const rect = el.getBoundingClientRect();
+    return rect.bottom <= 0 || rect.right <= 0 ||
+        rect.top >= (window.innerHeight || document.documentElement.clientHeight) ||
+        rect.left >= (window.innerWidth || document.documentElement.clientWidth);
+}
+
+function updateTopButton(){
+    // show top button if header box is not in view
+    const topButton = document.querySelector('.top-button');
+    if(elOutOfView(document.querySelector('.header-box'))){
+        topButton.style.display = 'block';
+    } else {
+        topButton.style.display = 'none';
+    }
+}
+
+function infiniteScrollCheck(){
+    // if the 2nd to last or last post on the page is in view, load more posts
+    const pageRowDivs = document.getElementsByClassName('home-post-row');
+    if(pageRowDivs.length > 1){
+        const last = pageRowDivs[pageRowDivs.length - 1];
+        const last2 = pageRowDivs[pageRowDivs.length - 2];
+
+        if(!elOutOfView(last) || !elOutOfView(last2)){
+            // load more
+            populatePageRows(Math.min(MAX_POSTS, pageRowDivs.length + LOAD_POST_NUM));
+        }
+    }
+}
+
+window.onload = () => {
+    populatePageRows(INITIAL_POSTS);
+    updateTopButton();
+}
 window.onresize = () => populatePageRows(0);
+window.onscroll = () => {
+    updateTopButton();
+    infiniteScrollCheck();
+}
 `;
 }
 
@@ -111,6 +148,7 @@ body {
 .header-box {
     background-color: white;
     width: 95%;
+    margin-top: 10px;
 }
 
 .header {
@@ -177,7 +215,7 @@ body {
 }
 
 .home-post-image-container {
-    flex-grow: 1;
+    flex-grow: 2;
     position: relative;
     min-width: 300px;
     min-height: 300px;
@@ -191,7 +229,7 @@ body {
 }
 
 .home-post-text-container-grow {
-    flex-grow: 1.3;
+    flex-grow: 2.6;
 }
 
 .home-post-text-container {
@@ -200,7 +238,6 @@ body {
 }
 
 .home-post-title {
-    font-size: 36px;
     padding: 30px 15px 0px 15px;
     font-weight: bold;
     width: calc(100% - 30px);
@@ -208,35 +245,48 @@ body {
 
 .home-post-date {
     padding-left: 15px;
-    padding-bottom: 5px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     width: calc(100% - 15px);
 }
 
 .home-post-summary {
     padding-left: 15px;
     padding-right: 15px;
-    padding-top: 15px;
     width: (100% - 30px);
+    line-height: 24px;
 }
 
 .home-post-link-row {
-    display: flex;
-    flex-direction: row-reverse;
     width: 100%;
+    min-height: 45px;
 }
 
 .home-post-read-more {
-    margin-right: 15px;
-    margin-top: 30px;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
     text-decoration: none;
 }
 
 .post-root {
     width: 80%;
+    margin-bottom: 30px;
 }
 
 .post-root .home-post-row {
     margin-top: 60px;
+}
+
+.top-button {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+}
+
+.top-button a {
+    text-decoration: none;
+    color: #25a186;
 }
 `
 }
@@ -255,7 +305,7 @@ function homePageHtml(pages: Page[]): string {
     <main>
         <div class="root">
             <div class="header-box">
-                <div class="header">
+                <div class="header" id="header">
                     <div class="header-title-container">
                         <span class="header-title-text">Rick and Julie's Excellent Adventure</span>
                     </div>
@@ -269,11 +319,14 @@ function homePageHtml(pages: Page[]): string {
                     </div>
                 </div>
                 <div class="first-post">
-                    ${pages.length === 0 ? '' : homePostRow('#25a186', 'white', 1)}
+                    ${pages.length === 0 ? '' : homePostRow('#25a186', 'white', 'white', 'white', 1, 2.6)}
                 </div>
             </div>
             <div class="post-root">
-                ${pages.length > 1 ? homePostRow('white', '#25a186', 1) : 0}
+                ${pages.length > 1 ? homePostRow('white', '#25a186', 'black', 'rgb(100, 100, 100)', .75, 1) : 0}
+            </div>
+            <div class="top-button">
+                <a href="#header">Top</a>
             </div>
         </div>
     </main>
@@ -282,19 +335,19 @@ function homePageHtml(pages: Page[]): string {
 </html>`
 }
 
-function homePostRow(backgroundColor: string, textColor: string, imageScaling: number): string{
+function homePostRow(backgroundColor: string, headerColor: string, textColor: string, dateColor: string, fontSizeScale: number, imageFlexGrow: number): string{
     return `
 <div class="home-post-row" style="background-color: ${backgroundColor}; color: ${textColor};">
-    <div class="home-post-image-container">
+    <div class="home-post-image-container" style="flex-grow: ${imageFlexGrow}">
         <img class="home-post-image" src="https://i.pinimg.com/originals/e1/60/8e/e1608eff46f97e2b1f6f9b40ae698dff.jpg"/>
     </div>
     <div class="home-post-text-container home-post-text-container-grow">
         <div class="home-post-text-intermediate">
-            <div class="home-post-title"></div>
-            <div class="home-post-date"></div>
-            <div class="home-post-summary"></div>
-            <div class="home-post-link-row">
-                <a href="#" class="home-post-read-more" style="color: ${textColor}">READ MORE</a>
+            <div class="home-post-title" style="font-size: ${36 * fontSizeScale}px; color: ${headerColor}"></div>
+            <div class="home-post-date" style="font-size: ${17 * fontSizeScale}px; color: ${dateColor}"></div>
+            <div class="home-post-summary" style="font-size: ${20 * fontSizeScale}px"></div>
+            <div class="home-post-link-row" style="font-size: ${20 * fontSizeScale}px">
+                <a href="#" class="home-post-read-more" style="color: ${headerColor}">READ MORE</a>
             </div>
         </div>
     </div>
@@ -303,7 +356,8 @@ function homePostRow(backgroundColor: string, textColor: string, imageScaling: n
 }
 
 function getPageSummary(page: Page){
-    return `Our travel day good weather's streak held up once again as we journeyed further north along the Appalachian mountains. Our campground was fairly remote and the roads leading to it were twisty, but that's the way it is in these parts. Fortunately, we only had a couple of hours drive this time.`
+    const s = `Our travel day good weather's streak held up once again as we journeyed further north along the Appalachian mountains. Our campground was fairly remote and the roads leading to it were twisty, but that's the way it is in these parts. Fortunately, we only had a couple of hours drive this time.`
+    return s
 }
 
 function staticLinkHtml(pages: Page[]){
