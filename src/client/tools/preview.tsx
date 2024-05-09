@@ -116,8 +116,12 @@ function infiniteScrollCheck(){
         const last2 = pageRowDivs[pageRowDivs.length - 2];
 
         if((!elOutOfView(last) || !elOutOfView(last2)) && pageRowDivs.length < MAX_POSTS){
+            // save scroll location
+            const scrollY = window.scrollY;
             // load more
             populatePageRows(Math.min(MAX_POSTS, pageRowDivs.length + LOAD_POST_NUM));
+            // reset scroll location
+            window.scrollTo(0, scrollY);
         }
     }
 }
