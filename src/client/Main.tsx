@@ -137,8 +137,8 @@ export function Main() {
 
     function showPreview(pageSource: Page | null){
         setPreview(makePreview(pages)).then(() => {
-            // open new tab at localhost:3000/preview/index.html
-            window.open('http://localhost:3000/preview/index.html', '_blank')
+            // open new tab at localhost:3000/preview/home.html
+            window.open('http://localhost:3000/preview/home.html', '_blank')
         })
     }
 

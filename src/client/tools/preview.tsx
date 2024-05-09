@@ -299,7 +299,7 @@ function homePageHtml(pages: Page[]): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Rick & Julie's Excellent Adventure</title>
-    <link rel="stylesheet" type="text/css" href="./index.css">
+    <link rel="stylesheet" type="text/css" href="./home.css">
   </head>
   <body>
     <main>
@@ -330,7 +330,7 @@ function homePageHtml(pages: Page[]): string {
             </div>
         </div>
     </main>
-	<script src="index.js"></script>
+	<script src="home.js"></script>
   </body>
 </html>`
 }

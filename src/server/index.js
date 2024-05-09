@@ -30,16 +30,16 @@ app.post('/serve-preview', cors(corsOptions), function(req, res){
     }
     const data = JSON.parse(req.body)
     // write html files, css files, and js files to preview directory
-    fs.writeFileSync(rootDir + '/preview/index.html', data.homeHtml)
-    fs.writeFileSync(rootDir + '/preview/index.css', data.homeCss)
-    fs.writeFileSync(rootDir + '/preview/index.js', data.homeJs)
+    fs.writeFileSync(rootDir + '/preview/home.html', data.homeHtml)
+    fs.writeFileSync(rootDir + '/preview/home.css', data.homeCss)
+    fs.writeFileSync(rootDir + '/preview/home.js', data.homeJs)
     // TODO pages
 
     res.send(JSON.stringify({success: true}))
 })
 
 app.get('/preview', cors(corsOptions), function(req, res){
-    res.sendFile(rootDir + '/preview/index.html')
+    res.sendFile(rootDir + '/preview/home.html')
 })
 
 app.post('/media-cleanup', cors(corsOptions), function(req, res){
