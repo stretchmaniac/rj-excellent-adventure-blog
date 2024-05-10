@@ -19,7 +19,7 @@ export type Media = {
 
 export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Media> {
     return new Promise((resolve, reject) => {
-        copyResource(unstableAbsoluteOriginalPath).then(path => {
+        copyResource(unstableAbsoluteOriginalPath, 'media', null, false).then(path => {
             resolve({
                 type: MediaType.IMAGE,
                 unstableAbsoluteOriginalPath: unstableAbsoluteOriginalPath,

@@ -58,6 +58,8 @@ app.post('/serve-preview', cors(corsOptions), function(req, res){
             fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
         }
     }
+    // copy fixed-assets folder
+    fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
 
     res.send(JSON.stringify({success: true}))
 })
@@ -88,13 +90,17 @@ app.post('/media-cleanup', cors(corsOptions), function(req, res){
 
     // get referenced file names from request body
     const referenced = JSON.parse(req.body).referencedPaths
+    const referencedUUIDs = referenced.map(r => {
+        const matches = r.match(/_.*-.*-.*-/g)
+        return matches[matches.length - 1]
+    })
     // delete anything in media folder that isn't in referenced but conforms to 
     // uuid structure
     const fNames = fs.readdirSync(rootDir + '/media', { withFileTypes: true })
         .filter(dirent => !dirent.isDirectory())
         .map(dirent => dirent.name)
     for(let f of fNames){
-        if(f.match(/_.*-.*-.*-.*\./g) && referenced.indexOf(f) === -1){
+        if(f.match(/_.*-.*-.*-.*\./g) && referencedUUIDs.filter(uuid => f.includes(uuid)).length === 0){
             console.log('removing media:', rootDir + '/media/' + f)
             fs.unlinkSync(rootDir + '/media/' + f)
         }
@@ -111,22 +117,29 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
     }
     const info = JSON.parse(req.body)
     const srcPath = info.path
+    const targetFolder = info.targetFolder
+    const noResize = info.noResize
+    const rename = info.rename
+
     const parts = srcPath.split(/(\/|\\)/g)
     const last = parts[parts.length - 1]
     const split = last.split('.')
     const ext = split[split.length - 1]
     const name = split.slice(0, split.length - 1).join('.')
-    // check if media folder exists
-    if(!fs.existsSync(rootDir + '/media')){
-        fs.mkdirSync(rootDir + '/media')
+    // check if target folder exists
+    if(!fs.existsSync(rootDir + '/' + targetFolder)){
+        fs.mkdirSync(rootDir + '/' + targetFolder)
     }
     
-    // save to media folder, return path
+    // save to target folder, return path
     const uuid = randomUUID()
-    const newPath = 'media/' + name + '_' + uuid + '.' + ext
+    const renameQ = rename.trim().length > 0
+    const newPath = renameQ ? 
+        targetFolder + '/' + rename + '.' + ext :
+        targetFolder + '/' + name + '_' + uuid + '.' + ext
     fs.copyFileSync(srcPath, rootDir + '/' + newPath)
 
-    if(['png', 'jpg', 'JPG', 'jpeg', 'JPEG', 'bmp'].indexOf(ext) !== -1){
+    if(!noResize && ['png', 'jpg', 'JPG', 'jpeg', 'JPEG', 'bmp'].indexOf(ext) !== -1){
         // generate resized versions using image magick
         // small 350 x infinity
         // medium 600 x infinity
@@ -137,11 +150,14 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
             const sizeName = IMAGE_SIZE_NAMES[i]
             const width = IMAGE_SIZE_WIDTHS[i]
             magickPromises.push(new Promise((resolve, reject) => {
+                const dest = renameQ ? 
+                    rootDir + '/' + targetFolder + '/' + rename + '_' + sizeName + '.' + ext :
+                    rootDir + '/' + targetFolder + '/' + name + '_' + uuid + '_' + sizeName + '.' + ext
                 spawn('magick', [
                     rootDir + '/' + newPath, 
                     '-resize', 
                     width + 'x10000',
-                    rootDir + '/media/' + name + '_' + uuid + '_' + sizeName + '.' + ext
+                    dest
                 ]).on('close', () => {
                     resolve()
                 })
@@ -247,6 +263,7 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
     // serve files from rootDir
     app.use('/media', express.static(serve + '/media'))
     app.use('/preview', express.static(serve + '/preview'))
+    app.use('/fixed-assets', express.static(serve + '/fixed-assets'))
 
     res.send({success: true})
 })

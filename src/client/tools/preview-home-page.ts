@@ -188,7 +188,8 @@ body {
 .header-title-container {
     height: 150px;
     width: 100%;
-    background-color: rgba(0,0,0,.05);
+    background-image: url('./header.jpg');
+    background-size: cover;
     position: relative;
 }
 

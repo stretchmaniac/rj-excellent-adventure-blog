@@ -70,7 +70,7 @@ export function chooseFiles(multiple: boolean): Promise<string[]> {
     })
 }
 
-export function copyResource(path: string): Promise<string> {
+export function copyResource(path: string, targetFolder: string, rename: string | null, noResize: boolean): Promise<string> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/copy-resource', {
             method: 'POST',
@@ -78,7 +78,7 @@ export function copyResource(path: string): Promise<string> {
             headers: {
                 'Content-Type': 'text/plain'
             },
-            body: JSON.stringify({path: path})
+            body: JSON.stringify({path: path, targetFolder: targetFolder, rename: rename !== null ? rename : '', noResize: noResize})
         })
         .then(response => response.text())
         .then(data => resolve(JSON.parse(data).path))

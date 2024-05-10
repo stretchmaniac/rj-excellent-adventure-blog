@@ -12,6 +12,7 @@ import { UnsavedLoadPopup } from './components/UnsavedLoadPopup'
 import { loadData, mergeData, setData, setMirrorDirectory, setPreview } from './tools/http'
 import { WaitingPopup } from './components/WaitingPopup'
 import { makePreview } from './tools/preview'
+import { MoreToolsPopup } from './components/MoreToolsPopup'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -131,6 +132,7 @@ export function Main() {
         popupOpen: false,
         message: ''
     })
+    const [moreToolsPopupOpen, setMoreToolsPopupOpen] = React.useState(false)
 
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
@@ -145,6 +147,7 @@ export function Main() {
     return <div className="root">
         <Header config={config} setConfig={setConfigWithSideEffects}
             pages={pages}
+            showMoreToolsPopup={() => setMoreToolsPopupOpen(true)}
             setWaitingPopup={setWaitingPopup}
             showUnsavedLoadPopup={callback => {
                 if(pages.length === 0){
@@ -210,6 +213,7 @@ export function Main() {
                 })}
             />
         </div>
+        {moreToolsPopupOpen && <MoreToolsPopup pages={pages} close={() => setMoreToolsPopupOpen(false)}/>}
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
         {newPagePopup.popupOpen ? 
