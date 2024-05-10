@@ -162,6 +162,25 @@ export function setData(state: BlogState) : Promise<void> {
     })
 }
 
+export type ResourceTestResult = {
+    found: string[]
+    missing: string[]
+}
+export function testResources(): Promise<ResourceTestResult> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/test-resources', {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            }
+        }).then(response => response.text())
+        .then(data => {
+            resolve(JSON.parse(data) as ResourceTestResult)
+        })
+    })
+}
+
 export function loadData(): Promise<BlogState> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/load-data', {

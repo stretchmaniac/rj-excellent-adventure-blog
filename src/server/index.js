@@ -3,6 +3,7 @@ const cors = require('cors')
 const spawn = require('child_process').spawn;
 const fs = require('fs');
 const { randomUUID } = require('crypto');
+const { spawnSync } = require('child_process');
 
 const app = express()
 app.use(express.json())
@@ -74,6 +75,37 @@ function objToStringStringMap(obj){
 
 app.get('/preview', cors(corsOptions), function(req, res){
     res.sendFile(rootDir + '/preview/home.html')
+})
+
+app.get('/test-resources', cors(corsOptions), function(req, res){
+    const found = []
+    const missing = ['pannellum', 'powershell', 'image magick']
+    // test for powershell 7
+    try {
+        spawnSync('pwsh', ['-version'])
+        found.push('powershell')
+        missing.splice(missing.indexOf('powershell'), 1)
+    }
+    catch(e) { }
+    // test for image magick
+    try {
+        spawnSync('magick', ['-version'])
+        found.push('image magick')
+        missing.splice(missing.indexOf('image magick'), 1)
+    }
+    catch(e) { }
+
+    if(rootDir !== null){
+        // test for pannellum folder
+        if(fs.existsSync(rootDir + '/fixed-assets/pannellum.htm') && 
+            fs.existsSync(rootDir + '/fixed-assets/pannellum.css') &&
+            fs.existsSync(rootDir + '/fixed-assets/pannellum.js')){
+            found.push('pannellum')
+            missing.splice(missing.indexOf('pannellum'), 1)
+        }
+    }
+    
+    res.send(JSON.stringify({found: found, missing: missing}))
 })
 
 app.post('/media-cleanup', cors(corsOptions), function(req, res){
