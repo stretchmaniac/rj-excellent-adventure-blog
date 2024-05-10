@@ -3,6 +3,18 @@ import { sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
 export function setPreview(preview: GeneratedPreview): Promise<void> {
+    const mapToObj = (map: Map<string, string>) => {
+        const res: any = {}
+        for(const key of map.keys()){
+            res[key] = map.get(key)
+        }
+        return res
+    }
+    const jsonPreview = {
+        ...preview,
+        pageIdToFolderName: mapToObj(preview.pageIdToFolderName),
+        imageCopyMap: mapToObj(preview.imageCopyMap)
+    }
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/serve-preview', {
             method: 'POST',
@@ -10,7 +22,7 @@ export function setPreview(preview: GeneratedPreview): Promise<void> {
             headers: {
                 'Content-Type': 'text/plain'
             },
-            body: JSON.stringify(preview)
+            body: JSON.stringify(jsonPreview)
         })
         .then(response => response.text())
         .then(data => resolve())

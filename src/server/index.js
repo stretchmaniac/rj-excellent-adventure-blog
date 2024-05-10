@@ -35,8 +35,40 @@ app.post('/serve-preview', cors(corsOptions), function(req, res){
     fs.writeFileSync(rootDir + '/preview/home.js', data.homeJs)
     // TODO pages
 
+    // re-create page folders
+    const pageIdToFolderName = objToStringStringMap(data.pageIdToFolderName)
+    for(const folder of pageIdToFolderName.values()){
+        if(fs.existsSync(rootDir + '/preview/' + folder)){
+            fs.rmSync(rootDir + '/preview/' + folder, {recursive: true, force: true})
+        }
+        fs.mkdirSync(rootDir + '/preview/' + folder)
+    }
+    // copy images to page folders 
+    const imgCopyMap = objToStringStringMap(data.imageCopyMap)
+    for(const mediaSrc of imgCopyMap.keys()){
+        const dest = imgCopyMap.get(mediaSrc)
+        const srcNames = [mediaSrc]
+        const extI = mediaSrc.lastIndexOf('.')
+        const extWithPeriod = mediaSrc.substring(extI)
+        const base = mediaSrc.substring(0, extI)
+        for(const name of IMAGE_SIZE_NAMES){
+            srcNames.push(base + '_' + name + extWithPeriod)
+        }
+        for(const src of srcNames){
+            fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+        }
+    }
+
     res.send(JSON.stringify({success: true}))
 })
+
+function objToStringStringMap(obj){
+    const map = new Map()
+    for(const key in obj){
+        map.set(key, obj[key])
+    }
+    return map
+}
 
 app.get('/preview', cors(corsOptions), function(req, res){
     res.sendFile(rootDir + '/preview/home.html')
@@ -70,6 +102,8 @@ app.post('/media-cleanup', cors(corsOptions), function(req, res){
     res.send(JSON.stringify({success: true}))
 })
 
+const IMAGE_SIZE_NAMES = ['small', 'medium', 'large', 'x-large']
+const IMAGE_SIZE_WIDTHS = [700, 1200, 1800, 2400]
 app.post('/copy-resource', cors(corsOptions), function(req, res){
     if(rootDir === null){
         res.send(JSON.stringify({success: false, reason: 'No mirror directory set'}))
@@ -88,9 +122,37 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
     }
     
     // save to media folder, return path
-    const newPath = 'media/' + name + '_' + randomUUID() + '.' + ext
+    const uuid = randomUUID()
+    const newPath = 'media/' + name + '_' + uuid + '.' + ext
     fs.copyFileSync(srcPath, rootDir + '/' + newPath)
-    res.send(JSON.stringify({success: true, path: newPath}))
+
+    if(['png', 'jpg', 'JPG', 'jpeg', 'JPEG', 'bmp'].indexOf(ext) !== -1){
+        // generate resized versions using image magick
+        // small 350 x infinity
+        // medium 600 x infinity
+        // large 900 x infinity
+        // x-large 1200 x infinity
+        const magickPromises = []
+        for(let i = 0; i < IMAGE_SIZE_NAMES.length; i++){
+            const sizeName = IMAGE_SIZE_NAMES[i]
+            const width = IMAGE_SIZE_WIDTHS[i]
+            magickPromises.push(new Promise((resolve, reject) => {
+                spawn('magick', [
+                    rootDir + '/' + newPath, 
+                    '-resize', 
+                    width + 'x10000',
+                    rootDir + '/media/' + name + '_' + uuid + '_' + sizeName + '.' + ext
+                ]).on('close', () => {
+                    resolve()
+                })
+            }))
+        }
+        Promise.all(magickPromises).then(() => {
+            res.send(JSON.stringify({success: true, path: newPath}))
+        })
+    } else {
+        res.send(JSON.stringify({success: true, path: newPath}))
+    }
 })
 
 app.post('/set-data', cors(corsOptions), function(req, res){
