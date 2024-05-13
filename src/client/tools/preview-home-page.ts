@@ -2,7 +2,7 @@ import { Page } from "../types/PageType";
 import { getReadableDateString } from "./date";
 import { getSummaryImg, getSummaryText } from "./empty-page";
 import { Media } from "./media";
-import { getPreviewImgFullSizeUrl, getPreviewImgSrcSet } from "./preview";
+import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgFullSizeUrl, getPreviewImgSrcSet } from "./preview";
 
 function makeStringLiteral(s: string){
     return "'" + s.replace(/'/g, "\\'") + "'";
@@ -138,103 +138,7 @@ window.onscroll = () => {
 export function homePageCss(): string {
     return `
 
-@media screen and (max-width: 600px) {
-    .header-box {
-        width: 100%;
-        margin-top: 0;
-    }
-
-    .post-root {
-        width: 100%;
-    }
-
-    .top-button {
-        left: -50px !important; // remove top button for small screens
-    }
-}
-
-@media screen and (min-width: 601px) {
-    .header-box {
-        width: 95%;
-        margin-top: 18px;
-    }
-
-    .post-root {
-        width: 80%;
-    }
-}
-
-body {
-    background-color: rgb(50, 50, 50);
-    font-family: sans-serif;
-    margin: 0;
-}
-
-.root {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.header-box {
-    background-color: white;
-}
-
-.header {
-    width: 100%;
-}
-
-.header-title-container {
-    height: 150px;
-    width: 100%;
-    background-image: url('./header.jpg');
-    background-size: cover;
-    position: relative;
-}
-
-.header-title-text {
-    font-size: 30px;
-    position: absolute;
-    left: 15px;
-    top: 15px;
-}
-
-.header-links-container {
-    display: flex;
-    flex-direction: row;
-}
-
-.static-page-links {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.older-posts-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-}
-
-.header-link {
-    display: block;
-    padding: 10px;
-    margin-left: 15px;
-    margin-right: 15px;
-    text-decoration: none;
-    color: #25a186;
-}
-
-.older-posts-link {
-    display: block;
-    padding: 10px;
-    margin-left: 15px;
-    margin-right: 15px;
-    text-decoration: none;
-    color: black;
-}
+${getHeaderCssFragment()}
 
 .home-post-row {
     display: flex;
@@ -335,19 +239,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
     <main>
         <div class="root">
             <div class="header-box">
-                <div class="header" id="header">
-                    <div class="header-title-container">
-                        <span class="header-title-text">Rick and Julie's Excellent Adventure</span>
-                    </div>
-                    <div class="header-links-container">
-                        <div class="static-page-links">
-                            ${staticLinkHtml(pages)}
-                        </div>
-                        <div class="older-posts-container">
-                            <a class="older-posts-link" href="#">Older Posts</a>
-                        </div>
-                    </div>
-                </div>
+                ${getHeaderHtmlFragment(pages, '')}
                 <div class="first-post">
                     ${pages.length === 0 ? '' : homePostRow(
                                                     '#25a186', 'white', 'white', 'white', 1, 2.6, 
@@ -404,33 +296,4 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
     </div>
 </div>
 `
-}
-
-function staticLinkHtml(pages: Page[]){
-    const linked = pages.filter(p => !p.isBlogPost && p.linkedFromHeader)
-    linked.sort((a, b) => {
-        const aOrder = a.headerSortOrder
-        const bOrder = b.headerSortOrder
-        if(a === b){
-            return 0
-        }
-        const aNumber = Number.parseFloat(aOrder)
-        const bNumber = Number.parseFloat(bOrder)
-        if(isNaN(aNumber) && isNaN(bNumber)){
-            return a < b ? -1 : 1
-        }
-        if(isNaN(aNumber)){
-            return -1
-        }
-        if(isNaN(bNumber)){
-            return 1
-        }
-        return aNumber === bNumber ? 0 :
-            (aNumber < bNumber ? -1 : 1)
-    })
-    return linked.map(p => `
-        <a class="header-link" href="#">
-            ${p.title}
-        </a>
-    `).join('\n')
 }

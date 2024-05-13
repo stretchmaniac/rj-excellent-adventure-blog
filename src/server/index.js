@@ -34,6 +34,9 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.writeFileSync(rootDir + '/preview/home.html', data.homeHtml)
     fs.writeFileSync(rootDir + '/preview/home.css', data.homeCss)
     fs.writeFileSync(rootDir + '/preview/home.js', data.homeJs)
+
+    fs.writeFileSync(rootDir + '/preview/older-posts.html', data.olderPostsHtml)
+    fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
     // TODO pages
 
     // re-create page folders
@@ -42,7 +45,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         if(fs.existsSync(rootDir + '/preview/' + folder)){
             // remove all files in folder (removing folder entirely had issues -- see https://github.com/nodejs/node/issues/32001 )
             fs.readdirSync(rootDir + '/preview/' + folder)
-                .forEach(f => fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true}));
+                .forEach(f => fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true}))
         } else {
             fs.mkdirSync(rootDir + '/preview/' + folder)
         }
