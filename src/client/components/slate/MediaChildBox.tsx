@@ -4,34 +4,57 @@ import { BiImageAdd } from "react-icons/bi"
 import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
 import { MdDelete, MdOutlineFileUpload } from "react-icons/md";
 import { ImEnlarge2, ImShrink2 } from "react-icons/im";
-import { FaParagraph } from "react-icons/fa6";
-import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
+import { FaParagraph, FaRegImage } from "react-icons/fa6";
+import { PiSphere } from "react-icons/pi";
+import { ReactEditor, RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Path, Transforms } from "slate";
 import { chooseFiles } from "../../tools/http";
-import { Media, registerMedia } from "../../tools/media";
+import { Media, MediaType, registerMedia } from "../../tools/media";
+import 'pannellum/build/pannellum.css'
+import 'pannellum'
 
 export default function MediaChildBox(props: MediaChildProps) {
     const editor = useSlate()
     const selected = useSelected()
     const focused = useFocused()
+    const pannellumRef = React.createRef<HTMLDivElement>()
+
+    React.useEffect(() => {
+        if(pannellumRef.current && props.media.content?.type === MediaType.PHOTOSPHERE){
+            (window as any).pannellum.viewer(pannellumRef.current, {
+                "type": "equirectangular",
+                "panorama": props.media.content?.stableRelativePath,
+                "autoLoad": true
+            })
+        }
+    }, [props.media.content?.type])
+
+    const showToolbar = selected && focused || props.media.content?.type === MediaType.PHOTOSPHERE
+
     return <div {...props.attributes}
                 contentEditable={false}
                 className={'media-child' +
                 (props.media.content === null ? ' media-child-no-content ' + props.media.size : '') +
                 (selected && focused ? ' media-child-selected' : '')}
                 onMouseDown={e => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                    if(ReactEditor.isFocused(editor)){
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }
                 }}>
         {props.children}
         {props.media.content === null && <BiImageAdd className="missing-media-icon"/>}
-        {props.media.content !== null && <img
+        {props.media.content !== null && props.media.content.type === MediaType.IMAGE && <img
             className={props.media.size + '-box'}
             crossOrigin="anonymous"
             src={props.media.content.stableRelativePath}
             />}
-        {selected && focused && <div className='media-toolbar'>
+        {props.media.content !== null && props.media.content.type === MediaType.PHOTOSPHERE && 
+            <div className={props.media.size + '-pannellum'}>
+                <div ref={pannellumRef}></div>    
+            </div>}
+        {showToolbar && <div className='media-toolbar'>
             <button title='add left' className='media-tool-button'
                 onClick={(e) => {
                     insertLeft(editor, props)
@@ -80,6 +103,18 @@ export default function MediaChildBox(props: MediaChildProps) {
                     toggleParentCaption(editor, props, !hasParentCaption(props))
                 }}>
                 <FaParagraph className='media-tool-icon'/>
+            </button>
+        </div>}
+        {showToolbar && props.media.content !== null && <div className='media-toolbar-2nd-row'>
+            <button title='image' 
+                className={(props.media.content.type === MediaType.IMAGE ? 'selected ' : '') + 'media-tool-button'}
+                onClick={() => changeMediaType(MediaType.IMAGE, editor, props)}>
+                <FaRegImage className='media-tool-icon'/>
+            </button>
+            <button title='photosphere' 
+                className={(props.media.content.type === MediaType.PHOTOSPHERE ? 'selected ' : '') + 'media-tool-button'}
+                onClick={() => changeMediaType(MediaType.PHOTOSPHERE, editor, props)}>
+                <PiSphere className='media-tool-icon'/>
             </button>
         </div>}
     </div>
@@ -175,6 +210,12 @@ function deleteMedia(editor: Editor, props: MediaChildProps) {
 
 function resize(newSize: string, editor: Editor, props: MediaChildProps){
     Transforms.setNodes(editor, {size: newSize} as Partial<Node>, {
+        at: [...props.parentPath, props.mediaIndex]
+    })
+}
+
+function changeMediaType(newType: MediaType, editor: Editor, props: MediaChildProps){
+    Transforms.setNodes(editor, {content: {...props.media.content, type: newType}} as Partial<Node>, {
         at: [...props.parentPath, props.mediaIndex]
     })
 }

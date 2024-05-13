@@ -19,7 +19,7 @@ module.exports = (env, options) =>
                     exclude: /node_modules/,
                 },
                 {
-                    test: /\.scss$/,
+                    test: /\.s?css$/,
                     use: [
                         // We're in dev and want HMR, SCSS is handled in JS
                         // In production, we want our css as files

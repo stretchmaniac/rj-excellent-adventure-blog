@@ -40,6 +40,11 @@
     max-width: 250px;
 }
 
+.small-pannellum {
+    width: 250px;
+    height: 200px;
+}
+
 .small {
     width: 250px;
     height: 250px;
@@ -47,6 +52,11 @@
 
 .medium-box {
     max-width: 400px;
+}
+
+.medium-pannellum {
+    width: 400px;
+    height: 320px;
 }
 
 .medium {
@@ -57,6 +67,12 @@
 .large-box {
     max-width: 750px;
 }
+
+.large-pannellum {
+    width: 750px;
+    height: 600px;
+}
+
 .large {
     width: 750px;
     height: 750px;
@@ -72,15 +88,22 @@
     transform: translate(-50%, -50%);
 }
 
-.media-toolbar {
+.media-toolbar, .media-toolbar-2nd-row {
     position: absolute;
-    left: 10px;
-    top: 10px;
+    right: 10px;
     background-color: white;
     box-shadow: 0px 0px 1px black;
     display: flex;
     flex-direction: row;
     align-items: stretch;
+}
+
+.media-toolbar {
+    top: 10px;
+}
+
+.media-toolbar-2nd-row {
+    top: 45px;
 }
 
 .media-tool-button {
