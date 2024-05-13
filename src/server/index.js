@@ -20,7 +20,7 @@ app.use(cors(corsOptions))
 console.log('starting server on port ' + port)
 let rootDir = null
 
-app.post('/serve-preview', cors(corsOptions), function(req, res){
+app.post('/serve-preview', cors(corsOptions), async function(req, res){
     if(rootDir === null){
         res.send(JSON.stringify({success: false, reason: 'Mirror directory has not been set'}))
         return
@@ -40,9 +40,12 @@ app.post('/serve-preview', cors(corsOptions), function(req, res){
     const pageIdToFolderName = objToStringStringMap(data.pageIdToFolderName)
     for(const folder of pageIdToFolderName.values()){
         if(fs.existsSync(rootDir + '/preview/' + folder)){
-            fs.rmSync(rootDir + '/preview/' + folder, {recursive: true, force: true})
+            // remove all files in folder (removing folder entirely had issues -- see https://github.com/nodejs/node/issues/32001 )
+            fs.readdirSync(rootDir + '/preview/' + folder)
+                .forEach(f => fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true}));
+        } else {
+            fs.mkdirSync(rootDir + '/preview/' + folder)
         }
-        fs.mkdirSync(rootDir + '/preview/' + folder)
     }
     // copy images to page folders 
     const imgCopyMap = objToStringStringMap(data.imageCopyMap)
