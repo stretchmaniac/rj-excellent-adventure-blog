@@ -118,13 +118,13 @@ export default function PageSettings(props: PageSettingsProps) {
                                 })
                             }}>Choose image thumbnail file</button>
                         }
-                        {props.page.autoSummary && getSummaryImg(props.page) === null && 
+                        {props.page.autoSummaryImg && getSummaryImg(props.page) === null && 
                             <IoIosWarning 
                                 style={{color: '#f4b656', width: 20, height: 20}}
                                 title='No root-level image found'/>
                         }
                     </React.Fragment>
-                    <img src={props.page.autoSummary ? 
+                    <img src={props.page.autoSummaryImg ? 
                         getSummaryImg(props.page)?.stableRelativePath
                         : props.page.summaryImg?.stableRelativePath}/>
                 </div>
