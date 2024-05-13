@@ -96,7 +96,10 @@ export default function PageSettings(props: PageSettingsProps) {
                 </div>
                 <div className='input-row-checkbox'>
                     <input type="checkbox" checked={props.page.autoSummaryImg}
-                        onChange={e => props.editPage({...props.page, autoSummaryImg: e.target.checked})}
+                        onChange={e => {
+                                props.editPage({...props.page, autoSummaryImg: e.target.checked, summaryImg: null})
+                            }
+                        }
                         />
                     <span className='input-label-checkbox'>
                         Auto image thumbnail (first image)
