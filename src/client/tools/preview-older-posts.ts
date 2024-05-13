@@ -1,5 +1,5 @@
 import { Page } from "../types/PageType";
-import { getReadableDateString, getShortReadableDateString } from "./date";
+import { getShortReadableDateString } from "./date";
 import { getHeaderCssFragment, getHeaderHtmlFragment } from "./preview";
 
 export function homePageOlderPostsCss(){
@@ -40,7 +40,7 @@ ${getHeaderCssFragment()}
 export function homePageOlderPostsHtml(pages: Page[]){
 
     let months = ''
-    const bins = binToMonths(pages)
+    const bins = binToMonths(pages.filter(p => p.isBlogPost))
     for(let bin of bins){
         months += monthHtml(bin)
     }
