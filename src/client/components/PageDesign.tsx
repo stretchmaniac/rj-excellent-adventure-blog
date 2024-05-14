@@ -1,5 +1,5 @@
 import React from 'react'
-import { Editor, createEditor, Node, Transforms, Path, Range, Point } from 'slate'
+import { Editor, createEditor, Node, Transforms, Path, Range, Point, Ancestor } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementProps } from 'slate-react'
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
@@ -31,6 +31,8 @@ const withInlinesAndVoids = (editor: Editor) => {
   // we need to manually specify inline elements so that slate doesn't silently 
   // delete them :(
   editor.isInline = el => ['a'].includes(el.type)
+  const prevIsBlock = editor.isBlock
+  //editor.isBlock = el => prevIsBlock(el) || ['header-container', 'content-container'].includes(el.type)
   editor.isVoid = el => ['media-child'].includes(el.type)
   return editor
 }
@@ -123,31 +125,64 @@ export default function PageDesign(props: PageDesignProps) {
 
 function maintainFixedHeader(editor: Editor, title: string, date: Date){
   const exp = fixedBlogHeader(title, date)
-  // check if first children match exp
-  let matches = true
-  for(let i = 0; i < exp.length; i++){
-    if(i >= editor.children.length){
-      matches = false 
-      break
-    }
-    const expEl = exp[i]
-    const actEl = editor.children[i]
-    if(!compareElRecursive(expEl, actEl)){
-      matches = false
-      break
-    }
-  }
+  // exp consists of two children
+  //  - child #1 of type header-container
+  //  - child #2 of type content-container
+
+  const matches = editor.children.length === 2 &&
+    compareElRecursive(exp[0], editor.children[0]) &&
+    exp[1].children.map(
+      (c, i) => (editor.children[1] as any)?.children.length > i && 
+                  compareElRecursive(c, (editor.children[1] as any)?.children[i])
+    ).filter(s => !s).length === 0  
 
   if(!matches){
-    // delete all existing readOnly elements and insert exp
-    editor.removeNodes({
-      at: [],
-      match: (n, p) => (n as any).readOnly
+    editor.withoutNormalizing(() => {
+      // delete all existing readOnly elements and insert required children
+      while([...Editor.nodes(editor, {at: [], match: (n, p) => (n as any).readOnly})].length > 0){
+        Transforms.removeNodes(editor, {
+          at: [],
+          match: (n, p) => (n as any).readOnly
+        })
+      }
+      if(editor.children.length === 0){
+        Transforms.insertNodes(editor, {type: 'paragraph', children:[{text:''}]}, {at: [0]})
+      }
+      // if no content-container node, wrap all existing nodes in content-container
+      if([...Editor.nodes(editor, {
+        at: [],
+        match: (n, p) => (n as any).type === 'content-container'
+      })].length === 0){
+        Transforms.wrapNodes(editor, {
+          type: 'content-container',
+          children: []
+        } as any, {
+          at: [],
+          match: () => true,
+          split: false,
+          voids: true,
+          mode: 'all'
+        })
+      }
+
+      // header-container node
+      Transforms.insertNodes(editor, exp[0] as any, {at: [0]})
+
+      const contentNodeRes = [...Editor.nodes(editor, {
+        at: [],
+        match: (n, p) => (n as any).type === 'content-container'
+      })][0]
+      const [contentNode, contentPath] = contentNodeRes
+      // add empty paragraph to contentNode if empty
+      if((contentNode as any).children.length === 0){
+        Transforms.insertNodes(editor, {type: 'paragraph', children:[{text:''}]}, {at: [...contentPath, 0]})
+      }
+
+      // prepend exp[1] in content-container
+      Transforms.insertNodes(editor, exp[1].children as any, {
+        at: [...contentPath, 0]
+      })
     })
-    if(editor.children.length === 0){
-      editor.insertNodes({type: 'paragraph', children:[{text:''}]}, {at: [0]})
-    }
-    editor.insertNodes(exp as any, {at: [0]})
   }
 
   return matches
@@ -277,7 +312,7 @@ function getSelectedText(): string {
 }
 
 function getFormatStateLocal(editorContext: Editor): FormatState {
-  let lineSpacing = 1.15
+  let lineSpacing = 2
   let textTag = 'paragraph'
   let textAlign = 'left'
   let blockQuote = false

@@ -1,6 +1,6 @@
 import { Page } from '../types/PageType'
 import { getReadableDateString } from './date';
-import { Media, hasImageExt } from './media';
+import { Media, MediaType, hasImageExt } from './media';
 
 export function nextID(): string {
     return '' + crypto.randomUUID()
@@ -80,7 +80,8 @@ export function getSummaryText(page: Page): string{
         return page.summaryText
     }
     // generate auto summary; find first non-empty paragraph at the root level
-    for(const obj of page.design.slice(2)){ // first two elements are header, date
+    // first entry is header-container, second is content-container, first entry in content-container is date
+    for(const obj of page.design[1].children.slice(1)){
         if(obj.type === 'paragraph'){
             // check if paragraph is empty
             if(obj.children && obj.children.length > 0 && obj.children[0].text && obj.children[0].text.trim().length > 0){
@@ -96,11 +97,12 @@ export function getSummaryImg(page: Page): Media | null {
         return page.summaryImg
     }
     // generate auto image; find first non-empty media box at root level
-    for(const obj of page.design){
+    // first entry is header-container, second is content-container, first entry in content-container is date
+    for(const obj of page.design[1].children){
         if(obj.type === 'media-parent'){
             // check children
             for(const child of obj.children){
-                if(child.type === 'media-child' && child.content !== null){
+                if(child.type === 'media-child' && child.content !== null && child.content.type === MediaType.IMAGE){
                     // check extension on content
                     const m = child.content as Media
                     if(hasImageExt(m.stableRelativePath)){
@@ -116,17 +118,30 @@ export function getSummaryImg(page: Page): Media | null {
 export function fixedBlogHeader(title: string, date: Date) {
     return [
         {
-            type: 'h1',
+            type: 'header-container',
             readOnly: true,
-            children: [{text: title}]
-        },{
-            type: 'paragraph',
-            readOnly: true,
-            children: [{text: getReadableDateString(date), fontSize: 'small'}]
-        }, {
-            type: 'paragraph',
-            readOnly: true,
-            children: [{text: ''}]  
+            children: [
+                {
+                    type: 'h1',
+                    readOnly: true,
+                    children: [{text: title}]
+                }
+            ]
+        },
+        {
+            type: 'content-container',
+            readOnly: false,
+            children: [
+                {
+                    type: 'paragraph',
+                    readOnly: true,
+                    children: [{text: getReadableDateString(date), fontSize: 'small'}]
+                }, {
+                    type: 'paragraph',
+                    readOnly: true,
+                    children: [{text: ''}]  
+                }
+            ]
         }
     ]
 }

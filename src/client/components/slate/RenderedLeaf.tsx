@@ -1,4 +1,5 @@
 import { RenderLeafProps } from "slate-react";
+import { fontMap } from "../../tools/font-size";
 
 export default function RenderedLeaf(props: RenderLeafProps){
     const leaf = props.leaf as any
@@ -18,7 +19,7 @@ export default function RenderedLeaf(props: RenderLeafProps){
 
     const style: any = {}
     if(leaf.fontSize){
-        style.fontSize = leaf.fontSize
+        style.fontSize = fontMap(leaf.fontSize) + 'px'
     }
     if(leaf.familyOnly){
         style.backgroundImage = `repeating-linear-gradient(
