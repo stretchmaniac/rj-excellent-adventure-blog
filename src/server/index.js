@@ -37,6 +37,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
 
     fs.writeFileSync(rootDir + '/preview/older-posts.html', data.olderPostsHtml)
     fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
+    fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
     // TODO pages
 
     // re-create page folders
@@ -85,7 +86,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick', 'open sans']
+    const missing = ['pannellum', 'powershell', 'image magick', 'open sans', 'lora']
     // test for powershell 7
     try {
         spawnSync('pwsh', ['-version'])
@@ -110,7 +111,7 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
             missing.splice(missing.indexOf('pannellum'), 1)
         }
 
-        // test for open-sans
+        // test for open-sans font
         const suffixes = ['italic', 'regular']
         for(let size of ['300', '500', '600', '700', '800']){
             for(let it of ['italic', '']){
@@ -122,6 +123,15 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
             ).filter(s => s).length === suffixes.length){
             found.push('open sans')
             missing.splice(missing.indexOf('open sans'), 1)
+        }
+
+        // test for lora font
+        const lSuffixes = ['500', '500italic', '600', '600italic', '700', '700italic', 'italic', 'regular']
+        if(lSuffixes.map(s => 
+            fs.existsSync(rootDir + '/fixed-assets/lora-v35-latin-' + s + '.woff2')
+        ).filter(s => s).length === lSuffixes.length){
+            found.push('lora')
+            missing.splice(missing.indexOf('lora'), 1)
         }
     }
     

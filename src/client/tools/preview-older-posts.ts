@@ -1,10 +1,75 @@
 import { Page } from "../types/PageType";
 import { getShortReadableDateString } from "./date";
+import { getPageSearchTextArr } from "./page-search";
 import { getHeaderCssFragment, getHeaderHtmlFragment } from "./preview";
+import { makeStringLiteral } from "./preview-home-page";
+
+export function homePageOlderPostsJs(pages: Page[]): string{
+    let strContents = '{\n'
+    strContents += pages.map(p => 
+        `  '${p.id}': [` + getPageSearchTextArr(p).map(s => makeStringLiteral(s)).join(',') + ']'
+    ).join(',\n')
+    strContents += '}'
+    return `
+const pageData = ${strContents};
+
+function updateSearch(){
+    const searchBar = document.getElementById('search-bar');
+    const monthHeaders = document.getElementsByClassName('month-li');
+    const postEntries = document.getElementsByClassName('inner-list-item');
+
+    const val = searchBar.value.trim().toLocaleLowerCase();
+    if(val.length > 0){
+        // apply search
+        for(const post of postEntries){
+            const searchTextArr = pageData[post.id];
+            if(searchTextArr.filter(t => t.includes(val)).length === 0){
+                post.classList.add('hidden');
+            } else {
+                post.classList.remove('hidden');
+            }
+        }
+        // remove months with no visible children, expand all details
+        for(const mo of monthHeaders){
+            if(mo.querySelector('li:not(.hidden)') == null){
+                mo.classList.add('hidden');
+            } else {
+                mo.classList.remove('hidden');
+            }
+        }
+    } else {
+        // clear search
+        for(const mo of monthHeaders){
+            mo.classList.remove('hidden');
+        }
+        for(const post of postEntries){
+            post.classList.remove('hidden');
+        }
+    }
+}
+
+window.onload = () => {
+    const searchBar = document.getElementById('search-bar');
+
+    // set "x" behavior of search bar
+    document.getElementById('search-bar-cancel').addEventListener('click', () => {
+        searchBar.value = '';
+        updateSearch();
+    });
+
+    // set search behavior
+    searchBar.addEventListener('input', () => updateSearch())
+}    
+`
+}
 
 export function homePageOlderPostsCss(){
     return `
 ${getHeaderCssFragment()}
+
+.header-links-container {
+    border-bottom: 1px solid rgb(100,100,100) !important;
+}
 
 .tree-view-root {
     width: 100%;
@@ -15,6 +80,11 @@ ${getHeaderCssFragment()}
     list-style-type: none;
     margin-top: 0px;
     padding-left: 0px;
+    font-size: 20px;
+}
+
+.inner-list-item {
+    list-style-type: none;
 }
 
 .tree-view-content {
@@ -33,6 +103,34 @@ ${getHeaderCssFragment()}
 .list-link {
     text-decoration: none;
     color: #25a186;
+}
+
+.search-bar-wrapper {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 28px;
+    width: 350px;
+    position: relative;
+}
+
+.search-bar-input {
+    font-size: 16px;
+    font-family: "Lora", serif;
+    padding: 2px;
+    width: calc(100% - 30px);
+    padding-right: 24px;
+}
+
+.search-bar-cancel-icon {
+    position: absolute;
+    right: 6px;
+    top: 3px;
+    color: rgb(150,150,150);
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
 }
 `
 }
@@ -61,6 +159,10 @@ export function homePageOlderPostsHtml(pages: Page[]){
                 ${getHeaderHtmlFragment(pages, '')}
                 <div class="tree-view-root">
                     <div class="tree-view-content">
+                        <div class="search-bar-wrapper">
+                            <input id="search-bar" class="search-bar-input" placeholder="⌕ Filter posts"/>
+                            <div id="search-bar-cancel" class="search-bar-cancel-icon" title="Clear search">✖</div>
+                        </div>
                         <ul class="outer-list">
                             ${months}
                         </ul>
@@ -69,6 +171,7 @@ export function homePageOlderPostsHtml(pages: Page[]){
             </div>
         </div>
     </main>
+    <script src="older-posts.js"></script>
   </body>
 </html>`
 }
@@ -86,13 +189,13 @@ function monthHtml(bin: MonthBin){
         // remove year
         shortDate = shortDate.substring(0, shortDate.length - 5)
         itemHtml += `
-            <li>
+            <li class='inner-list-item' id='${p.id}'>
                 ${shortDate}: <a class="list-link" href="#">${p.title}</a>
             </li>
         `
     }
 
-    return `<li>
+    return `<li class='month-li'>
     <details>
         <summary>${bin.dateDisplayStr + stateString}</summary>
         <ul>

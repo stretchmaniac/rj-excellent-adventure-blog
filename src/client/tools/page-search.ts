@@ -1,7 +1,12 @@
 import { Page } from '../types/PageType'
 
-export default function pageContains(page: Page, searchString: string) : boolean {
+export function pageContains(page: Page, searchString: string) : boolean {
     const lowerSearch = searchString.toLocaleLowerCase()
+    const searches = getPageSearchTextArr(page)
+    return searches.filter(s => s.indexOf(lowerSearch) >= 0).length > 0
+}
+
+export function getPageSearchTextArr(page: Page): string[] {
     const title = page.title.toLocaleLowerCase()
     const summary = page.summaryText.toLocaleLowerCase()
     let date1 = 'invalid date';
@@ -18,7 +23,7 @@ export default function pageContains(page: Page, searchString: string) : boolean
     const searches = [title, summary, date1, date2, date3, 
         ...getPageDesignTextNodes(page.design).map(s => s.toLocaleLowerCase())
     ]
-    return searches.filter(s => s.indexOf(lowerSearch) >= 0).length > 0
+    return searches
 }
 
 function getPageDesignTextNodes(obj: any): string[] {

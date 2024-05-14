@@ -4,7 +4,7 @@ import { getSummaryImg, getSummaryText } from "./empty-page";
 import { Media } from "./media";
 import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgFullSizeUrl, getPreviewImgSrcSet } from "./preview";
 
-function makeStringLiteral(s: string){
+export function makeStringLiteral(s: string){
     return "'" + s.replace(/'/g, "\\'") + "'";
 }
 
@@ -140,6 +140,15 @@ export function homePageCss(): string {
 
 ${getHeaderCssFragment()}
 
+@media screen and (max-width: 600px) {
+    .home-post-row {
+        margin-top: 30px !important;
+    }
+    .post-root {
+        margin-top: 0px !important;
+    }
+}
+
 .home-post-row {
     display: flex;
     flex-direction: row-reverse;
@@ -152,8 +161,6 @@ ${getHeaderCssFragment()}
 .home-post-image-container {
     flex-grow: 2;
     position: relative;
-    min-width: 300px;
-    min-height: 300px;
 }
 
 .home-post-image {
@@ -176,6 +183,7 @@ ${getHeaderCssFragment()}
     padding: 30px 15px 0px 15px;
     font-weight: bold;
     width: calc(100% - 30px);
+    font-family: 'Open Sans', sans-serif;
 }
 
 .home-post-date {
@@ -189,7 +197,7 @@ ${getHeaderCssFragment()}
     padding-left: 15px;
     padding-right: 15px;
     width: (100% - 30px);
-    line-height: 24px;
+    line-height: 38px;
 }
 
 .home-post-link-row {
@@ -202,6 +210,7 @@ ${getHeaderCssFragment()}
     right: 15px;
     bottom: 15px;
     text-decoration: none;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .post-root {
@@ -216,11 +225,12 @@ ${getHeaderCssFragment()}
     position: fixed;
     bottom: 15px;
     left: 15px;
+    font-weight: 700;
 }
 
 .top-button a {
     text-decoration: none;
-    color: #25a186;
+    color: rgb(200, 200, 200);
 }
 `
 }
@@ -242,19 +252,19 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
                 ${getHeaderHtmlFragment(pages, '')}
                 <div class="first-post">
                     ${pages.length === 0 ? '' : homePostRow(
-                                                    '#25a186', 'white', 'white', 'white', 1, 2.6, 
+                                                    '#25a186', 'white', 'white', 'white', 1, 2.6, 400,
                                                     getSummaryImg(pages[0]), idMap.get(pages[0].id) as string
                                                 )}
                 </div>
             </div>
             <div class="post-root">
                 ${pages.length > 1 ? homePostRow(
-                                        'white', '#25a186', 'black', 'rgb(100, 100, 100)', .75, 1,
+                                        'white', '#25a186', 'black', 'rgb(100, 100, 100)', 1, 1, 300,
                                         getSummaryImg(pages[1]), idMap.get(pages[1].id) as string
                                     ) : 0}
             </div>
             <div class="top-button">
-                <a href="#header">Top</a>
+                <a href="#header">TOP</a>
             </div>
         </div>
     </main>
@@ -264,7 +274,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
 }
 
 function homePostRow(backgroundColor: string, headerColor: string, textColor: string, 
-    dateColor: string, fontSizeScale: number, imageFlexGrow: number,
+    dateColor: string, fontSizeScale: number, imageFlexGrow: number, imageMinDim: number,
     thumbnailMedia: Media | null, pageFolderName: string): string{
 
     const src = getPreviewImgFullSizeUrl(thumbnailMedia, pageFolderName)
@@ -281,7 +291,7 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
         '(max-width: 800px) 100vw, (max-width: 950px) 50vw, 350px'
     return `
 <div class="home-post-row" style="background-color: ${backgroundColor}; color: ${textColor};">
-    <div class="home-post-image-container" style="flex-grow: ${imageFlexGrow}">
+    <div class="home-post-image-container" style="flex-grow: ${imageFlexGrow}; min-width: ${imageMinDim}px; min-height: ${imageMinDim}px">
         <img class="home-post-image" srcset="${srcset}" sizes="${sizes}" src="${src}"/>
     </div>
     <div class="home-post-text-container home-post-text-container-grow">

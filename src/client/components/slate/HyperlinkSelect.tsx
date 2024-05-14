@@ -3,7 +3,7 @@ import { Link } from "../../types/link"
 import './../../assets/stylesheets/slate/toggle-button.scss'
 import { Page } from "../../types/PageType"
 import PageList from "../PageList"
-import pageContains from "../../tools/page-search"
+import { pageContains } from "../../tools/page-search"
 
 export default function HyperlinkSelect(props: HyperlinkSelectProps){
     const [awaitingMenu, setAwaitingMenu] = React.useState(false)

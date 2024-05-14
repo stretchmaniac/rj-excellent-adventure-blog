@@ -40,11 +40,15 @@ export default function RenderedElement(props: RenderElementProps) {
         textAlign: textAlign === 'left' ? 'left' as const :
             (textAlign === 'center' ? 'center' as const : 'right' as const)
     }
+    const headerStyle = {
+        ...genericStyle,
+        fontFamily: 'Open Sans'
+    }
     if(t === 'h1'){
-        return <h1 style={genericStyle} {...props.attributes}>{props.children}</h1>
+        return <h1 style={headerStyle} {...props.attributes}>{props.children}</h1>
     }
     if(t == 'h2'){
-        return <h2 style={genericStyle} {...props.attributes}>{props.children}</h2>
+        return <h2 style={headerStyle} {...props.attributes}>{props.children}</h2>
     }
     if(t === 'a'){
         const link = (el as any).link as Link

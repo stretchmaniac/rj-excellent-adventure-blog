@@ -3,9 +3,8 @@ import SearchBar from './SearchBar'
 import { Page } from './../types/PageType'
 import React from 'react'
 import PageList from './PageList'
-import pageContains from '../tools/page-search'
+import { pageContains } from '../tools/page-search'
 import ToggleButtonGroup from './ToggleButtonGroup'
-import { emptyBlogPost, emptyStaticPage } from '../tools/empty-page'
 
 const EXPLORER_MODE = {
     SEARCH_RESULTS: 0,
