@@ -4,7 +4,7 @@ import { BiImageAdd } from "react-icons/bi"
 import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
 import { MdDelete, MdOutlineFileUpload, MdPushPin } from "react-icons/md";
 import { ImEnlarge2, ImShrink2 } from "react-icons/im";
-import { FaParagraph, FaRegImage } from "react-icons/fa6";
+import { FaAngleLeft, FaAngleRight, FaParagraph, FaRegImage } from "react-icons/fa6";
 import { PiSphere } from "react-icons/pi";
 import { ReactEditor, RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import './../../assets/stylesheets/slate/media-child-box.scss'
@@ -66,6 +66,10 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <div ref={pannellumRef}></div>    
             </div>}
         {showToolbar && <div className='media-toolbar'>
+            <button title='move left' className='media-tool-button' disabled={!hasLeft(props)}
+                onClick={() => moveLeft(editor, props)}>
+                <FaAngleLeft className='media-tool-icon-small'/>
+            </button>
             <button title='add left' className='media-tool-button'
                 onClick={(e) => {
                     insertLeft(editor, props)
@@ -79,6 +83,10 @@ export default function MediaChildBox(props: MediaChildProps) {
                 }}>
                 <TbColumnInsertRight className='media-tool-icon'/>
             </button>
+            <button title='move right' className='media-tool-button' disabled={!hasRight(props)}
+                onClick={() => moveRight(editor, props)}>
+                <FaAngleRight className='media-tool-icon-small'/>
+            </button>
             <button title='delete' className='media-tool-button'
                 onClick={(e) => deleteMedia(editor, props)}>
                 <MdDelete className='media-tool-icon'/>
@@ -86,20 +94,6 @@ export default function MediaChildBox(props: MediaChildProps) {
             <button title='choose file' className='media-tool-button'
                 onClick={() => chooseFile(editor, props)}>
                 <MdOutlineFileUpload className='media-tool-icon'/>
-            </button>
-            <button title='bigger' className='media-tool-button'
-                onClick={(e) => resize(props.media.size === 'small' ? 'medium' : 'large',
-                    editor, props
-                )}
-                disabled={props.media.size === 'large'}>
-                <ImEnlarge2 className='media-tool-icon-small' />
-            </button>
-            <button title='smaller' className='media-tool-button'
-                onClick={(e) => resize(props.media.size === 'large' ? 'medium' : 'small',
-                    editor, props
-                )}
-                disabled={props.media.size === 'small'}>
-                <ImShrink2 className='media-tool-icon-small' />
             </button>
             <button title='caption' 
                 className={(hasCaption(props) ? 'selected ': '') + 'media-tool-button'}
@@ -116,7 +110,34 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <FaParagraph className='media-tool-icon'/>
             </button>
         </div>}
-        {showToolbar && props.media.content !== null && <div className='media-toolbar-2nd-row'>
+        {showToolbar && <div className='media-toolbar-2nd-row'>
+            <button title='extra small' 
+                className={'media-tool-button' + (props.media.size === 'x-small' ? ' selected' : '')}
+                onClick={() => resize('x-small', editor, props)}>
+                <span className='media-tool-button-text'>XS</span>
+            </button>
+            <button title='small'
+                className={'media-tool-button' + (props.media.size === 'small' ? ' selected' : '')}
+                onClick={() => resize('small', editor, props)}>
+                <span className='media-tool-button-text'>S</span>
+            </button>
+            <button title='medium'
+                className={'media-tool-button' + (props.media.size === 'medium' ? ' selected' : '')}
+                onClick={() => resize('medium', editor, props)}>
+                <span className='media-tool-button-text'>M</span>
+            </button>
+            <button title='large'
+                className={'media-tool-button' + (props.media.size === 'large' ? ' selected' : '')}
+                onClick={() => resize('large', editor, props)}>
+                <span className='media-tool-button-text'>L</span>
+            </button>
+            <button title='extra large'
+                className={'media-tool-button' + (props.media.size === 'x-large' ? ' selected' : '')}
+                onClick={() => resize('x-large', editor, props)}>
+                <span className='media-tool-button-text'>XL</span>
+            </button>
+        </div>}
+        {showToolbar && props.media.content !== null && <div className='media-toolbar-3rd-row'>
             <button title='image' 
                 className={(props.media.content.type === MediaType.IMAGE ? 'selected ' : '') + 'media-tool-button'}
                 onClick={() => changeMediaType(MediaType.IMAGE, editor, props)}>
@@ -128,7 +149,7 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <PiSphere className='media-tool-icon'/>
             </button>
         </div>}
-        {showToolbar && props.media.content?.type === MediaType.PHOTOSPHERE && <div className='media-toolbar-3rd-row'>
+        {showToolbar && props.media.content?.type === MediaType.PHOTOSPHERE && <div className='media-toolbar-4th-row'>
             <button title='save current orientation as default'
                 className='media-tool-button'
                 onClick={() => {
@@ -218,9 +239,49 @@ function hasCaption(props: MediaChildProps){
         cArr[props.mediaIndex + 1].type === 'media-child-caption'
 }
 
+function leftHasCaption(props: MediaChildProps){
+    const cArr = props.parentNode.children
+    return 0 <= props.mediaIndex - 1 && 
+        cArr[props.mediaIndex - 1].type === 'media-child-caption'
+}
+
+function rightHasCaption(props: MediaChildProps){
+    const cArr = props.parentNode.children
+    const w = props.mediaIndex + (hasCaption(props) ? 2 : 1)
+    return w >= cArr.length - 1 ? false :
+        cArr[w + 1].type === 'media-child-caption'
+}
+
 function hasParentCaption(props: MediaChildProps){
     const cArr = props.parentNode.children
     return cArr.length > 0 && cArr[cArr.length - 1].type === 'media-parent-caption'
+}
+
+function hasLeft(props: MediaChildProps){
+    return props.mediaIndex != 0
+}
+
+function hasRight(props: MediaChildProps){
+    const rel = props.mediaIndex + (hasCaption(props) ? 1 : 0)
+    return rel < props.parentNode.children.length - 1
+}
+
+function moveRight(editor: Editor, props: MediaChildProps){
+    const newMChildren: Array<MediaChild> = [...props.parentNode.children]
+    const removed = newMChildren.splice(props.mediaIndex, 1 + (hasCaption(props) ? 1 : 0))
+    const insertLoc = props.mediaIndex + (rightHasCaption(props) ? 2 : 1)
+    newMChildren.splice(insertLoc, 0, ...removed)
+    replaceMediaChildren(editor, props, newMChildren)
+    Transforms.select(editor, [...props.parentPath, insertLoc])
+}
+
+function moveLeft(editor: Editor, props: MediaChildProps){
+    const newMChildren: Array<MediaChild> = [...props.parentNode.children]
+    const removed = newMChildren.splice(props.mediaIndex, 1 + (hasCaption(props) ? 1 : 0))
+    const insertLoc = props.mediaIndex - (leftHasCaption(props) ? 2 : 1)
+    newMChildren.splice(insertLoc, 0, ...removed)
+    replaceMediaChildren(editor, props, newMChildren)
+    Transforms.select(editor, [...props.parentPath, insertLoc])
 }
 
 function insertRight(editor: Editor, props: MediaChildProps) {

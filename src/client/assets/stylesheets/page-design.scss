@@ -12,6 +12,7 @@
     padding: 15px;
     flex-grow: 1;
     min-height: 0px;
+    max-width: calc(1125px + 30px);
     overflow-y: auto;
     scrollbar-gutter: stable;
     font-family: "Lora", serif;

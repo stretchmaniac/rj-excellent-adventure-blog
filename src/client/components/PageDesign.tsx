@@ -783,7 +783,7 @@ function bulkInsertMedia(editor: Editor, media: Media[]) {
 export type MediaChild = {
   type: string,
   content: Media | null
-  size: string // small, medium, large
+  size: string // x-small, small, medium, large, x-large
   children: Array<any>
 }
 

@@ -22,6 +22,7 @@
 .media-child {
     position: relative;
     cursor: pointer;
+    max-width: 100%;
 }
 
 .media-child-no-content {
@@ -36,46 +37,64 @@
     border: 1px solid blue;
 }
 
+$x-small-width: 335px;
+$x-small-height: 335px;
+
+$small-width: 400px;
+$small-height: 400px;
+
+$medium-width: 506px;
+$medium-height: 506px;
+
+$large-width: 800px;
+$large-height: 800px;
+
+$x-large-width: 1125px;
+$x-large-height: 800px;
+
+.x-small-box {
+    max-width: min($x-small-width, 100%)
+}
+.x-small-pannellum, .x-small {
+    max-width: 100%;
+    width: $x-small-width;
+    height: $x-small-height;
+}
+
 .small-box {
-    max-width: 250px;
+    max-width: min($small-width, 100%);
 }
-
-.small-pannellum {
-    width: 250px;
-    height: 200px;
-}
-
-.small {
-    width: 250px;
-    height: 250px;
+.small-pannellum, .small {
+    max-width: 100%;
+    width: $small-width;
+    height: $small-height;
 }
 
 .medium-box {
-    max-width: 400px;
+    max-width: min($medium-width, 100%);
 }
-
-.medium-pannellum {
-    width: 400px;
-    height: 320px;
-}
-
-.medium {
-    width: 400px;
-    height: 400px;
+.medium-pannellum, .medium {
+    max-width: 100%;
+    width: $medium-width;
+    height: $medium-height;
 }
 
 .large-box {
-    max-width: 750px;
+    max-width: min($large-width, 100%);
+}
+.large-pannellum, .large {
+    max-width: 100%;
+    width: $large-width;
+    height: $large-height;
 }
 
-.large-pannellum {
-    width: 750px;
-    height: 600px;
+.x-large-box {
+    max-width: min($x-large-width, 100%);
 }
-
-.large {
-    width: 750px;
-    height: 750px;
+.x-large-pannellum, .x-large {
+    max-width: 100%;
+    width: $x-large-width;
+    height: $x-large-height;
 }
 
 .missing-media-icon {
@@ -88,7 +107,7 @@
     transform: translate(-50%, -50%);
 }
 
-.media-toolbar, .media-toolbar-2nd-row, .media-toolbar-3rd-row {
+.media-toolbar, .media-toolbar-2nd-row, .media-toolbar-3rd-row, .media-toolbar-4th-row {
     position: absolute;
     right: 10px;
     background-color: white;
@@ -110,6 +129,10 @@
     top: 80px;
 }
 
+.media-toolbar-4th-row {
+    top: 115px;
+}
+
 .media-tool-button {
     border: none;
     background-color: white;
@@ -120,6 +143,11 @@
     margin: 2px;
     border-radius: 3px;
     max-width: 24px;
+}
+
+.media-tool-button-text {
+    height: 24px;
+    font-size: 18px;
 }
 
 .media-tool-icon {
