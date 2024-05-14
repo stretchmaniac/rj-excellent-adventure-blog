@@ -183,6 +183,7 @@ export function Main() {
             <PageEditor 
                 page={selectedPage}
                 allPages={pages}
+                setWaitingPopup={setWaitingPopup}
                 previewHook={() => showPreview(selectedPage)}
                 onPageEdit={p => {
                     const newPages = []

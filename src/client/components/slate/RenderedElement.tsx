@@ -8,8 +8,15 @@ import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor } from "slate";
 import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
+import { WaitingPopup } from "../../Main";
 
-export default function RenderedElement(props: RenderElementProps) {
+export type CustomRenderedElementProps = {
+    usualProps: RenderElementProps,
+    setWaitingPopup: (popup: WaitingPopup) => void
+}
+
+export default function RenderedElement(bigProps: CustomRenderedElementProps) {
+    const props = bigProps.usualProps
     const el = props.element
     const t = (el as any).type
     const editor = useSlate()
@@ -25,7 +32,8 @@ export default function RenderedElement(props: RenderElementProps) {
             media={el as MediaChild}
             mediaIndex={elPath[elPath.length - 1]}
             parentNode={parent}
-            parentPath={parentPath}>
+            parentPath={parentPath}
+            setWaitingPopup={bigProps.setWaitingPopup}>
             {props.children}
         </MediaChildBox>
     }

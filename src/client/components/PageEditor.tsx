@@ -4,6 +4,7 @@ import './../assets/stylesheets/page-editor.scss'
 import ToggleButtonGroup from './ToggleButtonGroup';
 import PageSettings from './PageSettings';
 import PageDesign from './PageDesign';
+import { WaitingPopup } from '../Main';
 
 export default function PageEditor(props: PageEditorProps){
     const page = props.page;
@@ -30,6 +31,7 @@ export default function PageEditor(props: PageEditorProps){
                         pageDate={page.date}
                         isBlogPost={page.isBlogPost}
                         previewHook={props.previewHook}
+                        setWaitingPopup={props.setWaitingPopup}
                         onChange={d => props.onPageEdit({
                             ...page,
                             design: d
@@ -53,5 +55,6 @@ export type PageEditorProps = {
     onPageEdit: (newPage: Page) => void
     deletePage: () => void
     previewHook: () => void
+    setWaitingPopup: (popup: WaitingPopup) => void
     showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

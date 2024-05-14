@@ -15,6 +15,7 @@ import { Page } from '../types/PageType'
 import { Link } from '../types/link'
 import { fixedBlogHeader } from '../tools/empty-page'
 import { Media } from '../tools/media'
+import { WaitingPopup } from '../Main'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -61,7 +62,9 @@ export default function PageDesign(props: PageDesignProps) {
     }
 
     const renderLeaf = React.useCallback((p: RenderLeafProps) => <RenderedLeaf {...p}/>, [])
-    const renderEl = React.useCallback((p: RenderElementProps) => <RenderedElement {...p}/>, [])
+    const renderEl = React.useCallback((p: RenderElementProps) => 
+      <RenderedElement usualProps={p} setWaitingPopup={props.setWaitingPopup}/>, []
+    )
     const [clickPopupState, setClickPopupState] = React.useState<ClickToExitPopupProps>({
       open: false,
       contents: '',
@@ -831,4 +834,5 @@ export type PageDesignProps = {
   designStruct: any[]
   onChange: (design: any[]) => void
   previewHook: () => void
+  setWaitingPopup: (popup: WaitingPopup) => void
 }

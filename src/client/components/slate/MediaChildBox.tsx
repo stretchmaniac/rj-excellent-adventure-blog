@@ -13,6 +13,7 @@ import { chooseFiles } from "../../tools/http";
 import { Media, MediaType, registerMedia } from "../../tools/media";
 import 'pannellum/build/pannellum.css'
 import 'pannellum'
+import { WaitingPopup } from "../../Main";
 
 export default function MediaChildBox(props: MediaChildProps) {
     const editor = useSlate()
@@ -168,7 +169,9 @@ export default function MediaChildBox(props: MediaChildProps) {
 }
 
 function chooseFile(editor: Editor, props: MediaChildProps){
+    props.setWaitingPopup({popupOpen: true, message: 'Please use system dialog to select file.'})
     chooseFiles(false).then(files => {
+        props.setWaitingPopup({popupOpen: false, message: ''})
         if(files.length === 0){
             // no files chosen
             return
@@ -372,4 +375,5 @@ export type MediaChildProps = {
     parentNode: any
     parentPath: Path
     children: React.ReactNode
+    setWaitingPopup: (popup: WaitingPopup) => void
 }
