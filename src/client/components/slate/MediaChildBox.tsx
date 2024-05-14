@@ -216,7 +216,7 @@ function replaceMediaChildren(editor: Editor, props: MediaChildProps, newChildre
         newChildren[i] = {...newChildren[i]}
     }
 
-    if(newChildren.length === 0){
+    if(newChildren.length === 0 || newChildren.length == 1 && newChildren[0].type === 'media-parent-caption'){
         // remove the parent node entirely
         Transforms.removeNodes(editor, {
             at: props.parentPath
@@ -263,7 +263,7 @@ function hasLeft(props: MediaChildProps){
 
 function hasRight(props: MediaChildProps){
     const rel = props.mediaIndex + (hasCaption(props) ? 1 : 0)
-    return rel < props.parentNode.children.length - 1
+    return rel < props.parentNode.children.length - (hasParentCaption(props) ? 2 : 1)
 }
 
 function moveRight(editor: Editor, props: MediaChildProps){
@@ -326,7 +326,7 @@ function toggleParentCaption(editor: Editor, props: MediaChildProps, enabled: bo
             children: [{
                 type: 'paragraph',
                 textAlign: 'center',
-                children: [{text: 'parent caption text', fontSize: 'small'}]
+                children: [{text: 'parent caption text', fontSize: 'small', italic: true}]
             }]
         })
     }
@@ -352,7 +352,7 @@ function toggleCaption(editor: Editor, props: MediaChildProps, enabled: boolean)
             children: [{
                 type: 'paragraph',
                 textAlign: 'center',
-                children: [{text: 'caption text', fontSize: 'small'}]
+                children: [{text: 'caption text', fontSize: 'small', italic: true}]
             }]
         })
     }
