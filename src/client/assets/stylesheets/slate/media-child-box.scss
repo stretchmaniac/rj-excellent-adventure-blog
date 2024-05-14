@@ -88,7 +88,7 @@
     transform: translate(-50%, -50%);
 }
 
-.media-toolbar, .media-toolbar-2nd-row {
+.media-toolbar, .media-toolbar-2nd-row, .media-toolbar-3rd-row {
     position: absolute;
     right: 10px;
     background-color: white;
@@ -104,6 +104,10 @@
 
 .media-toolbar-2nd-row {
     top: 45px;
+}
+
+.media-toolbar-3rd-row {
+    top: 80px;
 }
 
 .media-tool-button {

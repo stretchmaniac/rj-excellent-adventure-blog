@@ -2,7 +2,7 @@ import React from "react"
 import { MediaChild } from "../PageDesign"
 import { BiImageAdd } from "react-icons/bi"
 import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
-import { MdDelete, MdOutlineFileUpload } from "react-icons/md";
+import { MdDelete, MdOutlineFileUpload, MdPushPin } from "react-icons/md";
 import { ImEnlarge2, ImShrink2 } from "react-icons/im";
 import { FaParagraph, FaRegImage } from "react-icons/fa6";
 import { PiSphere } from "react-icons/pi";
@@ -19,14 +19,25 @@ export default function MediaChildBox(props: MediaChildProps) {
     const selected = useSelected()
     const focused = useFocused()
     const pannellumRef = React.createRef<HTMLDivElement>()
+    const [pannellumViewer, setPannellumViewer] = React.useState(null)
 
     React.useEffect(() => {
         if(pannellumRef.current && props.media.content?.type === MediaType.PHOTOSPHERE){
-            (window as any).pannellum.viewer(pannellumRef.current, {
+            const options = props.media.content.photosphereOptions
+            let initPitch = 0
+            let initYaw = 0
+            if(options){
+                initPitch = options.initialPitch
+                initYaw = options.initialYaw
+            }
+            const res = (window as any).pannellum.viewer(pannellumRef.current, {
                 "type": "equirectangular",
                 "panorama": props.media.content?.stableRelativePath,
-                "autoLoad": true
+                "autoLoad": true,
+                "pitch": initPitch,
+                "yaw": initYaw
             })
+            setPannellumViewer(res)
         }
     }, [props.media.content?.type])
 
@@ -115,6 +126,21 @@ export default function MediaChildBox(props: MediaChildProps) {
                 className={(props.media.content.type === MediaType.PHOTOSPHERE ? 'selected ' : '') + 'media-tool-button'}
                 onClick={() => changeMediaType(MediaType.PHOTOSPHERE, editor, props)}>
                 <PiSphere className='media-tool-icon'/>
+            </button>
+        </div>}
+        {showToolbar && props.media.content?.type === MediaType.PHOTOSPHERE && <div className='media-toolbar-3rd-row'>
+            <button title='save current orientation as default'
+                className='media-tool-button'
+                onClick={() => {
+                    if(pannellumViewer){
+                        setPhotospherePinLocation(
+                            (pannellumViewer as any).getPitch(), 
+                            (pannellumViewer as any).getYaw(), 
+                            editor, props
+                        )
+                    }
+                }}>
+                <MdPushPin className='media-tool-icon'/>
             </button>
         </div>}
     </div>
@@ -218,6 +244,13 @@ function changeMediaType(newType: MediaType, editor: Editor, props: MediaChildPr
     Transforms.setNodes(editor, {content: {...props.media.content, type: newType}} as Partial<Node>, {
         at: [...props.parentPath, props.mediaIndex]
     })
+}
+
+function setPhotospherePinLocation(pitch: number, yaw: number, editor: Editor, props: MediaChildProps){
+    Transforms.setNodes(editor, 
+        {content: {...props.media.content, photosphereOptions: {initialPitch: pitch, initialYaw: yaw}}} as Partial<Node>, 
+        { at: [...props.parentPath, props.mediaIndex] }
+    )
 }
 
 function toggleParentCaption(editor: Editor, props: MediaChildProps, enabled: boolean){

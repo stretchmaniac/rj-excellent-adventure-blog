@@ -10,8 +10,14 @@ export type MediaResizeParams = {
     // todo 
 }
 
+export type PhotosphereOptions = {
+    initialPitch: number,
+    initialYaw: number
+}
+
 export type Media = {
     type: MediaType,
+    photosphereOptions?: PhotosphereOptions
     unstableAbsoluteOriginalPath: string, // may become obsolete at any point, do NOT use for building website
     stableRelativePath: string, // path of copied resource within save folder
     resizeBehavior: MediaResizeParams
