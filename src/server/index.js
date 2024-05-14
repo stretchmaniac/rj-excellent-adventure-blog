@@ -85,7 +85,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick']
+    const missing = ['pannellum', 'powershell', 'image magick', 'open sans']
     // test for powershell 7
     try {
         spawnSync('pwsh', ['-version'])
@@ -108,6 +108,20 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
             fs.existsSync(rootDir + '/fixed-assets/pannellum.js')){
             found.push('pannellum')
             missing.splice(missing.indexOf('pannellum'), 1)
+        }
+
+        // test for open-sans
+        const suffixes = ['italic', 'regular']
+        for(let size of ['300', '500', '600', '700', '800']){
+            for(let it of ['italic', '']){
+                suffixes.push(size + it)
+            }
+        }
+        if(suffixes.map(s => 
+                fs.existsSync(rootDir + '/fixed-assets/open-sans-v40-latin-' + s + '.woff2')
+            ).filter(s => s).length === suffixes.length){
+            found.push('open sans')
+            missing.splice(missing.indexOf('open sans'), 1)
         }
     }
     

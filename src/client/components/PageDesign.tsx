@@ -4,6 +4,7 @@ import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementPro
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
 import { withHistory } from 'slate-history'
+import './../assets/stylesheets/slate/open-sans.scss'
 import './../assets/stylesheets/page-design.scss'
 import Toolbar, { FormatState } from './slate/Toolbar'
 import RenderedLeaf from './slate/RenderedLeaf'

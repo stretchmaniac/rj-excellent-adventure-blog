@@ -19,12 +19,14 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
     const testResourceNameMap = {
         'powershell': 'Powershell 7',
         'image magick': 'Image Magick',
-        'pannellum': 'Pannellum'
+        'pannellum': 'Pannellum',
+        'open sans': 'Open Sans Font'
     } as any
     const testResourceDownloadLinkMap = {
         'powershell': 'https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4',
         'image magick': 'https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-32-Q16-HDRI-x64-dll.exe',
-        'pannellum': 'https://github.com/mpetroff/pannellum/releases/download/2.5.6/pannellum-2.5.6.zip'
+        'pannellum': 'https://github.com/mpetroff/pannellum/releases/download/2.5.6/pannellum-2.5.6.zip',
+        'open sans': 'https://gwfh.mranftl.com/api/fonts/open-sans?download=zip&subsets=latin&variants=300,500,600,700,800,300italic,regular,italic,500italic,600italic,700italic,800italic&formats=woff2'
     } as any
     const testResourcesExtraActions = {
         'pannellum': {
@@ -35,6 +37,25 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                     promises.push(copyResource(f + '/pannellum/pannellum.htm', 'fixed-assets', 'pannellum', true))
                     promises.push(copyResource(f + '/pannellum/pannellum.js', 'fixed-assets', 'pannellum', true))
                     promises.push(copyResource(f + '/pannellum/pannellum.css', 'fixed-assets', 'pannellum', true))
+                    Promise.all(promises).then(() => {
+                        testResources().then(v => setResourceTestRes(v))
+                    })
+                })
+            }
+        }, 
+        'open sans': {
+            title: 'Choose extracted open-sans-v40-latin folder',
+            action: () => {
+                chooseFolder().then(f => {
+                    const promises = []
+                    promises.push(copyResource(f + '/open-sans-v40-latin-italic.woff2', 'fixed-assets', 'open-sans-v40-latin-italic', true))
+                    promises.push(copyResource(f + '/open-sans-v40-latin-regular.woff2', 'fixed-assets', 'open-sans-v40-latin-regular', true))
+                    for(let size of ['300', '500', '600', '700', '800']){
+                        for(let it of ['italic', '']){
+                            const name = 'open-sans-v40-latin-' + size + it
+                            promises.push(copyResource(f + '/' + name + '.woff2', 'fixed-assets', name, true))
+                        }
+                    }
                     Promise.all(promises).then(() => {
                         testResources().then(v => setResourceTestRes(v))
                     })
