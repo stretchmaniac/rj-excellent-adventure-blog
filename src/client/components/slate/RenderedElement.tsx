@@ -5,7 +5,7 @@ import { Link } from "../../types/link";
 import { MediaChild } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
 import './../../assets/stylesheets/slate/media-child-box.scss'
-import { Editor } from "slate";
+import { Editor, Node } from "slate";
 import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
 import { WaitingPopup } from "../../Main";
@@ -54,7 +54,10 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         fontFamily: 'Open Sans'
     }
     if(t === 'header-container'){
-        return <div contentEditable={false} 
+        if((el as any).hidden){
+            return <div style={{display: 'none'}} {...props.attributes}>{...props.children}</div>
+        }
+        return <div
             style={{
                 width: '80%', 
                 backgroundColor: '#25a186', 

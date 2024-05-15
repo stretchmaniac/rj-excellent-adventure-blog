@@ -32,8 +32,6 @@ const withInlinesAndVoids = (editor: Editor) => {
   // we need to manually specify inline elements so that slate doesn't silently 
   // delete them :(
   editor.isInline = el => ['a'].includes(el.type)
-  const prevIsBlock = editor.isBlock
-  //editor.isBlock = el => prevIsBlock(el) || ['header-container', 'content-container'].includes(el.type)
   editor.isVoid = el => ['media-child'].includes(el.type)
   return editor
 }
@@ -75,12 +73,15 @@ export default function PageDesign(props: PageDesignProps) {
     const rootRef = React.useRef<HTMLDivElement>(null)
     if(props.isBlogPost){
       maintainFixedHeader(editor, props.pageTitle, props.pageDate)
+    } else {
+      maintainFixedHeaderContentStructure(editor)
     }
 
     return <div className="page-design-root" ref={rootRef}>
       <ClickToExitPopup {...clickPopupState} />
       <Slate editor={editor} initialValue={props.designStruct} key={''+props.pageID}>
           <Toolbar getFormatState={getFormatState} 
+            showTitleBarButton={!props.isBlogPost}
             allPages={props.allPages}
             getSelectedText={getSelectedText}
             onFormatChange={(item, f) => {
@@ -124,6 +125,90 @@ export default function PageDesign(props: PageDesignProps) {
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
     </div>
+}
+
+function maintainFixedHeaderContentStructure(editor: Editor){
+  // if no content-container at root level, wrap all content in content-container
+  const content = [...Editor.nodes(editor, {
+    at: [],
+    match: (n,p) => (n as any).type === 'content-container' && p.length === 1
+  })]
+  const hasHeader = [...Editor.nodes(editor, {at: [], match: (n,p) => (n as any).type === 'header-container'})].length > 0
+  if(content.length === 0 && !hasHeader){
+    Transforms.wrapNodes(editor, {
+      type: 'content-container',
+      children: []
+    } as any, {
+      at: [],
+      match: () => true,
+      split: false,
+      voids: true,
+      mode: 'all'
+    })
+  } else if(content.length === 0 && hasHeader){
+    // add empty content-container block after header
+    Transforms.insertNodes(editor, {
+      type: 'content-container',
+      children: [{type: 'paragraph', children: [{text: ''}]}]
+    } as any, {
+      at: [1]
+    })
+  }
+
+  // if no header-container, add one to beginning
+  const headers = [...Editor.nodes(editor, {
+    at: [],
+    match: (n,p) => (n as any).type === 'header-container'
+  })]
+  if(headers.length === 0){
+    // add one at the beginning
+    Transforms.insertNodes(editor, {
+      type: 'header-container',
+      children: [{type: 'h1', children: [{text: ''}]}]
+    } as any, {at: [0]})
+  }
+
+  // delete anything at the root level that is not of type header-container or content-container
+  let m
+  while((m = [...Editor.nodes(editor, {at: [], 
+    match: (n,p) => p.length === 1 && !['header-container', 'content-container'].includes((n as any).type)
+  })]).length > 0){
+    Transforms.removeNodes(editor, {at: m[0][1]})
+  }
+
+  // reorder so that header-container is first
+  if((editor.children[0] as any).type !== 'header-container'){
+    Transforms.moveNodes(editor, {
+      at: [],
+      match: (n,p) => p.length === 1 && (n as any).type === 'header-container',
+      to: [0]
+    })
+  }
+  // delete any header-container NOT at [0]
+  while((m = [...Editor.nodes(editor, {at: [], 
+    match: (n, p) => (n as any).type === 'header-container' && (p.length > 1 || p[0] !== 0)
+  })]).length > 0){
+    Transforms.removeNodes(editor, {at: m[0][1]})
+  }
+
+  // if header container contains only text node, add h1
+  const h = editor.children[0] as any
+  if(h.children.length === 0 || !('type' in h.children[0])){
+    Transforms.removeNodes(editor, {at: [0]})
+    Transforms.insertNodes(editor, {
+      type: 'header-container',
+      children: [{type: 'h1', children: [{text: ''}]} as any]
+    } as any, {
+      at: [0]
+    })
+  }
+
+  // delete any content-container node NOT at [1]
+  while((m = [...Editor.nodes(editor, {at: [], 
+    match: (n, p) => (n as any).type === 'content-container' && (p.length > 1 || p[0] !== 1)
+  })]).length > 0){
+    Transforms.removeNodes(editor, {at: m[0][1]})
+  }
 }
 
 function maintainFixedHeader(editor: Editor, title: string, date: Date){
@@ -348,6 +433,8 @@ function getFormatStateLocal(editorContext: Editor): FormatState {
       }
     }
   }
+  const hideTitleBar = editorContext.children.length > 0 &&
+    (editorContext.children[0] as any).hidden
   return {
     bold: markActive(editorContext, 'bold'),
     italic: markActive(editorContext, 'italic'),
@@ -360,7 +447,8 @@ function getFormatStateLocal(editorContext: Editor): FormatState {
     textAlign: textAlign,
     link: link,
     blockQuote: blockQuote,
-    list: list
+    list: list,
+    showTitleBar: !hideTitleBar
   }
 }
 
@@ -412,6 +500,18 @@ function setBlockFormat(editor: Editor, changedItem: string, format: FormatState
     setBlockQuote(editor, format.blockQuote)
   } else if(changedItem === 'list'){
     setList(editor, format.list)
+  } else if(changedItem === 'showTitleBar'){
+    setTitleBar(editor, format.showTitleBar)
+  }
+}
+
+function setTitleBar(editor: Editor, value: boolean){
+  if(editor.children.length > 0){
+    Transforms.setNodes(editor, {
+      hidden: !value
+    } as Partial<Node>, {
+      at: [0]
+    })
   }
 }
 
@@ -728,8 +828,6 @@ function setLink(editor: Editor, linkText: string, link: Link){
     // move out of link element
     Transforms.move(editor, {distance: 1, unit: 'offset'})
   }
-  
-  console.log('children', editor.children)
 }
 
 function setList(editor: Editor, list: string){

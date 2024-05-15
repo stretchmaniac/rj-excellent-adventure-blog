@@ -156,7 +156,6 @@ export function setData(state: BlogState) : Promise<void> {
         .then(response => response.text())
         .then(data => resolve())
         .then(error => {
-            console.log('Error setting data!', error)
             resolve()
         })
     })

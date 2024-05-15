@@ -1,6 +1,6 @@
 import './../../assets/stylesheets/slate/toolbar.scss'
 import { BiBold, BiItalic, BiUnderline, BiStrikethrough, BiSolidQuoteAltLeft  } from 'react-icons/bi'
-import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted  } from "react-icons/md";
+import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted, MdTitle  } from "react-icons/md";
 import { VscTextSize } from "react-icons/vsc"
 import { FaHouseChimney, FaRegImage, FaRegImages } from "react-icons/fa6";
 import { GrTextAlignCenter, GrTextAlignLeft, GrTextAlignRight } from "react-icons/gr";
@@ -224,6 +224,12 @@ export default function Toolbar(props: ToolbarProps) {
             }}>
             <FaRegImages className='react-icons' />
         </ToggleButton>
+        {props.showTitleBarButton && <ToggleButton
+            title="show green title bar"
+            active={formatState.showTitleBar}
+            onChange={active => props.onFormatChange('showTitleBar', {...formatState, showTitleBar: active})}>
+            <MdTitle className='react-icons'/>
+        </ToggleButton>}
         <div className='toolbar-right-side'>
             <button onClick={() => props.previewHook()}>Preview</button>
         </div>
@@ -232,6 +238,7 @@ export default function Toolbar(props: ToolbarProps) {
 
 export type ToolbarProps = {
     allPages: Array<Page>
+    showTitleBarButton: boolean
     getSelectedText: () => string
     insertText: (text: string) => void
     insertMediaBox: () => void
@@ -256,4 +263,5 @@ export type FormatState = {
     link: Link | null
     blockQuote: boolean
     list: string // ul, ol, or empty string
+    showTitleBar: boolean
 }

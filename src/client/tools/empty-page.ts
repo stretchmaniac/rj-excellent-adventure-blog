@@ -79,6 +79,9 @@ export function getSummaryText(page: Page): string{
     if(!page.autoSummary){
         return page.summaryText
     }
+    if(page.design.length < 2){
+        return ''
+    }
     // generate auto summary; find first non-empty paragraph at the root level
     // first entry is header-container, second is content-container, first entry in content-container is date
     for(const obj of page.design[1].children.slice(1)){
@@ -95,6 +98,9 @@ export function getSummaryText(page: Page): string{
 export function getSummaryImg(page: Page): Media | null {
     if(!page.autoSummaryImg){
         return page.summaryImg
+    }
+    if(page.design.length < 2){
+        return null
     }
     // generate auto image; find first non-empty media box at root level
     // first entry is header-container, second is content-container, first entry in content-container is date
@@ -150,10 +156,11 @@ export function emptyBlogPostWithTitleDate(title: string, date: Date) : Page {
     const p = emptyBlogPost()
     p.title = title
     p.date = date
-    p.design = [...fixedBlogHeader(title, date),{
+    p.design = fixedBlogHeader(title, date)
+    p.design[1].children.push({
         type: 'paragraph',
         children: [{text: 'Gustav is back!'}]
-    }]
+    })
     return p
 }
 
