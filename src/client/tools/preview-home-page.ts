@@ -10,8 +10,6 @@ export function makeStringLiteral(s: string){
 
 export function homePageJs(pages: Page[], idMap: Map<string, string>): string {
     const blogPosts = pages.filter(p => p.isBlogPost)
-    // put in reverse order to newest is first
-    blogPosts.reverse()
     const numBlogPosts = blogPosts.length
     return `
 const MAX_POSTS = ${numBlogPosts};

@@ -34,10 +34,10 @@ export function emptyBlogPost(): Page {
 export function sortPages(newPages: Page[]){
     newPages.sort((a, b) => {
         if(a.date < b.date){
-            return -1
+            return 1
         }
         if(b.date < a.date) {
-            return 1
+            return -1
         }
         // sort alphabetically according to title next
         if(a.title !== b.title){

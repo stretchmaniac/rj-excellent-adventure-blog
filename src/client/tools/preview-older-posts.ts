@@ -213,8 +213,7 @@ type MonthBin = {
     orderedPages: Page[]
 }
 function binToMonths(pages: Page[]){
-    // reverse pages to go from newest to oldest
-    const newToOld = [...pages].reverse()
+    const newToOld = [...pages]
 
     const matchesMonthAndYear = (bin: MonthBin, month: number, year: number) => 
         bin.month === month && bin.year === year

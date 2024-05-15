@@ -1,23 +1,32 @@
 import ReactDOMServer from 'react-dom/server'
 
 export function serializeToHTML(pageDesign: any[]){
+    const state: SerializeState = {
+        inHeaderContainer: false
+    }
     return pageDesign.map(child => 
-        ReactDOMServer.renderToStaticMarkup(serializeInternal(child))
+        ReactDOMServer.renderToStaticMarkup(serializeInternal(child, state))
     ).join('\n')
 }
 
-function serializeInternal(child: any): React.ReactNode {
+type SerializeState = {
+    inHeaderContainer: boolean
+}
+
+function serializeInternal(child: any, state: SerializeState): React.ReactNode {
     const type = ('type' in child) ? child.type : ''
     if(type === 'header-container'){
-        return serializeHeaderContainer(child)
+        return serializeHeaderContainer(child, state)
     } else if(type === 'content-container'){
-        return serializeContentContainer(child)
+        return serializeContentContainer(child, state)
     }
 
+
+    console.log('missed type:', child)
     return ''
 }
 
-function serializeHeaderContainer(container: any): React.ReactNode {
+function serializeHeaderContainer(container: any, state: SerializeState): React.ReactNode {
     if(container.hidden){
         return ''
     }
@@ -31,17 +40,23 @@ function serializeHeaderContainer(container: any): React.ReactNode {
         paddingBottom: '40px',
         fontSize: '30px'
     }}>
-        <h1>Placeholder header</h1>
+        {container.children && 
+            container.children.map(
+                (c: any) => serializeInternal(c, {...state, inHeaderContainer: true})
+            )
+        }
     </div>
 }
 
-function serializeContentContainer(container: any): React.ReactNode {
+function serializeContentContainer(container: any, state: SerializeState): React.ReactNode {
     return <div style={{
         marginLeft: '10%',
         marginRight: '10%',
         maxWidth: '1125px',
         paddingTop: '5px'
     }}>
-        <p>Placeholder content</p>
+        {container.children && 
+            container.children.map((c: any) => serializeInternal(c, {...state}))
+        }
     </div>
 }
