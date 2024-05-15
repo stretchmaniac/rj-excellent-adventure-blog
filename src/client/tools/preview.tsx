@@ -1,18 +1,24 @@
+import { serializeToHTML } from "../components/slate/Serializer";
 import { Page } from "../types/PageType";
 import { getAllReferencedMediaNames } from "./empty-page";
 import { Media } from "./media";
 import { homePageCss, homePageHtml, homePageJs } from "./preview-home-page";
 import { homePageOlderPostsCss, homePageOlderPostsHtml, homePageOlderPostsJs } from "./preview-older-posts";
+import { pageCss, pageHtml, pageJs } from "./preview-page";
 
 export type GeneratedPreview = {
-    homeHtml: string,
-    homeCss: string,
-    homeJs: string,
-    pageIdToFolderName: Map<string, string>, // pageId --> folder name, which is url (i.e. kovaltour.com/folder.html)
+    homeHtml: string
+    homeCss: string
+    homeJs: string
+    pageIdToFolderName: Map<string, string> // pageId --> folder name, which is url (i.e. kovaltour.com/folder.html)
     imageCopyMap: Map<string, string> // '<name>.ext' ---> folder name of target
-    olderPostsHtml: string,
-    olderPostsCss: string,
+    olderPostsHtml: string
+    olderPostsCss: string
     olderPostsJs: string
+    pagesHtmlIds: string[]
+    pagesHtml: string[]
+    pagesCss: string[]
+    pagesJs: string[]
 }
 
 export function makePreview(pages: Page[]): GeneratedPreview {
@@ -23,9 +29,13 @@ export function makePreview(pages: Page[]): GeneratedPreview {
         homeJs: homePageJs(pages, idMap),
         pageIdToFolderName: idMap,
         imageCopyMap: getImageCopyMap(pages, idMap),
-        olderPostsHtml: homePageOlderPostsHtml(pages),
+        olderPostsHtml: homePageOlderPostsHtml(pages, idMap),
         olderPostsCss: homePageOlderPostsCss(),
-        olderPostsJs: homePageOlderPostsJs(pages)
+        olderPostsJs: homePageOlderPostsJs(pages),
+        pagesHtmlIds: pages.map(p => p.id),
+        pagesHtml: pages.map(p => pageHtml(pages, p, idMap)),
+        pagesCss: pages.map(p => pageCss(p)),
+        pagesJs: pages.map(p => pageJs(p))
     }
 }
 
@@ -341,7 +351,6 @@ body {
 .header-title-container {
     height: 200px;
     width: 100%;
-    background-image: url('./header.jpg');
     background-size: cover;
     position: relative;
 }
@@ -389,23 +398,23 @@ body {
 }`
 }
 
-export function getHeaderHtmlFragment(pages: Page[], homeRootRelativePath: string){
+export function getHeaderHtmlFragment(pages: Page[], idMap: Map<string, string>, homeRootRelativePath: string, includeOlderPosts: boolean){
     return `<div class="header" id="header">
-    <div class="header-title-container">
+    <div class="header-title-container" style="background-image: url('${homeRootRelativePath}header.jpg')">
         <span class="header-title-text"><a href="${homeRootRelativePath}home.html">Rick and Julie's Excellent Adventure</a></span>
     </div>
     <div class="header-links-container">
         <div class="static-page-links">
-            ${staticLinkHtml(pages)}
+            ${staticLinkHtml(pages, homeRootRelativePath, idMap)}
         </div>
         <div class="older-posts-container">
-            <a class="older-posts-link" href="older-posts.html">Older Posts</a>
+            ${includeOlderPosts ? '<a class="older-posts-link" href="older-posts.html">Older Posts</a>' : ''}
         </div>
     </div>
 </div>`
 }
 
-function staticLinkHtml(pages: Page[]){
+function staticLinkHtml(pages: Page[], homeRootRelativePath: string, idMap: Map<string, string>){
     const linked = pages.filter(p => !p.isBlogPost && p.linkedFromHeader)
     linked.sort((a, b) => {
         const aOrder = a.headerSortOrder
@@ -428,7 +437,7 @@ function staticLinkHtml(pages: Page[]){
             (aNumber < bNumber ? -1 : 1)
     })
     return linked.map(p => `
-        <a class="header-link" href="#">
+        <a class="header-link" href="${homeRootRelativePath + idMap.get(p.id)}/page.html">
             ${p.title}
         </a>
     `).join('\n')

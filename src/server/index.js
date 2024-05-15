@@ -7,7 +7,7 @@ const { spawnSync } = require('child_process');
 
 const app = express()
 app.use(express.json())
-app.use(express.text())
+app.use(express.text({limit: '100mb'}))
 
 const port = 3000
 
@@ -38,7 +38,6 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.writeFileSync(rootDir + '/preview/older-posts.html', data.olderPostsHtml)
     fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
     fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
-    // TODO pages
 
     // re-create page folders
     const pageIdToFolderName = objToStringStringMap(data.pageIdToFolderName)
@@ -68,6 +67,19 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     }
     // copy fixed-assets folder
     fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
+
+    // copy page html, css and js files to page folder
+    const orderedIds = data.pagesHtmlIds
+    const orderedPageHtml = data.pagesHtml
+    const orderedPageCss = data.pagesCss
+    const orderedPageJs = data.pagesJs
+    for(let i = 0; i < orderedIds.length; i++){
+        const id = orderedIds[i]
+        const folderName = pageIdToFolderName.get(id)
+        fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.html', orderedPageHtml[i])
+        fs.writeFileSync(rootDir + '/preview/' + folderName + '/styles.css', orderedPageCss[i])
+        fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.js', orderedPageJs[i])
+    }
 
     res.send(JSON.stringify({success: true}))
 })

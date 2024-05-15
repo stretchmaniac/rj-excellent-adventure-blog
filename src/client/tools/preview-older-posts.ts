@@ -135,12 +135,12 @@ ${getHeaderCssFragment()}
 `
 }
 
-export function homePageOlderPostsHtml(pages: Page[]){
+export function homePageOlderPostsHtml(pages: Page[], idMap: Map<string, string>){
 
     let months = ''
     const bins = binToMonths(pages.filter(p => p.isBlogPost))
     for(let bin of bins){
-        months += monthHtml(bin)
+        months += monthHtml(bin, idMap)
     }
 
     return `<!DOCTYPE html>
@@ -156,7 +156,7 @@ export function homePageOlderPostsHtml(pages: Page[]){
     <main>
         <div class="root">
             <div class="header-box">
-                ${getHeaderHtmlFragment(pages, '')}
+                ${getHeaderHtmlFragment(pages, idMap, '', false)}
                 <div class="tree-view-root">
                     <div class="tree-view-content">
                         <div class="search-bar-wrapper">
@@ -176,7 +176,7 @@ export function homePageOlderPostsHtml(pages: Page[]){
 </html>`
 }
 
-function monthHtml(bin: MonthBin){
+function monthHtml(bin: MonthBin, idMap: Map<string, string>){
     let stateString = ''
     if(bin.states.length > 0){
         const maxThree = bin.states.slice(0, Math.min(3, bin.states.length))
@@ -190,7 +190,7 @@ function monthHtml(bin: MonthBin){
         shortDate = shortDate.substring(0, shortDate.length - 5)
         itemHtml += `
             <li class='inner-list-item' id='${p.id}'>
-                ${shortDate}: <a class="list-link" href="#">${p.title}</a>
+                ${shortDate}: <a class="list-link" href="${idMap.get(p.id)}/page.html">${p.title}</a>
             </li>
         `
     }

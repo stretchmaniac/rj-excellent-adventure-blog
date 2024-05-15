@@ -18,6 +18,7 @@ const MAX_POSTS = ${numBlogPosts};
 const INITIAL_POSTS = Math.min(MAX_POSTS, 8);
 const LOAD_POST_NUM = 3;
 const pageTitles=[${blogPosts.map(p => makeStringLiteral(p.title)).join(',')}];
+const pageFolderNames = [${blogPosts.map(p => makeStringLiteral(idMap.get(p.id) as string)).join(',')}];
 const pageDates = [${blogPosts.map(p => makeStringLiteral(getReadableDateString(p.date))).join(',')}];
 const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getSummaryText(p))).join(',')}];
 const pageThumbnailSrcsets = [${blogPosts.map(
@@ -79,10 +80,17 @@ function removeTextContent(pageRow){
 function setContent(pageRow, pageIndex){
     const title = pageRow.querySelector('.home-post-title');
     title.textContent = pageTitles[pageIndex];
+    title.href = pageFolderNames[pageIndex] + '/page.html';
+
+    const readMore = pageRow.querySelector('.home-post-read-more');
+    readMore.href = title.href
+
     const date = pageRow.querySelector('.home-post-date');
     date.textContent = pageDates[pageIndex];
+
     const summary = pageRow.querySelector('.home-post-summary');
     summary.textContent = pageSummaries[pageIndex];
+
     const img = pageRow.querySelector('.home-post-image');
     img.srcset = pageThumbnailSrcsets[pageIndex];
     img.src = pageThumbnailSrcs[pageIndex];
@@ -180,6 +188,8 @@ ${getHeaderCssFragment()}
 }
 
 .home-post-title {
+    display: block;
+    text-decoration: none;
     padding: 30px 15px 0px 15px;
     font-weight: bold;
     width: calc(100% - 30px);
@@ -249,7 +259,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
     <main>
         <div class="root">
             <div class="header-box">
-                ${getHeaderHtmlFragment(pages, '')}
+                ${getHeaderHtmlFragment(pages, idMap, '', true)}
                 <div class="first-post">
                     ${pages.length === 0 ? '' : homePostRow(
                                                     '#25a186', 'white', 'white', 'white', 1, 2.6, 400,
@@ -296,7 +306,7 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
     </div>
     <div class="home-post-text-container home-post-text-container-grow">
         <div class="home-post-text-intermediate">
-            <div class="home-post-title" style="font-size: ${36 * fontSizeScale}px; color: ${headerColor}"></div>
+            <a href="#" class="home-post-title" style="font-size: ${36 * fontSizeScale}px; color: ${headerColor}"></a>
             <div class="home-post-date" style="font-size: ${17 * fontSizeScale}px; color: ${dateColor}"></div>
             <div class="home-post-summary" style="font-size: ${20 * fontSizeScale}px"></div>
             <div class="home-post-link-row" style="font-size: ${20 * fontSizeScale}px">
