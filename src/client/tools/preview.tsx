@@ -60,7 +60,7 @@ function getIdToFolderMap(pages: Page[]): Map<string, string> {
     for(const p of pages){
         let title = escapeTitle(p.title)
         let count = 0
-        while(res.has(title)){
+        while([...res.values()].includes(title)){
             title = escapeTitle(p.title) + count
             count++
         }

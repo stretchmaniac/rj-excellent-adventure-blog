@@ -40,11 +40,3 @@ In order to give permission for powershell to run certain commands, you'll need 
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 This needs to be done only once.
-
-Stylistic Changes
----
-Basic stylistic changes to blog posts can be made in 
-```
-src/assets/stylesheets/slate/rendered-element.scss
-```
-Changes here will apply **globally** to all blog posts.

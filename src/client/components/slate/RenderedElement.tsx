@@ -1,5 +1,4 @@
 import { ReactEditor, RenderElementProps, useSlate } from "slate-react";
-import './../../assets/stylesheets/slate/rendered-element.scss'
 import './../../assets/stylesheets/slate/html-tag-styles/blockquote.scss'
 import { Link } from "../../types/link";
 import { MediaChild } from "../PageDesign";
@@ -121,6 +120,8 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         ...genericStyle,
         fontSize: max + 'px',
         lineHeight: '' + lineHeight,
+        marginTop: '0px',
+        marginBottom: '0px'
     }
     // default to <p>
     return <p style={pStyle} {...props.attributes}>

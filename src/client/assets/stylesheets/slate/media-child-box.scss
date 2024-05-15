@@ -37,64 +37,66 @@
     border: 1px solid blue;
 }
 
-$x-small-width: 335px;
-$x-small-height: 335px;
+div {
+    --x-small-width: 335px;
+    --x-small-height: 335px;
 
-$small-width: 400px;
-$small-height: 400px;
+    --small-width: 400px;
+    --small-height: 400px;
 
-$medium-width: 506px;
-$medium-height: 506px;
+    --medium-width: 506px;
+    --medium-height: 506px;
 
-$large-width: 800px;
-$large-height: 800px;
+    --large-width: 800px;
+    --large-height: 800px;
 
-$x-large-width: 1125px;
-$x-large-height: 800px;
+    --x-large-width: 1125px;
+    --x-large-height: 800px;
+}
 
 .x-small-box {
-    max-width: min($x-small-width, 100%)
+    max-width: min(var(--x-small-width), 100%)
 }
 .x-small-pannellum, .x-small {
     max-width: 100%;
-    width: $x-small-width;
-    height: $x-small-height;
+    width: var(--x-small-width);
+    height: var(--x-small-height);
 }
 
 .small-box {
-    max-width: min($small-width, 100%);
+    max-width: min(var(--small-width), 100%);
 }
 .small-pannellum, .small {
     max-width: 100%;
-    width: $small-width;
-    height: $small-height;
+    width: var(--small-width);
+    height: var(--small-height);
 }
 
 .medium-box {
-    max-width: min($medium-width, 100%);
+    max-width: min(var(--medium-width), 100%);
 }
 .medium-pannellum, .medium {
     max-width: 100%;
-    width: $medium-width;
-    height: $medium-height;
+    width: var(--medium-width);
+    height: var(--medium-height);
 }
 
 .large-box {
-    max-width: min($large-width, 100%);
+    max-width: min(var(--large-width), 100%);
 }
 .large-pannellum, .large {
     max-width: 100%;
-    width: $large-width;
-    height: $large-height;
+    width: var(--large-width);
+    height: var(--large-height);
 }
 
 .x-large-box {
-    max-width: min($x-large-width, 100%);
+    max-width: min(var(--x-large-width), 100%);
 }
 .x-large-pannellum, .x-large {
     max-width: 100%;
-    width: $x-large-width;
-    height: $x-large-height;
+    width: var(--x-large-width);
+    height: var(--x-large-height);
 }
 
 .missing-media-icon {
