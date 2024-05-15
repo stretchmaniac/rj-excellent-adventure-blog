@@ -138,9 +138,14 @@ export function Main() {
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
 
     function showPreview(pageSource: Page | null){
-        setPreview(makePreview(pages)).then(() => {
-            // open new tab at localhost:3000/preview/home.html
-            window.open('http://localhost:3000/preview/home.html', '_blank')
+        const preview = makePreview(pages)
+        setPreview(preview).then(() => {
+            if(pageSource){
+                window.open(`http://localhost:3000/preview/${preview.pageIdToFolderName.get(pageSource.id)}/page.html`, '_blank')
+            } else {
+                // default to home
+                window.open('http://localhost:3000/preview/home.html', '_blank')
+            }
         })
     }
 
