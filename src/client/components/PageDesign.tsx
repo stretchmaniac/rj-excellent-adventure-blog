@@ -638,15 +638,27 @@ function rangeIntersectNode(range: Range, node: Node, nodePath: Path) : Range | 
     return null
   }
   let [p1, p2] = orderedPts(range)
+  // ranges must always refer to leaf nodes, see here: https://docs.slatejs.org/concepts/03-locations#range
   if(Path.compare(p1.path, nodePath) === -1){
+    const fullPath = [...nodePath]
+    while((node as any).children){
+      fullPath.push(0)
+      node = (node as any).children[0]
+    }
     p1 = {
-      path: nodePath,
+      path: fullPath,
       offset: 0
     }
   }
   if(Path.compare(p2.path, nodePath) === 1){
+    const fullPath = [...nodePath]
+    while((node as any).children){
+      const ch = (node as any).children
+      fullPath.push(ch.length - 1)
+      node = ch[ch.length - 1]
+    }
     p2 = {
-      path: nodePath,
+      path: fullPath,
       offset: Node.string(node).length
     }
   }
@@ -661,6 +673,27 @@ function rangeContainsNodeContents(range: Range, node: Node, nodePath: Path){
   const p1Ok = Path.compare(p1.path, nodePath) === -1 || pointBeginsNode(p1, node, nodePath)
   const p2Ok = Path.compare(p2.path, nodePath) === 1 || pointEndsNode(p2, node, nodePath)
   return p1Ok && p2Ok
+}
+
+function pathPrefixedBy(path: Path, prefixTest: Path){
+  if(prefixTest.length > path.length){
+    return false
+  }
+  for(let i = 0; i < prefixTest.length; i++){
+    if(path[i] !== prefixTest[i]){
+      return false
+    }
+  }
+  return true
+}
+
+function rangeContainsPtInNode(range: Range, node: Node, nodePath: Path){
+  const [p1, p2] = orderedPts(range)
+  const p1Before = Path.compare(p1.path, nodePath) === -1
+  const p2Before = Path.compare(p2.path, nodePath) === -1
+  const p1After = Path.compare(p1.path, nodePath) === 1
+  const p2After = Path.compare(p2.path, nodePath) === 1
+  return !(p1Before && p2Before || p1After && p2After)
 }
 
 function rangeDisjointFromNodeContents(range: Range, node: Node, nodePath: Path){
@@ -683,11 +716,16 @@ function setTextTag(editor: Editor, tag: string) {
   if(editor.selection){
     if(Range.isCollapsed(editor.selection)){
       // insert new node, if applicable
-      const [textNode, textNodePath] = [...Editor.nodes(editor, {
+      const found = [...Editor.nodes(editor, {
         at: [],
         match: (n, path) => searchTypes.indexOf((n as any).type) !== -1 && 
           nodeContainsRange(editor.selection as Range, n, path)
-      })][0]
+      })]
+      if(found.length === 0){
+        // no relevant text tags found
+        return
+      }
+      const [textNode, textNodePath] = found[0]
       const pt = editor.selection.anchor
       if(('type' in textNode) && textNode.type !== tag){
         if(Node.string(textNode).length === 0){
@@ -709,13 +747,13 @@ function setTextTag(editor: Editor, tag: string) {
         }
       }
     } else {
-      const overlapping = Editor.nodes(editor, {
+      const overlapping = [...Editor.nodes(editor, {
         at: [],
         match: (n, path) => searchTypes.indexOf((n as any).type) !== -1 && (
           rangePartiallyOverlapsNodeContents(editor.selection as Range, n, path) ||
           rangeContainsNodeContents(editor.selection as Range, n, path)),
         reverse: true
-      })
+      })]
       const originalSelection = editor.selection
       for(const entry of overlapping){
         const [n, path] = entry
@@ -833,7 +871,14 @@ function setBlockQuote(editor: Editor, quote: boolean){
           })
         }
         else {
-          // add new blockquote block item
+          // add new blockquote block item if not in media parent or media child
+          const p = [...editor.selection.anchor.path]
+          while(p.length > 0 && !getNodeAtPath(editor, p).type){
+            p.pop()
+          }
+          if(p.length === 0 || ['media-child','media-parent'].includes(getNodeAtPath(editor, p).type)){
+            return
+          }
           Transforms.insertNodes(editor, {type: 'blockquote', 
             children:[{
               type: 'paragraph',
@@ -842,7 +887,13 @@ function setBlockQuote(editor: Editor, quote: boolean){
           } as any)
         }
       } else {
-        // wrap selection in blockquote
+        // wrap selection in blockquote if not contained in media-parent
+        if([...Editor.nodes(editor, {
+          at: [],
+          match: (n, p) => (n as any).type === 'media-parent' && nodeContainsRange(editor.selection as Range, n, p)
+        })].length > 0){
+          return
+        }
         Transforms.wrapNodes(editor, {type: 'blockquote', children:[]} as any, {
           split: true
         })
@@ -923,6 +974,15 @@ function setList(editor: Editor, list: string){
             at: matchingPs[0][1]
           })
         }
+        // if nearest typed parent is type media-child, return
+        const typedPath = [...editor.selection.anchor.path]
+        while(typedPath.length > 0 && !getNodeAtPath(editor, typedPath).type){
+          typedPath.pop()
+        }
+        if(typedPath.length === 0 || ['media-parent', 'media-child'].includes(getNodeAtPath(editor, typedPath).type)){
+          return
+        }
+
         // add new list item
         Transforms.insertNodes(editor, {
           type: 'list',
@@ -943,6 +1003,18 @@ function setList(editor: Editor, list: string){
 }
 
 function insertMediaBox(editor: Editor, pageId: string) {
+  // just don't insert media if selection overlaps with any media-child 
+  if(!editor.selection){
+    return
+  }
+  if([...Editor.nodes(editor, {
+    at: [],
+    match: (n, p) => rangeContainsPtInNode(editor.selection as Range, n, p) &&
+                      (n as any).type === 'media-child'
+  })].length > 0){
+    return
+  }
+
   Transforms.splitNodes(editor)
   // add new media node at root level
   // the media parent will contain nodes of type "media-child", "media-child-caption", and 
@@ -966,6 +1038,18 @@ function insertMediaBox(editor: Editor, pageId: string) {
 }
 
 function bulkInsertMedia(editor: Editor, media: Media[]) {
+  // just don't insert media if selection overlaps with any media-child 
+  if(!editor.selection){
+    return
+  }
+  if([...Editor.nodes(editor, {
+    at: [],
+    match: (n, p) => rangeContainsPtInNode(editor.selection as Range, n, p) &&
+                      (n as any).type === 'media-child'
+  })].length > 0){
+    return
+  }
+  
   Transforms.splitNodes(editor)
   const nodes = []
   for(let m of media){
