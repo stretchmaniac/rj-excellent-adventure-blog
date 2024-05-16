@@ -65,7 +65,7 @@ window.onload = () => {
 
 export function homePageOlderPostsCss(){
     return `
-${getHeaderCssFragment()}
+${getHeaderCssFragment('')}
 
 .header-links-container {
     border-bottom: 1px solid rgb(100,100,100) !important;

@@ -287,9 +287,18 @@ function getFontCssFragment(){
       `
 }
 
-export function getHeaderCssFragment(){
+export function getHeaderCssFragment(homeRootRelativePath: string){
     return `
 ${getFontCssFragment()}
+
+/* rock-salt-regular - latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Rock Salt';
+  font-style: normal;
+  font-weight: 400;
+  src: url('${homeRootRelativePath}rock-salt-v22-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
 
 @media screen and (max-width: 600px) {
     .header-box {
@@ -356,11 +365,13 @@ body {
 }
 
 .header-title-text {
-    font-size: 35px;
+    font-size: 30px;
     font-weight: 800;
     position: absolute;
     left: 15px;
-    top: 15px;
+    top: 5px;
+    line-height: 1.75;
+    font-family: 'Rock Salt'
 }
 
 .header-links-container {

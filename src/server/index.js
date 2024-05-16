@@ -98,7 +98,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick', 'open sans', 'lora']
+    const missing = ['pannellum', 'powershell', 'image magick', 'open sans', 'lora', 'rock salt']
     // test for powershell 7
     try {
         spawnSync('pwsh', ['-version'])
@@ -144,6 +144,12 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
         ).filter(s => s).length === lSuffixes.length){
             found.push('lora')
             missing.splice(missing.indexOf('lora'), 1)
+        }
+
+        // test for rock salt font
+        if(fs.existsSync(rootDir + '/fixed-assets/rock-salt-v22-latin-regular.woff2')){
+            found.push('rock salt')
+            missing.splice(missing.indexOf('rock salt'), 1)
         }
     }
     

@@ -144,7 +144,7 @@ window.onscroll = () => {
 export function homePageCss(): string {
     return `
 
-${getHeaderCssFragment()}
+${getHeaderCssFragment('')}
 
 @media screen and (max-width: 600px) {
     .home-post-row {

@@ -32,7 +32,7 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
 
 export function pageCss(page: Page): string {
 return `
-${getHeaderCssFragment()}
+${getHeaderCssFragment('../')}
 
 .content-root{
     width: 100%;
