@@ -50,6 +50,16 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             fs.mkdirSync(rootDir + '/preview/' + folder)
         }
     }
+    // delete page folders not in use
+    const inUse = [...pageIdToFolderName.values()]
+    const unusedFolderNames = fs.readdirSync(rootDir + '/preview', { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name)
+        .filter(name => !inUse.includes(name))
+    for(const unused of unusedFolderNames){
+        fs.rmSync(rootDir + '/preview/' + unused, {recursive: true, force: true})
+    }
+
     // copy images to page folders 
     const imgCopyMap = objToStringStringMap(data.imageCopyMap)
     for(const mediaSrc of imgCopyMap.keys()){
