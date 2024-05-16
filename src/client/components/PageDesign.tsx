@@ -76,6 +76,7 @@ export default function PageDesign(props: PageDesignProps) {
     } else {
       maintainFixedHeaderContentStructure(editor)
     }
+    maintainImageParagraphs(editor)
 
     return <div className="page-design-root" ref={rootRef}>
       <ClickToExitPopup {...clickPopupState} />
@@ -125,6 +126,58 @@ export default function PageDesign(props: PageDesignProps) {
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
     </div>
+}
+
+function getNodeAtPath(editor: Editor, absPath: number[]){
+  let root: any = editor
+  let i = 0
+  while(i < absPath.length){
+    if(!root){
+      console.log(absPath, editor.children)
+    }
+    root = (root as any).children[absPath[i]]
+    i++
+  }
+  return root
+}
+
+function maintainImageParagraphs(editor: Editor){
+  const images = [...Editor.nodes(editor, {
+    at: [],
+    match: (n, p) => (n as any).type === 'media-parent',
+    mode: 'all'
+  })]
+  // we need a custom sort for modifying entries here
+  images.sort((r1, r2) => {
+    const p1 = r1[1]
+    const p2 = r2[1]
+    for(let i = 0; i < Math.min(p1.length, p2.length); i++){
+      if(p1[i] != p2[i]){
+        return p1[i] - p2[i]
+      }
+    }
+    return p2.length - p1.length
+  })
+
+  for(const [node, path] of images){
+    let insert = path[path.length - 1] === 0
+    if(!insert){
+      const queryPath = [...path.slice(0, path.length - 1), path[path.length-1] - 1]
+      const prev = getNodeAtPath(editor, queryPath)
+      if(prev && prev.type !== 'paragraph'){
+        insert = true
+      }
+    }
+    if(insert){
+      // insert paragraph before
+      Transforms.insertNodes(editor, {
+        type: 'paragraph',
+        children: [{text: ''}]
+      }, {
+        at: path
+      })
+    }
+  }
 }
 
 function maintainFixedHeaderContentStructure(editor: Editor){
@@ -301,6 +354,23 @@ function compareElRecursive(el1: any, el2: any): boolean {
 }
 
 function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
+  // when in a caption and the caption is empty, prevent default backspace and delete behavior
+  if(editor.selection && Range.isCollapsed(editor.selection)){
+    let nodeAt = Editor.node(editor, editor.selection)
+    while(nodeAt && nodeAt[1].length > 0 && !['media-child-caption', 'media-parent-caption'].includes((nodeAt[0] as any).type)){
+      nodeAt = Editor.parent(editor, nodeAt[1])
+    }
+    if(nodeAt[1].length > 0){
+      const [n, p] = nodeAt
+      if(pointBeginsNode(editor.selection.anchor, n, p) && e.code === 'Backspace'){
+        e.preventDefault()
+      }
+      if(pointEndsNode(editor.selection.anchor, n, p) && e.code === 'Delete'){
+        e.preventDefault()
+      }
+    }
+  }
+
   const formatState = getFormatStateLocal(editor)
   // when in a header or subheader, go to paragraph on enter key
   if(formatState.textTag !== 'paragraph'){
