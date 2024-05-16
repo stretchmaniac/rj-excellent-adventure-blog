@@ -86,9 +86,14 @@ export function getSummaryText(page: Page): string{
     // first entry is header-container, second is content-container, first entry in content-container is date
     for(const obj of page.design[1].children.slice(1)){
         if(obj.type === 'paragraph'){
-            // check if paragraph is empty
-            if(obj.children && obj.children.length > 0 && obj.children[0].text && obj.children[0].text.trim().length > 0){
-                return obj.children[0].text.trim()
+            let contents = ''
+            for(const child of obj.children){
+                if('text' in child){
+                    contents += child.text
+                }
+            }
+            if(contents.trim().length > 0){
+                return contents
             }
         }
     }
