@@ -64,7 +64,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     const imgCopyMap = objToStringStringMap(data.imageCopyMap)
     for(const mediaSrc of imgCopyMap.keys()){
         const dest = imgCopyMap.get(mediaSrc)
-        const srcNames = [mediaSrc]
+        const srcNames = [] // do not copy original
         const extI = mediaSrc.lastIndexOf('.')
         const extWithPeriod = mediaSrc.substring(extI)
         const base = mediaSrc.substring(0, extI)

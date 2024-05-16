@@ -4,11 +4,13 @@ import { Link } from '../../types/link'
 import { MediaChild } from '../PageDesign'
 import { Media, MediaType } from '../../tools/media'
 import React from 'react'
+import { getPreviewImgSizes, getPreviewImgSrcSet } from '../../tools/preview'
 
-export function serializeToHTML(pageDesign: any[], idMap: Map<string, string>){
+export function serializeToHTML(pageDesign: any[], pageId: string, idMap: Map<string, string>){
     const state: SerializeState = {
         inHeaderContainer: false,
-        idMap: idMap
+        idMap: idMap,
+        pageId: pageId
     }
     return pageDesign.map(child => 
         ReactDOMServer.renderToStaticMarkup(serializeInternal(child, state))
@@ -18,6 +20,7 @@ export function serializeToHTML(pageDesign: any[], idMap: Map<string, string>){
 type SerializeState = {
     inHeaderContainer: boolean
     idMap: Map<string, string>
+    pageId: string
 }
 
 function serializeInternal(child: any, state: SerializeState): React.ReactNode {
@@ -77,7 +80,8 @@ function serializeMediaChild(child: any, state: SerializeState): React.ReactNode
     return <div style={parentStyle} className={!content ? size : ''}>
         {content && content.type === MediaType.IMAGE && <img
             className={size + '-box'}
-            src={localImageUrl(content.stableRelativePath)}
+            srcSet={getPreviewImgSrcSet(content, state.idMap.get(state.pageId) as string, '../')}
+            sizes={getPreviewImgSizes(size)}
             />
         }
         {content && content.type === MediaType.PHOTOSPHERE && <div 

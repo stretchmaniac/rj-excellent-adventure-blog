@@ -70,8 +70,8 @@ function getIdToFolderMap(pages: Page[]): Map<string, string> {
 }
 
 const IMAGE_SIZE_NAMES = ['small', 'medium', 'large', 'x-large']
-const IMAGE_SIZE_WIDTHS = [700, 1200, 1800, 2400]
-export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: string){
+const IMAGE_SIZE_WIDTHS = [700, 1200, 1800, 2400] // in device pixels
+export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: string, homeRelativePath: string){
     if(!imageMedia){
         return ''
     }
@@ -86,7 +86,7 @@ export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: st
     for(let i = 0; i < IMAGE_SIZE_NAMES.length; i++){
         const name = IMAGE_SIZE_NAMES[i]
         const width = IMAGE_SIZE_WIDTHS[i]
-        const fullUrl = './' + pageFolderName + '/' + baseUrl + '_' + name + extWithDot
+        const fullUrl = homeRelativePath + pageFolderName + '/' + baseUrl + '_' + name + extWithDot
         srcset += fullUrl + ' ' + width + 'w'
         if(i < IMAGE_SIZE_NAMES.length - 1){
             srcset += ', '
@@ -95,12 +95,11 @@ export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: st
     return srcset
 }
 
-export function getPreviewImgFullSizeUrl(imageMedia: Media | null, pageFolderName: string){
-    if(!imageMedia){
-        return ''
-    }
-    const arr = imageMedia.stableRelativePath.split('/media/')
-    return './' + pageFolderName + '/' + arr[1]
+const CLIENT_IMAGE_SIZE_NAMES = ['x-small', 'small', 'medium', 'large', 'x-large']
+const CLIENT_IMAGE_SIZE_WIDTHS = [335, 400, 506, 800, 1125] // in css pixels
+export function getPreviewImgSizes(imgSize: string): string{
+    let maxWidth = CLIENT_IMAGE_SIZE_WIDTHS[CLIENT_IMAGE_SIZE_NAMES.indexOf(imgSize)]
+    return `(max-width: ${maxWidth}px) 100vw, ${maxWidth}px`
 }
 
 function getFontCssFragment(){

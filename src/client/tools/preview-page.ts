@@ -19,7 +19,7 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
                 <div class="header-box">
                     ${getHeaderHtmlFragment(pages, idMap, '../', false)}
                     <div class="content-root">
-                        ${serializeToHTML(page.design, idMap)}
+                        ${serializeToHTML(page.design, page.id, idMap)}
                     </div>
                 </div>
             </div>

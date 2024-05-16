@@ -2,7 +2,7 @@ import { Page } from "../types/PageType";
 import { getReadableDateString } from "./date";
 import { getSummaryImg, getSummaryText } from "./empty-page";
 import { Media } from "./media";
-import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgFullSizeUrl, getPreviewImgSrcSet } from "./preview";
+import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgSrcSet } from "./preview";
 
 export function makeStringLiteral(s: string){
     return "'" + s.replace(/'/g, "\\'") + "'";
@@ -20,10 +20,10 @@ const pageFolderNames = [${blogPosts.map(p => makeStringLiteral(idMap.get(p.id) 
 const pageDates = [${blogPosts.map(p => makeStringLiteral(getReadableDateString(p.date))).join(',')}];
 const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getSummaryText(p))).join(',')}];
 const pageThumbnailSrcsets = [${blogPosts.map(
-        p => makeStringLiteral(getPreviewImgSrcSet(getSummaryImg(p), idMap.get(p.id) as string))
+        p => makeStringLiteral(getPreviewImgSrcSet(getSummaryImg(p), idMap.get(p.id) as string, ''))
     ).join(',')}];
 const pageThumbnailSrcs = [${blogPosts.map(
-    p => makeStringLiteral(getPreviewImgFullSizeUrl(getSummaryImg(p), idMap.get(p.id) as string))
+    p => makeStringLiteral('')
 ).join(',')}];
 
 function populatePageRows(maxPages){
@@ -285,8 +285,8 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
     dateColor: string, fontSizeScale: number, imageFlexGrow: number, imageMinDim: number,
     thumbnailMedia: Media | null, pageFolderName: string): string{
 
-    const src = getPreviewImgFullSizeUrl(thumbnailMedia, pageFolderName)
-    const srcset = getPreviewImgSrcSet(thumbnailMedia, pageFolderName)
+    const src = ''
+    const srcset = getPreviewImgSrcSet(thumbnailMedia, pageFolderName, '')
     // for flexgrow > 2: (estimations)
     //   width < 700px : image takes up 100% of viewport
     //   otherwise image takes up 50% of viewport
