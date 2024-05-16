@@ -247,6 +247,8 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
                     rootDir + '/' + newPath, 
                     '-resize', 
                     width + 'x10000',
+                    '-quality',
+                    '70',
                     dest
                 ]).on('close', () => {
                     resolve()
