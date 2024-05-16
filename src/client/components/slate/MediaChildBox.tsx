@@ -204,31 +204,33 @@ function insert(editor: Editor, props: MediaChildProps, at: number){
 }
 
 function replaceMediaChildren(editor: Editor, props: MediaChildProps, newChildren: any[]){
-    Transforms.removeNodes(editor, {
-        at: [],
-        match: (n, p) => p.length > 0 && Path.equals(Editor.parent(editor, p)[1], props.parentPath)
-    })
-    // this copy operation is very important!
-    // slate will only re-render nodes that are updated. 
-    // Since all the images/captions are passed into each MediaChildBox, 
-    // we must trigger a re-render of every child whenever any child changes.
-    // While we removed all the child nodes above, this was apparently not enough
-    // to signal to slate that it should re-render each identical child mounted 
-    // in the insertNodes below. Copying each child does the trick, however.
-    for(let i = 0; i < newChildren.length; i++){
-        newChildren[i] = {...newChildren[i]}
-    }
-
-    if(newChildren.length === 0 || newChildren.length == 1 && newChildren[0].type === 'media-parent-caption'){
-        // remove the parent node entirely
+    editor.withoutNormalizing(() => {
         Transforms.removeNodes(editor, {
-            at: props.parentPath
+            at: [],
+            match: (n, p) => p.length > 0 && Path.equals(Editor.parent(editor, p)[1], props.parentPath)
         })
-    } else {
-        Transforms.insertNodes(editor, newChildren, {
-            at: [...props.parentPath, 0]
-        })
-    }
+        // this copy operation is very important!
+        // slate will only re-render nodes that are updated. 
+        // Since all the images/captions are passed into each MediaChildBox, 
+        // we must trigger a re-render of every child whenever any child changes.
+        // While we removed all the child nodes above, this was apparently not enough
+        // to signal to slate that it should re-render each identical child mounted 
+        // in the insertNodes below. Copying each child does the trick, however.
+        for(let i = 0; i < newChildren.length; i++){
+            newChildren[i] = {...newChildren[i]}
+        }
+
+        if(newChildren.length === 0 || newChildren.length == 1 && newChildren[0].type === 'media-parent-caption'){
+            // remove the parent node entirely
+            Transforms.removeNodes(editor, {
+                at: props.parentPath
+            })
+        } else {
+            Transforms.insertNodes(editor, newChildren, {
+                at: [...props.parentPath, 0]
+            })
+        }
+    })
 }
 
 function insertLeft(editor: Editor, props: MediaChildProps) {

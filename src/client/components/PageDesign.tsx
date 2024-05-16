@@ -49,9 +49,30 @@ const withNoEmptyLink = (editor: Editor) => {
   return editor
 }
 
+const withNoHangingMedia = (editor: Editor) => {
+  // delete any media-parent with no media-child
+  // delete any media-child/media-child-caption/media-parent-caption whose direct parent is not media-parent
+  const normalizeOriginal = editor.normalizeNode
+  editor.normalizeNode = ([node, path]) => {
+    if((node as any).type === 'media-parent' && (node as any).children.filter((c:any) => c.type === 'media-child').length === 0){
+      Transforms.removeNodes(editor, {at: path})
+      return
+    }
+    if(['media-child', 'media-child-caption', 'media-parent-caption'].includes((node as any).type)){
+      const [p, pPath] = Editor.parent(editor, path)
+      if((p as any).type !== 'media-parent'){
+        Transforms.removeNodes(editor, {at: path})
+        return
+      }
+    }
+    normalizeOriginal([node, path])
+  }
+  return editor
+}
+
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
-      const res = withNoEmptyLink(withInlinesAndVoids(withReact(withHistory(createEditor()))))
+      const res = withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(withReact(withHistory(createEditor())))))
       return res
     })
 
@@ -1049,7 +1070,7 @@ function bulkInsertMedia(editor: Editor, media: Media[]) {
   })].length > 0){
     return
   }
-  
+
   Transforms.splitNodes(editor)
   const nodes = []
   for(let m of media){
