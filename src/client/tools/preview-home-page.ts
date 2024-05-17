@@ -280,7 +280,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
             </div>
             <div class="post-root" id="post-root">
                 ${pages.length > 1 && 
-                    `<div class="more-posts-hint"><a href="#post-root">More Posts ↓<a/></div>`
+                    `<div class="more-posts-hint"><a href="#post-root">More Posts ↓</a></div>`
                 }
                 ${pages.length > 1 ? homePostRow(
                                         'white', '#25a186', 'black', 'rgb(100, 100, 100)', 1, 1, 300,
