@@ -239,6 +239,7 @@ ${getHeaderCssFragment('')}
 .top-button a {
     text-decoration: none;
     color: rgb(200, 200, 200);
+    font-family: 'Open Sans', sans-serif;
 }
 `
 }
