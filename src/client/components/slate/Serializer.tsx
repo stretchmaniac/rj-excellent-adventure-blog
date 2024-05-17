@@ -226,7 +226,8 @@ function serializeH2(child: any, state: SerializeState): React.ReactNode {
     const textAlign = 'textAlign' in child ? child.textAlign : 'left'
     return <h2 style={{
         fontFamily: 'Open Sans',
-        textAlign: textAlign
+        textAlign: textAlign,
+        color: '#53824A'
     }}>
         {child.children && 
             child.children.map((c: any, i: number) => serializeInternal(c, descState(state, child.children, i)))

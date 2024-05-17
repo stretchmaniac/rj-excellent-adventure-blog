@@ -84,7 +84,7 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         </div>
     }
     if(t == 'h2'){
-        return <h2 style={headerStyle} {...props.attributes}>{props.children}</h2>
+        return <h2 style={{...headerStyle, color: '#53824A'}} {...props.attributes}>{props.children}</h2>
     }
     if(t === 'a'){
         const link = (el as any).link as Link
