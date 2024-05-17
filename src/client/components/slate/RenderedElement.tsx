@@ -9,7 +9,7 @@ import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
 import { WaitingPopup } from "../../Main";
 import { getParElSpacing, getParNonParSpacing } from "../../tools/paragraph-spacing";
-import '../../assets/stylesheets/slate/emphasized-p.scss'
+import '../../assets/stylesheets/slate/misc-post.scss'
 import { numberArrEq } from "../../tools/misc";
 
 export type CustomRenderedElementProps = {
@@ -61,12 +61,10 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
             return <div style={{display: 'none'}} {...props.attributes}>{...props.children}</div>
         }
         return <div
+            className='header-container'
             style={{
-                width: '80%', 
                 backgroundColor: '#25a186', 
                 color: 'white', 
-                paddingLeft: '10%', 
-                paddingRight: '10%',
                 paddingTop: '40px',
                 paddingBottom: '40px',
                 fontSize: '30px'
@@ -81,7 +79,8 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
     }
     if(t === 'content-container'){
         return <div {...props.attributes}
-            style={{marginLeft: '10%', marginRight: '10%', maxWidth: '1125px', paddingTop: '5px'}}>
+            className='content-container'
+            style={{maxWidth: '1125px', paddingTop: '5px'}}>
             {props.children}
         </div>
     }

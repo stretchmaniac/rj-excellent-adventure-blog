@@ -110,6 +110,17 @@ div {
   vertical-align: bottom;
   line-height: .9em;
 }
+@media screen and (max-width: 600px) {
+  .header-container, .content-container {
+      padding-left: 25px !important;
+      padding-right: 25px !important;
+  }
+}
+
+.header-container, .content-container {
+  padding-left: 10%;
+  padding-right: 10%;
+}
 `
 }
 

@@ -351,12 +351,9 @@ function serializeHeaderContainer(container: any, state: SerializeState): React.
     if(container.hidden){
         return ''
     }
-    return <div style={{
-        width: '80%', 
+    return <div className="header-container" style={{
         backgroundColor: '#25a186', 
-        color: 'white', 
-        paddingLeft: '10%', 
-        paddingRight: '10%',
+        color: 'white',
         paddingTop: '40px',
         paddingBottom: '40px',
         fontSize: '30px'
@@ -370,9 +367,7 @@ function serializeHeaderContainer(container: any, state: SerializeState): React.
 }
 
 function serializeContentContainer(container: any, state: SerializeState): React.ReactNode {
-    return <div style={{
-        marginLeft: '10%',
-        marginRight: '10%',
+    return <div className="content-container" style={{
         maxWidth: '1125px',
         paddingTop: '5px'
     }}>
