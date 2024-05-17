@@ -376,6 +376,11 @@ function compareElRecursive(el1: any, el2: any): boolean {
 }
 
 function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
+  // shift-enter to insert newline character
+  if(e.shiftKey && e.code === 'Enter'){
+    Transforms.insertText(editor, '\n')
+    e.preventDefault()
+  }
   // when in a caption and the caption is empty, prevent default backspace and delete behavior
   if(editor.selection && Range.isCollapsed(editor.selection)){
     let nodeAt = Editor.node(editor, editor.selection)
