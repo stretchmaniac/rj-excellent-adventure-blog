@@ -19,7 +19,7 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
                 <div class="header-box">
                     ${getHeaderHtmlFragment(pages, idMap, '../', false)}
                     <div class="content-root">
-                        ${serializeToHTML(page.design, page.id, idMap)}
+                        ${serializeToHTML(page, idMap)}
                     </div>
                 </div>
             </div>
@@ -100,6 +100,15 @@ div {
   max-width: 100%;
   width: var(--x-large-width);
   height: var(--x-large-height);
+}
+
+.emphasized-p::first-line {
+  color: #25a186;
+}
+.emphasized-p::first-letter {
+  font-size: 50px;
+  vertical-align: bottom;
+  line-height: .9em;
 }
 `
 }

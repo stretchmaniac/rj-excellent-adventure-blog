@@ -84,16 +84,18 @@ function getAllRefMedia(workingList: ReferencedMedia[], obj: any){
     }
 }
 
-export function getSummaryText(page: Page): string{
-    if(!page.autoSummary){
-        return page.summaryText
-    }
+export function getFirstNonEmptyRootParLoc(page: Page): TextAndLocation {
     if(page.design.length < 2){
-        return ''
+        return {
+            text: '',
+            designLoc: null
+        }
     }
-    // generate auto summary; find first non-empty paragraph at the root level
+    // find first non-empty paragraph at the root level
     // first entry is header-container, second is content-container, first entry in content-container is date
+    let i = 0
     for(const obj of page.design[1].children.slice(1)){
+        i++
         if(obj.type === 'paragraph'){
             let contents = ''
             for(const child of obj.children){
@@ -102,11 +104,32 @@ export function getSummaryText(page: Page): string{
                 }
             }
             if(contents.trim().length > 0){
-                return contents
+                return {
+                    text: contents,
+                    designLoc: [1, i]
+                }
             }
         }
     }
-    return ''
+    return {
+        text: '',
+        designLoc: null
+    }
+}
+
+export type TextAndLocation = {
+    text: string
+    designLoc: number[] | null
+}
+
+export function getSummaryText(page: Page): TextAndLocation {
+    if(!page.autoSummary){
+        return {
+            text: page.summaryText,
+            designLoc: null
+        }
+    }
+    return getFirstNonEmptyRootParLoc(page)
 }
 
 export function getSummaryImg(page: Page): Media | null {

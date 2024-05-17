@@ -13,7 +13,7 @@ import RenderedElement from './slate/RenderedElement'
 import ClickToExitPopup, { ClickToExitPopupProps } from './ClickToExitPopup'
 import { Page } from '../types/PageType'
 import { Link } from '../types/link'
-import { fixedBlogHeader } from '../tools/empty-page'
+import { fixedBlogHeader, getFirstNonEmptyRootParLoc, getSummaryText } from '../tools/empty-page'
 import { Media } from '../tools/media'
 import { WaitingPopup } from '../Main'
 
@@ -82,8 +82,8 @@ export default function PageDesign(props: PageDesignProps) {
 
     const renderLeaf = React.useCallback((p: RenderLeafProps) => <RenderedLeaf {...p}/>, [])
     const renderEl = React.useCallback((p: RenderElementProps) => 
-      <RenderedElement usualProps={p} setWaitingPopup={props.setWaitingPopup}/>, []
-    )
+      <RenderedElement usualProps={p} setWaitingPopup={props.setWaitingPopup} targetEmphasizedPPath={getFirstNonEmptyRootParLoc(props.page).designLoc}/>,
+    [props.page])
     const [clickPopupState, setClickPopupState] = React.useState<ClickToExitPopupProps>({
       open: false,
       contents: '',
@@ -1104,6 +1104,7 @@ export type MediaChild = {
 }
 
 export type PageDesignProps = {
+  page: Page
   allPages: Array<Page>
   pageID: string
   pageTitle: string 

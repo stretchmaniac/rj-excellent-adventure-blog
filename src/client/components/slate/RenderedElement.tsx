@@ -9,10 +9,13 @@ import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
 import { WaitingPopup } from "../../Main";
 import { getParElSpacing, getParNonParSpacing } from "../../tools/paragraph-spacing";
+import '../../assets/stylesheets/slate/emphasized-p.scss'
+import { numberArrEq } from "../../tools/misc";
 
 export type CustomRenderedElementProps = {
     usualProps: RenderElementProps,
     setWaitingPopup: (popup: WaitingPopup) => void
+    targetEmphasizedPPath: number[] | null
 }
 
 export default function RenderedElement(bigProps: CustomRenderedElementProps) {
@@ -140,7 +143,9 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         marginBottom: marginBottom
     }
     // default to <p>
-    return <p style={pStyle} {...props.attributes}>
+    return <p style={pStyle} className={
+        numberArrEq(elPath, bigProps.targetEmphasizedPPath) ? 'emphasized-p' : ''
+        } {...props.attributes}>
         {props.children}
     </p>
 }

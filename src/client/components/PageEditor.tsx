@@ -24,6 +24,7 @@ export default function PageEditor(props: PageEditorProps){
                 </div>
                 {tab === 0 ? 
                     <PageDesign 
+                        page={page}
                         allPages={props.allPages}
                         designStruct={page.design}
                         pageID={page.id}

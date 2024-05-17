@@ -18,7 +18,7 @@ const LOAD_POST_NUM = 3;
 const pageTitles=[${blogPosts.map(p => makeStringLiteral(p.title)).join(',')}];
 const pageFolderNames = [${blogPosts.map(p => makeStringLiteral(idMap.get(p.id) as string)).join(',')}];
 const pageDates = [${blogPosts.map(p => makeStringLiteral(getReadableDateString(p.date))).join(',')}];
-const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getSummaryText(p))).join(',')}];
+const pageSummaries = [${blogPosts.map(p => makeStringLiteral(getSummaryText(p).text)).join(',')}];
 const pageThumbnailSrcsets = [${blogPosts.map(
         p => makeStringLiteral(getPreviewImgSrcSet(getSummaryImg(p), idMap.get(p.id) as string, ''))
     ).join(',')}];

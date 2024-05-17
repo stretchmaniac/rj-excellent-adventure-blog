@@ -79,12 +79,12 @@ export default function PageSettings(props: PageSettingsProps) {
                     </span>
                     {props.page.autoSummary ?
                         <React.Fragment>
-                            {getSummaryText(props.page) === '' && 
+                            {getSummaryText(props.page).text === '' && 
                                 <IoIosWarning 
                                     style={{color: '#f4b656', width: 20, height: 20}}
                                     title='No non-empty root-level paragraph text found'/>
                             }
-                            <span className='text-preview-block'>{getSummaryText(props.page)}</span>
+                            <span className='text-preview-block'>{getSummaryText(props.page).text}</span>
                         </React.Fragment>
                         
                         :

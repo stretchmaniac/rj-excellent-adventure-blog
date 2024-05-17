@@ -6,17 +6,22 @@ import { Media, MediaType } from '../../tools/media'
 import React from 'react'
 import { getPreviewImgSizes, getPreviewImgSrcSet } from '../../tools/preview'
 import { getParElSpacing, getParNonParSpacing } from '../../tools/paragraph-spacing'
+import { numberArrEq } from '../../tools/misc'
+import { getFirstNonEmptyRootParLoc, getSummaryText } from '../../tools/empty-page'
+import { Page } from '../../types/PageType'
 
-export function serializeToHTML(pageDesign: any[], pageId: string, idMap: Map<string, string>){
+export function serializeToHTML(page:Page, idMap: Map<string, string>){
     const state: SerializeState = {
         inHeaderContainer: false,
         idMap: idMap,
-        pageId: pageId,
+        pageId: page.id,
+        page: page,
         peerPrev: null,
-        peerNext: null
+        peerNext: null,
+        path: []
     }
-    return pageDesign.map((child, i) => 
-        ReactDOMServer.renderToStaticMarkup(serializeInternal(child, descState(state, pageDesign, i)))
+    return page.design.map((child, i) => 
+        ReactDOMServer.renderToStaticMarkup(serializeInternal(child, descState(state, page.design, i)))
     ).join('\n')
 }
 
@@ -24,15 +29,18 @@ type SerializeState = {
     inHeaderContainer: boolean
     peerPrev: any
     peerNext: any
+    path: number[]
     idMap: Map<string, string>
     pageId: string
+    page: Page 
 }
 
 function descState(state: SerializeState, childArr: any[], childIndex: number): SerializeState {
     return {
         ...state,
         peerPrev: childIndex > 0 ? childArr[childIndex - 1] : null,
-        peerNext: childIndex < childArr.length - 1 ? childArr[childIndex + 1] : null
+        peerNext: childIndex < childArr.length - 1 ? childArr[childIndex + 1] : null,
+        path: [...state.path, childIndex]
     }
 }
 
@@ -281,13 +289,15 @@ function serializeParagraph(child: any, state: SerializeState): React.ReactNode 
         marginBottom = getParNonParSpacing(fontSize, lineHeight, state.peerNext.type)
     }
 
+    const isEmphasized = numberArrEq(state.path, getFirstNonEmptyRootParLoc(state.page).designLoc)
+
     return <p style={{
         textAlign: textAlign as any,
         fontSize: fontSize + 'px',
         lineHeight: lineHeight,
         marginTop: marginTop + 'px',
         marginBottom: marginBottom + 'px'
-    }}>
+    }} className={isEmphasized ? 'emphasized-p' : ''}>
         {child.children && 
             child.children.map((c: any, i: number) => serializeInternal(c, descState(state, child.children, i)))
         }
