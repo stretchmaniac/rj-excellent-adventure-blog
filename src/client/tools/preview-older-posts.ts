@@ -31,10 +31,13 @@ function updateSearch(){
         }
         // remove months with no visible children, expand all details
         for(const mo of monthHeaders){
+            const details = mo.querySelector('details');
             if(mo.querySelector('li:not(.hidden)') == null){
                 mo.classList.add('hidden');
+                details.removeAttribute('open')
             } else {
                 mo.classList.remove('hidden');
+                details.open = 'true'
             }
         }
     } else {
@@ -90,6 +93,7 @@ ${getHeaderCssFragment('')}
 .tree-view-content {
     padding-top: 20px;
     padding-left: 30px;
+    font-family: "Open Sans", sans-serif;
 }
 
 .tree-view-content ul li {
@@ -115,7 +119,6 @@ ${getHeaderCssFragment('')}
 
 .search-bar-input {
     font-size: 16px;
-    font-family: "Lora", serif;
     padding: 2px;
     width: calc(100% - 30px);
     padding-right: 24px;
