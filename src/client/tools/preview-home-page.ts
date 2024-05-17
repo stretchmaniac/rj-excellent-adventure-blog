@@ -288,7 +288,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
                                     ) : 0}
             </div>
             <div class="top-button">
-                <a href="#header">TOP</a>
+                <a href="#header">TOP ↑</a>
             </div>
         </div>
     </main>
