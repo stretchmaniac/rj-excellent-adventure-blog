@@ -1,19 +1,28 @@
 import { BlogState } from "../types/blog-state"
-import { sortPages } from "./empty-page"
+import { ReferencedMedia, sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
 export function setPreview(preview: GeneratedPreview): Promise<void> {
-    const mapToObj = (map: Map<string, string>) => {
-        const res: any = {}
+    const mapToArr = (map: Map<string, string>) => {
+        const res: string[] = []
         for(const key of map.keys()){
-            res[key] = map.get(key)
+            res.push(key)
+            res.push(map.get(key) as string)
+        }
+        return res
+    }
+    const refMediaMapToArr = (map: Map<ReferencedMedia, string>) => {
+        const res: any[] = []
+        for(const key of map.keys()){
+            res.push(key)
+            res.push(map.get(key) as string)
         }
         return res
     }
     const jsonPreview = {
         ...preview,
-        pageIdToFolderName: mapToObj(preview.pageIdToFolderName),
-        imageCopyMap: mapToObj(preview.imageCopyMap)
+        pageIdToFolderName: mapToArr(preview.pageIdToFolderName),
+        imageCopyMap: refMediaMapToArr(preview.imageCopyMap)
     }
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/serve-preview', {
@@ -27,13 +36,12 @@ export function setPreview(preview: GeneratedPreview): Promise<void> {
         .then(response => response.text())
         .then(data => resolve())
         .then(error => {
-            console.log('Error loading preview', error)
             reject()
         })
     })
 }
 
-export function cleanupMedia(referencedMediaNames: string[]): Promise<void> {
+export function cleanupMedia(referencedMedia: ReferencedMedia[]): Promise<void> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/media-cleanup', {
             method: 'POST',
@@ -41,12 +49,11 @@ export function cleanupMedia(referencedMediaNames: string[]): Promise<void> {
             headers: {
                 'Content-Type': 'text/plain'
             },
-            body: JSON.stringify({referencedPaths: referencedMediaNames})
+            body: JSON.stringify({referencedMedia: referencedMedia})
         })
         .then(response => response.text())
         .then(data => resolve())
         .then(error => {
-            console.log('Error performing media cleanup')
             resolve()
         })
     })
@@ -64,8 +71,25 @@ export function chooseFiles(multiple: boolean): Promise<string[]> {
         }).then(response => response.text())
         .then(data => resolve(data.split('\n').map(s => s.trim()).filter(s => s.length > 0)))
         .then(error => {
-            console.log('Error accessing files', error)
             resolve([])
+        })
+    })
+}
+
+export function runCmdTask(type: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/cmd-task', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: type
+        })
+        .then(response => response.text())
+        .then(data => resolve())
+        .then(error => {
+            resolve()
         })
     })
 }
@@ -83,7 +107,6 @@ export function copyResource(path: string, targetFolder: string, rename: string 
         .then(response => response.text())
         .then(data => resolve(JSON.parse(data).path))
         .then(error => {
-            console.log('Error setting copy resource directory!')
             resolve('')
         })
     })
@@ -123,7 +146,6 @@ export function setMirrorDirectory(dir: string): Promise<boolean> {
             resolve(res.success)
         })
         .then(error => {
-            console.log('Error setting mirror directory!', error)
             resolve(false)
         })
     })
@@ -202,7 +224,6 @@ export function loadData(): Promise<BlogState> {
             }
         })
         .then(error => {
-            console.log('Error merging data!', error)
             resolve({
                 pages: [],
                 config: {

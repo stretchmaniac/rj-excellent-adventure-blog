@@ -1,6 +1,6 @@
 import { serializeToHTML } from "../components/slate/Serializer";
 import { Page } from "../types/PageType";
-import { getAllReferencedMediaNames } from "./empty-page";
+import { ReferencedMedia, getAllReferencedMedia } from "./empty-page";
 import { Media } from "./media";
 import { homePageCss, homePageHtml, homePageJs } from "./preview-home-page";
 import { homePageOlderPostsCss, homePageOlderPostsHtml, homePageOlderPostsJs } from "./preview-older-posts";
@@ -11,7 +11,7 @@ export type GeneratedPreview = {
     homeCss: string
     homeJs: string
     pageIdToFolderName: Map<string, string> // pageId --> folder name, which is url (i.e. kovaltour.com/folder.html)
-    imageCopyMap: Map<string, string> // '<name>.ext' ---> folder name of target
+    imageCopyMap: Map<ReferencedMedia, string> // media ---> folder name of target
     olderPostsHtml: string
     olderPostsCss: string
     olderPostsJs: string
@@ -39,10 +39,10 @@ export function makePreview(pages: Page[]): GeneratedPreview {
     }
 }
 
-function getImageCopyMap(pages: Page[], idMap: Map<string, string>): Map<string, string> {
-    const res = new Map<string, string>()
+function getImageCopyMap(pages: Page[], idMap: Map<string, string>): Map<ReferencedMedia, string> {
+    const res = new Map<ReferencedMedia, string>()
     for(const p of pages){
-        const refs = getAllReferencedMediaNames([p])
+        const refs = getAllReferencedMedia([p])
         for(const ref of refs){
             res.set(ref, idMap.get(p.id) as string)
         }

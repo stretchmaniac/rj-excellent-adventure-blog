@@ -67,6 +67,14 @@ function localImageUrl(stableRelativePath: string){
     return arr[arr.length - 1]
 }
 
+function stripExt(fileName: string): string{
+    const i = fileName.lastIndexOf('.')
+    if(i >= 0){
+        return fileName.substring(0, i)
+    }
+    return fileName
+}
+
 function serializeMediaChild(child: any, state: SerializeState): React.ReactNode {
     const content = child.content as Media | null
     const size = child.size 
@@ -87,7 +95,7 @@ function serializeMediaChild(child: any, state: SerializeState): React.ReactNode
         {content && content.type === MediaType.PHOTOSPHERE && <div 
             className={size + '-pannellum'}>
             <div className='pannellum-div' 
-                data-imgurl={localImageUrl(content.stableRelativePath)}
+                data-imgfolder={stripExt(localImageUrl(content.stableRelativePath)) + '_ps'}
                 data-pitch={content.photosphereOptions?.initialPitch}
                 data-yaw={content.photosphereOptions?.initialYaw}></div>    
         </div>}

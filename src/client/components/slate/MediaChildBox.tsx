@@ -36,7 +36,8 @@ export default function MediaChildBox(props: MediaChildProps) {
                 "panorama": props.media.content?.stableRelativePath,
                 "autoLoad": true,
                 "pitch": initPitch,
-                "yaw": initYaw
+                "yaw": initYaw,
+                "mouseZoom": false
             })
             setPannellumViewer(res)
         }

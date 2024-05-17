@@ -20,6 +20,18 @@ app.use(cors(corsOptions))
 console.log('starting server on port ' + port)
 let rootDir = null
 
+app.post('/cmd-task', cors(corsOptions), function (req, res){
+    const type = req.body
+    if(type === 'install pillow'){
+        spawnSync('python', ['-m', 'pip', 'install', 'Pillow'])
+    }
+    if(type === 'install numpy'){
+        spawnSync('python', ['-m', 'pip', 'install', 'numpy'])
+    }
+
+    res.send()
+})
+
 app.post('/serve-preview', cors(corsOptions), async function(req, res){
     if(rootDir === null){
         res.send(JSON.stringify({success: false, reason: 'Mirror directory has not been set'}))
@@ -40,7 +52,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
 
     // re-create page folders
-    const pageIdToFolderName = objToStringStringMap(data.pageIdToFolderName)
+    const pageIdToFolderName = arrToMap(data.pageIdToFolderName)
     for(const folder of pageIdToFolderName.values()){
         if(fs.existsSync(rootDir + '/preview/' + folder)){
             // remove all files in folder (removing folder entirely had issues -- see https://github.com/nodejs/node/issues/32001 )
@@ -61,19 +73,28 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     }
 
     // copy images to page folders 
-    const imgCopyMap = objToStringStringMap(data.imageCopyMap)
-    for(const mediaSrc of imgCopyMap.keys()){
-        const dest = imgCopyMap.get(mediaSrc)
-        const srcNames = [] // do not copy original
+    const imgCopyMap = arrToMap(data.imageCopyMap)
+    for(const media of imgCopyMap.keys()){
+        const mediaSrc = media.fileName
+        const mediaType = media.type
+        const dest = imgCopyMap.get(media)
+
         const extI = mediaSrc.lastIndexOf('.')
         const extWithPeriod = mediaSrc.substring(extI)
         const base = mediaSrc.substring(0, extI)
-        for(const name of IMAGE_SIZE_NAMES){
-            srcNames.push(base + '_' + name + extWithPeriod)
+        if(mediaType === 'IMAGE'){
+            const srcNames = [] // do not copy original
+            for(const name of IMAGE_SIZE_NAMES){
+                srcNames.push(base + '_' + name + extWithPeriod)
+            }
+            for(const src of srcNames){
+                fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+            }
+        } else if(mediaType === 'PHOTOSPHERE'){
+            // copy _ps folder
+            fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
         }
-        for(const src of srcNames){
-            fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
-        }
+        
     }
     // copy fixed-assets folder
     fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
@@ -94,10 +115,10 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     res.send(JSON.stringify({success: true}))
 })
 
-function objToStringStringMap(obj){
+function arrToMap(arr){
     const map = new Map()
-    for(const key in obj){
-        map.set(key, obj[key])
+    for(let i = 0; i < arr.length; i += 2){
+        map.set(arr[i], arr[i+1])
     }
     return map
 }
@@ -108,7 +129,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick', 'open sans', 'lora', 'rock salt']
+    const missing = ['pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt']
     // test for powershell 7
     try {
         spawnSync('pwsh', ['-version'])
@@ -121,6 +142,40 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
         spawnSync('magick', ['-version'])
         found.push('image magick')
         missing.splice(missing.indexOf('image magick'), 1)
+    }
+    catch(e) { }
+    // test for python 3
+    try {
+        const res = spawnSync('python', ['--version'], { encoding: 'utf-8' })
+        if(res.stdout.match(/Python 3/g)){
+            found.push('python')
+            missing.splice(missing.indexOf('python'), 1)
+        }
+    }
+    catch(e) { }
+    // test for pillow
+    if(found.indexOf('python') !== -1){
+        const res = spawnSync('python', ['-m', 'pip', 'show', 'Pillow'], { encoding: 'utf-8' })
+        if(res.stderr.trim().length === 0){
+            found.push('pillow')
+            missing.splice(missing.indexOf('pillow'), 1)
+        }
+    }
+    // test for numpy
+    if(found.indexOf('python') !== -1){
+        const res = spawnSync('python', ['-m', 'pip', 'show', 'numpy'], { encoding: 'utf-8' })
+        if(res.stderr.trim().length === 0){
+            found.push('numpy')
+            missing.splice(missing.indexOf('numpy'), 1)
+        }
+    }
+    // test for hugin
+    try {
+        const res = spawnSync('nona', {encoding: 'utf-8'})
+        if(res.stderr.startsWith('nona: No output prefix')){
+            found.push('hugin')
+            missing.splice(missing.indexOf('hugin'), 1)
+        }
     }
     catch(e) { }
 
@@ -179,22 +234,44 @@ app.post('/media-cleanup', cors(corsOptions), function(req, res){
     }
 
     // get referenced file names from request body
-    const referenced = JSON.parse(req.body).referencedPaths
-    const referencedUUIDs = referenced.map(r => {
-        const matches = r.match(/_.*-.*-.*-/g)
+    const referencedMedia = JSON.parse(req.body).referencedMedia
+    const referencedImageUUIDs = referencedMedia.filter(r => r.type === 'IMAGE').map(r => {
+        const matches = r.fileName.match(/_.*-.*-.*-/g)
+        return matches[matches.length - 1]
+    })
+    const referencedPhotosphereUUIDs = referencedMedia.filter(r => r.type === 'PHOTOSPHERE').map(r => {
+        const matches = r.fileName.match(/_.*-.*-.*-/g)
+        return matches[matches.length - 1]
+    })
+    const referencedVideoUUIDs = referencedMedia.filter(r => r.type === 'VIDEO').map(r => {
+        const matches = r.fileName.match(/_.*-.*-.*-/g)
         return matches[matches.length - 1]
     })
     // delete anything in media folder that isn't in referenced but conforms to 
     // uuid structure
-    const fNames = fs.readdirSync(rootDir + '/media', { withFileTypes: true })
+    const fileNames = fs.readdirSync(rootDir + '/media', { withFileTypes: true })
         .filter(dirent => !dirent.isDirectory())
         .map(dirent => dirent.name)
-    for(let f of fNames){
-        if(f.match(/_.*-.*-.*-.*\./g) && referencedUUIDs.filter(uuid => f.includes(uuid)).length === 0){
+    for(let f of fileNames){
+        if(f.match(/_.*-.*-.*-.*\./g) && referencedImageUUIDs.filter(uuid => f.includes(uuid)).length === 0 &&
+                referencedPhotosphereUUIDs.filter(uuid => f.includes(uuid)).length === 0 &&
+                referencedVideoUUIDs.filter(uuid => f.includes(uuid)).length === 0){
             console.log('removing media:', rootDir + '/media/' + f)
             fs.unlinkSync(rootDir + '/media/' + f)
         }
     }
+    // go through photosphere preview folders
+    const folderNames = fs.readdirSync(rootDir + '/media', { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .map(dirent => dirent.name)
+    for(let f of folderNames){
+        if(f.match(/_.*-.*-.*-.*_ps/g) && referencedPhotosphereUUIDs.filter(uuid => f.includes(uuid)).length === 0 &&
+                referencedImageUUIDs.filter(uuid => f.includes(uuid)).length === 0){ // images might still switch over to photospheres
+            console.log('removing media folder:', rootDir + '/media/' + f)
+            fs.rmSync(rootDir + '/media/' + f, {recursive: true, force: true})
+        }
+    }
+
     res.send(JSON.stringify({success: true}))
 })
 
@@ -255,7 +332,27 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
                 })
             }))
         }
-        Promise.all(magickPromises).then(() => {
+
+        // generate photosphere resized versions using nona
+        const photospherePromise = new Promise((resolve, reject) => {
+            const dest = renameQ ? 
+                    rootDir + '/' + targetFolder + '/' + rename + '_ps' :
+                    rootDir + '/' + targetFolder + '/' + name + '_' + uuid + '_ps'
+            spawn('python', [
+                './src/server/photosphere_generate.py',
+                '-n',
+                'nona',
+                '-o',
+                dest,
+                rootDir + '/' + newPath
+            ]).on('close', () => {
+                resolve()
+            }).on('error', (err) => {
+                console.log(err)
+            })
+        })
+
+        Promise.all([...magickPromises, photospherePromise]).then(() => {
             res.send(JSON.stringify({success: true, path: newPath}))
         })
     } else {

@@ -49,15 +49,20 @@ export function sortPages(newPages: Page[]){
     return newPages
 }
 
-export function getAllReferencedMediaNames(pages: Page[]){
-    let res: string[] = []
+export type ReferencedMedia = {
+    fileName: string,
+    type: MediaType
+}
+
+export function getAllReferencedMedia(pages: Page[]): ReferencedMedia[] {
+    let res: ReferencedMedia[] = []
     for(let p of pages){
         getAllRefMedia(res, p)
     }
     return res
 }
 
-function getAllRefMedia(workingList: string[], obj: any){
+function getAllRefMedia(workingList: ReferencedMedia[], obj: any){
     // look for any string with value containing "http://localhost:\d{4}/media/.*"
     const r = /http:\/\/localhost:\d{4}(\/|\\)media(\/|\\)/
     for(let key in obj){
@@ -69,8 +74,12 @@ function getAllRefMedia(workingList: string[], obj: any){
             }
         } else if(typeof obj[key] === 'string' && obj[key].match(r)){
             // don't include localhost part
-            const spl = obj[key].split(r) // splits on all capturing groups
-            workingList.push(spl[spl.length - 1])
+            const spl: string = obj[key].split(r) // splits on all capturing groups
+            const type = 'type' in obj ? obj.type as MediaType : MediaType.IMAGE
+            workingList.push({
+                fileName: spl[spl.length - 1],
+                type: type 
+            })
         }
     }
 }

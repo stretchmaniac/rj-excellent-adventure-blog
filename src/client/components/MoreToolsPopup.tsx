@@ -2,8 +2,8 @@ import './../assets/stylesheets/new-page-popup.scss'
 import './../assets/stylesheets/popup-common.scss'
 import './../assets/stylesheets/form-common.scss'
 import './../assets/stylesheets/more-tools-popup.scss'
-import { ResourceTestResult, chooseFiles, chooseFolder, cleanupMedia, copyResource, testResources } from '../tools/http'
-import { getAllReferencedMediaNames } from '../tools/empty-page'
+import { ResourceTestResult, chooseFiles, chooseFolder, cleanupMedia, copyResource, runCmdTask, testResources } from '../tools/http'
+import { getAllReferencedMedia } from '../tools/empty-page'
 import { Page } from '../types/PageType'
 import React from 'react'
 import { FaRegCircleCheck } from "react-icons/fa6";
@@ -20,6 +20,10 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'powershell': 'Powershell 7',
         'image magick': 'Image Magick',
         'pannellum': 'Pannellum',
+        'hugin': 'nona on PATH through Hugin',
+        'python': 'Python 3',
+        'pillow': 'Pillow for Python',
+        'numpy': 'numpy for Python',
         'open sans': 'Open Sans Font',
         'lora': 'Lora Font',
         'rock salt': 'Rock Salt Font'
@@ -28,11 +32,31 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'powershell': 'https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4',
         'image magick': 'https://imagemagick.org/archive/binaries/ImageMagick-7.1.1-32-Q16-HDRI-x64-dll.exe',
         'pannellum': 'https://github.com/mpetroff/pannellum/releases/download/2.5.6/pannellum-2.5.6.zip',
+        'hugin': 'https://sourceforge.net/projects/hugin/files/hugin/hugin-2023.0/Hugin-2023.0.0-win64.msi/download',
+        'python': 'https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe',
         'open sans': 'https://gwfh.mranftl.com/api/fonts/open-sans?download=zip&subsets=latin&variants=300,500,600,700,800,300italic,regular,italic,500italic,600italic,700italic,800italic&formats=woff2',
         'lora': 'https://gwfh.mranftl.com/api/fonts/lora?download=zip&subsets=latin&variants=500,600,700,regular,italic,500italic,600italic,700italic&formats=woff2',
         'rock salt': 'https://gwfh.mranftl.com/api/fonts/rock-salt?download=zip&subsets=latin&variants=regular&formats=woff2'
     } as any
     const testResourcesExtraActions = {
+        'pillow': {
+            title: 'Run "pip install Pillow" (requires python)',
+            action: () => {
+                setResourceTestRes(null)
+                runCmdTask('install pillow').then(() => {
+                    testResources().then(v => setResourceTestRes(v))
+                })
+            }
+        },
+        'numpy': {
+            title: 'Run "pip install numpy" (requires python)',
+            action: () => {
+                setResourceTestRes(null)
+                runCmdTask('install numpy').then(() => {
+                    testResources().then(v => setResourceTestRes(v))
+                })
+            }
+        },
         'pannellum': {
             title: 'Choose extracted pannellum-x.x.x folder',
             action: () => {
@@ -116,6 +140,9 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                             <img src={"http://localhost:3000/fixed-assets/header.jpg?t=" + imgUpdate}/>
                         </div>
                     </div>
+                    {!resourceTestRes && 
+                        <div>Loading...</div>
+                    }
                     {resourceTestRes && 
                         <React.Fragment>
                             <div className='resources-found'>
@@ -148,7 +175,7 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                     <div className='input-row'>
                         <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                             <button style={{marginBottom: 0}} onClick={() => {
-                                    cleanupMedia(getAllReferencedMediaNames(props.pages)).then(() => {
+                                    cleanupMedia(getAllReferencedMedia(props.pages)).then(() => {
                                         setTidyMediaFinished(true)
                                     })
                                 }}
