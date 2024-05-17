@@ -36,6 +36,8 @@ ${getHeaderCssFragment('../')}
 
 .content-root{
     width: 100%;
+    background-color: white;
+    padding-bottom: 20px;
 }
 
 div {

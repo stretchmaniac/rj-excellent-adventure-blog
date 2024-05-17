@@ -93,6 +93,7 @@ ${getHeaderCssFragment('')}
 .tree-view-content {
     padding-top: 20px;
     padding-left: 30px;
+    padding-bottom: 20px;
     font-family: "Open Sans", sans-serif;
 }
 

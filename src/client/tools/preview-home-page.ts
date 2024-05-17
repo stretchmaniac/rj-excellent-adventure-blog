@@ -155,6 +155,10 @@ ${getHeaderCssFragment('')}
     }
 }
 
+.first-post {
+    margin-top: 30px;
+}
+
 .home-post-row {
     display: flex;
     flex-direction: row-reverse;
@@ -241,6 +245,14 @@ ${getHeaderCssFragment('')}
     color: rgb(200, 200, 200);
     font-family: 'Open Sans', sans-serif;
 }
+
+.more-posts-hint a {
+    font-family: "Open Sans";
+    color: rgb(200,200,200);
+    margin-top: 5px;
+    font-size: 20px;
+    text-decoration: none;
+}
 `
 }
 
@@ -266,7 +278,10 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
                                                 )}
                 </div>
             </div>
-            <div class="post-root">
+            <div class="post-root" id="post-root">
+                ${pages.length > 1 && 
+                    `<div class="more-posts-hint"><a href="#post-root">More Posts ↓<a/></div>`
+                }
                 ${pages.length > 1 ? homePostRow(
                                         'white', '#25a186', 'black', 'rgb(100, 100, 100)', 1, 1, 300,
                                         getSummaryImg(pages[1]), idMap.get(pages[1].id) as string

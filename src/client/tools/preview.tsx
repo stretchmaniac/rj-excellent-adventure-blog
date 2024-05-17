@@ -340,7 +340,7 @@ body {
     align-items: center;
 }
 
-.header-box {
+.header {
     background-color: white;
 }
 
