@@ -57,9 +57,11 @@ function getIdToFolderMap(pages: Page[]): Map<string, string> {
             .replace(/\s+/gm, '-')
             .replace(/[^a-zA-Z0-9-_]/gm, '')
     }
-    for(const p of pages){
+    // put pages in reverse order so old links remain the same
+    const reverse = [...pages].reverse()
+    for(const p of reverse){
         let title = escapeTitle(p.title)
-        let count = 0
+        let count = 2
         while([...res.values()].includes(title)){
             title = escapeTitle(p.title) + count
             count++
