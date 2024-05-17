@@ -227,7 +227,7 @@ function serializeH1(child: any, state: SerializeState): React.ReactNode {
 
 function serializeParagraph(child: any, state: SerializeState): React.ReactNode {
     const textAlign = 'textAlign' in child ? child.textAlign : 'left'
-    const lineHeight = 'lineSpacing' in child ? child.lineSpacing : 2
+    const lineHeight = 'lineSpacing' in child ? child.lineSpacing : 1.5
     // search children for fontSize property
     let maxFontSize = 0
     iterateChildrenRecursive(child, c => {

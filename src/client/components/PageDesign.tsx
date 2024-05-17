@@ -491,7 +491,7 @@ function getSelectedText(): string {
 }
 
 function getFormatStateLocal(editorContext: Editor): FormatState {
-  let lineSpacing = 2
+  let lineSpacing = 1.5
   let textTag = 'paragraph'
   let textAlign = 'left'
   let blockQuote = false

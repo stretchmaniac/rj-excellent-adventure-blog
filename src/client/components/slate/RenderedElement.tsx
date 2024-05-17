@@ -102,7 +102,7 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
     if(t === 'li'){
         return <li {...props.attributes}>{props.children}</li>
     }
-    const lineHeight = ('lineSpacing' in el ? el.lineSpacing : 2) as Number
+    const lineHeight = ('lineSpacing' in el ? el.lineSpacing : 1.5) as Number
     // get maximum font size from children for line height calculations
     const matching = [...Editor.nodes(editor, {
         match: (n, p) => ('fontSize' in n),
