@@ -305,7 +305,7 @@ function homePostRow(backgroundColor: string, headerColor: string, textColor: st
     <div class="home-post-text-container home-post-text-container-grow">
         <div class="home-post-text-intermediate">
             <a href="#" class="home-post-title" style="font-size: ${36 * fontSizeScale}px; color: ${headerColor}"></a>
-            <div class="home-post-date" style="font-size: ${17 * fontSizeScale}px; color: ${dateColor}"></div>
+            <div class="home-post-date" style="font-size: ${17 * fontSizeScale}px; color: ${dateColor}; font-family: 'Open Sans';"></div>
             <div class="home-post-summary" style="font-size: ${20 * fontSizeScale}px"></div>
             <div class="home-post-link-row" style="font-size: ${20 * fontSizeScale}px">
                 <a href="#" class="home-post-read-more" style="color: ${headerColor}">READ MORE</a>

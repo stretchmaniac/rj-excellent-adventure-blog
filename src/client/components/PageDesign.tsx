@@ -532,6 +532,7 @@ function getFormatStateLocal(editorContext: Editor): FormatState {
     underline: markActive(editorContext, 'underline'),
     strikethrough: markActive(editorContext, 'strikethrough'),
     fontSize: markValue(editorContext, 'fontSize', 'medium'),
+    font: markValue(editorContext, 'font', 'Lora'),
     lineSpacing: lineSpacing,
     textTag: textTag,
     familyOnly: markActive(editorContext, 'familyOnly'),
@@ -574,6 +575,9 @@ function setMarkFormat(editor: Editor, changedItem: string, format: FormatState)
   }
   if(changedItem === 'fontSize'){
     Editor.addMark(editor, 'fontSize', format.fontSize)
+  }
+  if(changedItem === 'font'){
+    Editor.addMark(editor, 'font', format.font)
   }
 }
 

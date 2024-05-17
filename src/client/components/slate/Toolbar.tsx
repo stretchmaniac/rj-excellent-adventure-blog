@@ -4,6 +4,7 @@ import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotion
 import { VscTextSize } from "react-icons/vsc"
 import { FaHouseChimney, FaRegImage, FaRegImages } from "react-icons/fa6";
 import { GrTextAlignCenter, GrTextAlignLeft, GrTextAlignRight } from "react-icons/gr";
+import { RxFontFamily } from "react-icons/rx";
 import ToggleButton from './ToggleButton'
 import DropDownSelect from './DropDownSelect'
 import EmojiSelect from './EmojiSelect';
@@ -147,6 +148,20 @@ export default function Toolbar(props: ToolbarProps) {
             closeClickToExitPopup={props.closeClickToExitPopup}>
             <VscTextSize className="react-icons"/>
         </DropDownSelect>
+        <DropDownSelect title="font"
+            options={['Lora', 'Open Sans', 'Monospace']}
+            optionsRendering={[
+                <span style={{fontFamily: 'Lora'}}>Lora</span>,
+                <span style={{fontFamily: 'Open Sans'}}>Open Sans</span>,
+                <span style={{fontFamily: 'monospace'}}>Monospace</span>
+            ]}
+            selected={formatState.font}
+            onChange={opt => props.onFormatChange('font', {...formatState, font: opt})}
+            clickToExitPopupHook={props.clickToExitPopupHook}
+            closeClickToExitPopup={props.closeClickToExitPopup}
+            >
+            <RxFontFamily className="react-icons" />
+        </DropDownSelect>
         { /*<ToggleButton title="family only"
             active={formatState.familyOnly}
             onChange={active => props.onFormatChange('familyOnly', {
@@ -256,6 +271,7 @@ export type FormatState = {
     underline: boolean
     strikethrough: boolean
     fontSize: string // 'medium', 'small', 'x-small', 'xx-small'
+    font: string // 'open sans', 'lora', 'monospace'
     lineSpacing: number
     textTag: string // h1, h2, ..., hk or paragraph
     familyOnly: boolean

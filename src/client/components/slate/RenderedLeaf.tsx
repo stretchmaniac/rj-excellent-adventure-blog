@@ -26,6 +26,9 @@ export default function RenderedLeaf(props: RenderLeafProps){
             45deg, rgba(255,0,0,.3), transparent 1px, transparent 3px
         )`
     }
+    if(leaf.font){
+        style.fontFamily = leaf.font
+    }
 
     return <span style={style} {...props.attributes}>{result}</span>
 }

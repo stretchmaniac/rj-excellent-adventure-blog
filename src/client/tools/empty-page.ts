@@ -155,7 +155,7 @@ export function fixedBlogHeader(title: string, date: Date) {
                 {
                     type: 'paragraph',
                     readOnly: true,
-                    children: [{text: getReadableDateString(date), fontSize: 'small'}]
+                    children: [{text: getReadableDateString(date), fontSize: 'small', font: 'open sans'}]
                 }, {
                     type: 'paragraph',
                     readOnly: true,

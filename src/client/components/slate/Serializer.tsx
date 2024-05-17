@@ -287,8 +287,10 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
 
     const fontSize = child.fontSize ? fontMap(child.fontSize) + 'px' : ''
     const emptyText = child.text.trim() === ''
+    const font = child.font ? child.font : ''
     return <span style={{
         fontSize: fontSize,
+        fontFamily: font,
         whiteSpace: emptyText ? 'pre' : ''
     }}>{child.text === '' ? ' ' : child.text}</span>
 }
