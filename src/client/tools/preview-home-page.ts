@@ -273,7 +273,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
                 ${getHeaderHtmlFragment(pages, idMap, '', true)}
                 <div class="first-post">
                     ${pages.length === 0 ? '' : homePostRow(
-                                                    '#25a186', 'white', 'white', 'white', 1, 2.6, 400,
+                                                    '#53824A', 'white', 'white', 'white', 1, 2.6, 400,
                                                     getSummaryImg(pages[0]), idMap.get(pages[0].id) as string
                                                 )}
                 </div>
@@ -283,7 +283,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
                     `<div class="more-posts-hint"><a href="#post-root">More Posts ↓</a></div>`
                 }
                 ${pages.length > 1 ? homePostRow(
-                                        'white', '#25a186', 'black', 'rgb(100, 100, 100)', 1, 1, 300,
+                                        'white', '#53824A', 'black', 'rgb(100, 100, 100)', 1, 1, 300,
                                         getSummaryImg(pages[1]), idMap.get(pages[1].id) as string
                                     ) : 0}
             </div>

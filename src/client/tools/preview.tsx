@@ -350,7 +350,7 @@ body {
     margin-left: 15px;
     margin-right: 15px;
     text-decoration: none;
-    color: #25a186;
+    color: #53824A;
 }
 
 .header {

@@ -111,7 +111,7 @@ ${getHeaderCssFragment('')}
 
 .list-link {
     text-decoration: none;
-    color: #25a186;
+    color: #53824A;
 }
 
 .search-bar-wrapper {

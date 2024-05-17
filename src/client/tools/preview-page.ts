@@ -103,7 +103,7 @@ div {
 }
 
 .emphasized-p::first-line {
-  color: #25a186;
+  color: #53824A;
 }
 .emphasized-p::first-letter {
   font-size: 50px;

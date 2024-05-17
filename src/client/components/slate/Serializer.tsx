@@ -352,7 +352,7 @@ function serializeHeaderContainer(container: any, state: SerializeState): React.
         return ''
     }
     return <div className="header-container" style={{
-        backgroundColor: '#25a186', 
+        backgroundColor: '#53824A', 
         color: 'white',
         paddingTop: '40px',
         paddingBottom: '40px',
