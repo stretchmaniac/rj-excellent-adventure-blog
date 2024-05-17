@@ -1,5 +1,4 @@
 import { ReactEditor, RenderElementProps, useSlate } from "slate-react";
-import './../../assets/stylesheets/slate/html-tag-styles/blockquote.scss'
 import { Link } from "../../types/link";
 import { MediaChild, getNodeAtPath } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
