@@ -1,13 +1,14 @@
 import { ReactEditor, RenderElementProps, useSlate } from "slate-react";
 import './../../assets/stylesheets/slate/html-tag-styles/blockquote.scss'
 import { Link } from "../../types/link";
-import { MediaChild } from "../PageDesign";
+import { MediaChild, getNodeAtPath } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Node } from "slate";
 import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
 import { WaitingPopup } from "../../Main";
+import { getParElSpacing, getParNonParSpacing } from "../../tools/paragraph-spacing";
 
 export type CustomRenderedElementProps = {
     usualProps: RenderElementProps,
@@ -93,20 +94,62 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         return <blockquote {...props.attributes}>{props.children}</blockquote>
     }
     if(t === 'list'){
+        const fontSize = getFontSize(editor, elPath)
         if((el as any).listType === 'ol'){
-            return <ol {...props.attributes}>{props.children}</ol>
+            return <ol style={{fontSize: fontSize}} {...props.attributes}>{props.children}</ol>
         } else { // listType === 'ul'
-            return <ul {...props.attributes}>{props.children}</ul>
+            return <ul style={{fontSize: fontSize}} {...props.attributes}>{props.children}</ul>
         }
     }
     if(t === 'li'){
         return <li {...props.attributes}>{props.children}</li>
     }
-    const lineHeight = ('lineSpacing' in el ? el.lineSpacing : 1.5) as Number
+    const lineHeight = getLineHeight(el)
+    const fontSize = getFontSize(editor, elPath)
+
+    const priorPath = [...elPath]
+    priorPath[priorPath.length - 1]--
+    const priorNode = getNodeAtPath(editor, priorPath)
+    const afterPath = [...elPath]
+    afterPath[afterPath.length - 1]++
+    const afterNode = getNodeAtPath(editor, afterPath)
+    let marginTop = 0
+    if(priorNode && priorNode.type === 'paragraph'){
+        marginTop = getParElSpacing(
+            getFontSize(editor, priorPath), getLineHeight(priorNode),
+            fontSize, lineHeight
+        )
+    } else if(priorNode){
+        marginTop = getParNonParSpacing(fontSize, lineHeight, priorNode.type)
+    }
+    let marginBottom = 0
+    if(afterNode && afterNode.type === 'paragraph'){
+        marginBottom = getParElSpacing(
+            fontSize, lineHeight,
+            getFontSize(editor, afterPath), getLineHeight(afterNode)
+        )
+    } else if(afterNode){
+        marginBottom = getParNonParSpacing(fontSize, lineHeight, afterNode.type)
+    }
+
+    const pStyle = {
+        ...genericStyle,
+        fontSize: fontSize + 'px',
+        lineHeight: '' + lineHeight,
+        marginTop: marginTop,
+        marginBottom: marginBottom
+    }
+    // default to <p>
+    return <p style={pStyle} {...props.attributes}>
+        {props.children}
+    </p>
+}
+
+function getFontSize(editor: Editor, pElPath: number[]){
     // get maximum font size from children for line height calculations
     const matching = [...Editor.nodes(editor, {
         match: (n, p) => ('fontSize' in n),
-        at: elPath
+        at: pElPath
     })]
     let max = 0
     for(const match of matching){
@@ -116,15 +159,9 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         // default to standard size
         max = fontMap('medium')
     }
-    const pStyle = {
-        ...genericStyle,
-        fontSize: max + 'px',
-        lineHeight: '' + lineHeight,
-        marginTop: '0px',
-        marginBottom: '0px'
-    }
-    // default to <p>
-    return <p style={pStyle} {...props.attributes}>
-        {props.children}
-    </p>
+    return max
+}
+
+function getLineHeight(pEl: any){
+    return ('lineSpacing' in pEl ? pEl.lineSpacing : 1.5) as number
 }

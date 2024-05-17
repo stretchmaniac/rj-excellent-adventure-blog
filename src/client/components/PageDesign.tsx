@@ -149,14 +149,15 @@ export default function PageDesign(props: PageDesignProps) {
     </div>
 }
 
-function getNodeAtPath(editor: Editor, absPath: number[]){
+export function getNodeAtPath(editor: Editor, absPath: number[]){
   let root: any = editor
   let i = 0
   while(i < absPath.length){
-    if(!root){
-      console.log(absPath, editor.children)
+    const ch = (root as any).children
+    if(!ch || ch.length <= absPath[i]){
+      return null
     }
-    root = (root as any).children[absPath[i]]
+    root = ch[absPath[i]]
     i++
   }
   return root

@@ -5,22 +5,35 @@ import { MediaChild } from '../PageDesign'
 import { Media, MediaType } from '../../tools/media'
 import React from 'react'
 import { getPreviewImgSizes, getPreviewImgSrcSet } from '../../tools/preview'
+import { getParElSpacing, getParNonParSpacing } from '../../tools/paragraph-spacing'
 
 export function serializeToHTML(pageDesign: any[], pageId: string, idMap: Map<string, string>){
     const state: SerializeState = {
         inHeaderContainer: false,
         idMap: idMap,
-        pageId: pageId
+        pageId: pageId,
+        peerPrev: null,
+        peerNext: null
     }
-    return pageDesign.map(child => 
-        ReactDOMServer.renderToStaticMarkup(serializeInternal(child, state))
+    return pageDesign.map((child, i) => 
+        ReactDOMServer.renderToStaticMarkup(serializeInternal(child, descState(state, pageDesign, i)))
     ).join('\n')
 }
 
 type SerializeState = {
     inHeaderContainer: boolean
+    peerPrev: any
+    peerNext: any
     idMap: Map<string, string>
     pageId: string
+}
+
+function descState(state: SerializeState, childArr: any[], childIndex: number): SerializeState {
+    return {
+        ...state,
+        peerPrev: childIndex > 0 ? childArr[childIndex - 1] : null,
+        peerNext: childIndex < childArr.length - 1 ? childArr[childIndex + 1] : null
+    }
 }
 
 function serializeInternal(child: any, state: SerializeState): React.ReactNode {
@@ -54,7 +67,7 @@ function serializeInternal(child: any, state: SerializeState): React.ReactNode {
         return serializeMediaChild(child, state)
     } else if(type === 'media-child-caption' || type === 'media-parent-caption'){
         return <React.Fragment>
-            {child.children.map((c:any) => serializeInternal(c, state))}
+            {child.children.map((c:any, i:number) => serializeInternal(c, descState(state, child.children, i)))}
         </React.Fragment>
     }
 
@@ -136,13 +149,13 @@ function serializeMediaParent(child: any, state: SerializeState): React.ReactNod
                     flexDirection: 'column',
                     alignItems: 'center'
                 }}>
-                    {m && serializeInternal(m, state)}
-                    {mediaCaptions[i] && serializeInternal(mediaCaptions[i], state)}
+                    {m && serializeInternal(m, {...state, peerPrev: null, peerNext: null})}
+                    {mediaCaptions[i] && serializeInternal(mediaCaptions[i], {...state, peerPrev: null, peerNext: null})}
                 </div>
             )}
         </div>
         <div style={{ /* media-parent-caption div */ }}>
-            {parentCaption && serializeInternal(parentCaption, state)}
+            {parentCaption && serializeInternal(parentCaption, {...state, peerPrev: null, peerNext: null})}
         </div>
     </div>
 }
@@ -150,23 +163,24 @@ function serializeMediaParent(child: any, state: SerializeState): React.ReactNod
 function serializeListItem(child:any, state: SerializeState): React.ReactNode {
     return <li>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i:number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </li>
 }
 
 function serializeList(child: any, state: SerializeState): React.ReactNode {
+    const fontSize = getFontSize(child)
     if(child.listType === 'ol'){
-        return <ol>
+        return <ol style={{fontSize: fontSize + 'px'}}>
             {child.children && 
-                child.children.map((c: any) => serializeInternal(c, {...state}))
+                child.children.map((c: any, i:number) => serializeInternal(c, descState(state, child.children, i)))
             }
         </ol>
     }
 
-    return <ul>
+    return <ul style={{fontSize: fontSize + 'px'}}>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i:number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </ul>
 }
@@ -187,7 +201,7 @@ function serializeLink(child: any, state: SerializeState): React.ReactNode {
     }
     return <a href={url}>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any,i:number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </a>
 }
@@ -195,7 +209,7 @@ function serializeLink(child: any, state: SerializeState): React.ReactNode {
 function serializeBlockQuote(child: any, state: SerializeState): React.ReactNode {
     return <blockquote>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i:number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </blockquote>
 }
@@ -207,7 +221,7 @@ function serializeH2(child: any, state: SerializeState): React.ReactNode {
         textAlign: textAlign
     }}>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i: number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </h2>
 }
@@ -220,17 +234,15 @@ function serializeH1(child: any, state: SerializeState): React.ReactNode {
         maxWidth: state.inHeaderContainer ? 'calc(100% - 80px)' : ''
     }}>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i: number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </h1>
 }
 
-function serializeParagraph(child: any, state: SerializeState): React.ReactNode {
-    const textAlign = 'textAlign' in child ? child.textAlign : 'left'
-    const lineHeight = 'lineSpacing' in child ? child.lineSpacing : 1.5
+function getFontSize(el: any){
     // search children for fontSize property
     let maxFontSize = 0
-    iterateChildrenRecursive(child, c => {
+    iterateChildrenRecursive(el, c => {
         if(c.fontSize){
             maxFontSize = Math.max(maxFontSize, fontMap(c.fontSize))
         }
@@ -238,16 +250,46 @@ function serializeParagraph(child: any, state: SerializeState): React.ReactNode 
     if(maxFontSize === 0){
         maxFontSize = fontMap('medium')
     }
+    return maxFontSize
+}
+
+function getLineHeight(el: any){
+   return 'lineSpacing' in el ? el.lineSpacing : 1.5
+}
+
+function serializeParagraph(child: any, state: SerializeState): React.ReactNode {
+    const textAlign = 'textAlign' in child ? child.textAlign : 'left'
+    const lineHeight = getLineHeight(child)
+    const fontSize = getFontSize(child)
+
+    let marginTop = 0
+    if(state.peerPrev && state.peerPrev.type === 'paragraph'){
+        marginTop = getParElSpacing(
+            getFontSize(state.peerPrev), getLineHeight(state.peerPrev),
+            fontSize, lineHeight
+        )
+    } else if(state.peerPrev){
+        marginTop = getParNonParSpacing(fontSize, lineHeight, state.peerPrev.type)
+    }
+    let marginBottom = 0
+    if(state.peerNext && state.peerNext.type === 'paragraph'){
+        marginBottom = getParElSpacing(
+            fontSize, lineHeight,
+            getFontSize(state.peerNext), getLineHeight(state.peerNext)
+        )
+    } else if(state.peerNext){
+        marginBottom = getParNonParSpacing(fontSize, lineHeight, state.peerNext.type)
+    }
 
     return <p style={{
         textAlign: textAlign as any,
-        fontSize: maxFontSize + 'px',
+        fontSize: fontSize + 'px',
         lineHeight: lineHeight,
-        marginTop: '0px',
-        marginBottom: '0px'
+        marginTop: marginTop + 'px',
+        marginBottom: marginBottom + 'px'
     }}>
         {child.children && 
-            child.children.map((c: any) => serializeInternal(c, {...state}))
+            child.children.map((c: any, i: number) => serializeInternal(c, descState(state, child.children, i)))
         }
     </p>
 }
@@ -267,22 +309,22 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
     if(child.bold){
         const c = {...child}
         delete c.bold
-        return <strong>{serializeInternal(c, state)}</strong>
+        return <strong>{serializeInternal(c, {...state, peerPrev: null, peerNext: null})}</strong>
     }
     if(child.italic){
         const c = {...child}
         delete c.italic 
-        return <em>{serializeInternal(c, state)}</em>
+        return <em>{serializeInternal(c, {...state, peerPrev: null, peerNext: null})}</em>
     }
     if(child.underline){
         const c = {...child}
         delete c.underline
-        return <u>{serializeInternal(c, state)}</u>
+        return <u>{serializeInternal(c, {...state, peerPrev: null, peerNext: null})}</u>
     }
     if(child.strikethrough){
         const c = {...child}
         delete c.strikethrough
-        return <s>{serializeInternal(c, state)}</s>
+        return <s>{serializeInternal(c, {...state, peerPrev: null, peerNext: null})}</s>
     }
 
     const fontSize = child.fontSize ? fontMap(child.fontSize) + 'px' : ''
@@ -311,7 +353,7 @@ function serializeHeaderContainer(container: any, state: SerializeState): React.
     }}>
         {container.children && 
             container.children.map(
-                (c: any) => serializeInternal(c, {...state, inHeaderContainer: true})
+                (c: any, i: number) => serializeInternal(c, {...descState(state, container.children, i), inHeaderContainer: true})
             )
         }
     </div>
@@ -325,7 +367,7 @@ function serializeContentContainer(container: any, state: SerializeState): React
         paddingTop: '5px'
     }}>
         {container.children && 
-            container.children.map((c: any) => serializeInternal(c, {...state}))
+            container.children.map((c: any, i:number) => serializeInternal(c, descState(state, container.children, i)))
         }
     </div>
 }

@@ -203,8 +203,9 @@ export function testResources(): Promise<ResourceTestResult> {
 }
 
 export function loadData(): Promise<BlogState> {
+    // generate random number for cache busting
     return new Promise((resolve, reject) => {
-        fetch('http://localhost:3000/load-data', {
+        fetch('http://localhost:3000/load-data?q=' + crypto.randomUUID(), {
             method: 'GET',
             mode: 'cors',
             headers: {
