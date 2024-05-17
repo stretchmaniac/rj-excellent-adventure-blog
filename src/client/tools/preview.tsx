@@ -372,7 +372,8 @@ body {
     left: 15px;
     top: 5px;
     line-height: 1.75;
-    font-family: 'Rock Salt'
+    font-family: 'Rock Salt';
+    color: rgb(50,50,50);
 }
 
 .header-links-container {
