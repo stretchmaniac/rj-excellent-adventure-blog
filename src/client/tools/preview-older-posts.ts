@@ -90,6 +90,10 @@ ${getHeaderCssFragment('')}
     list-style-type: none;
 }
 
+.month-li ul {
+    padding-left: min(40px, 5%);
+}
+
 .tree-view-content {
     padding-top: 20px;
     padding-left: 30px;
