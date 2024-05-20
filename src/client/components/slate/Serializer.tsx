@@ -344,7 +344,7 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
     return <span style={{
         fontSize: fontSize,
         fontFamily: font,
-        whiteSpace: emptyText ? 'pre' : ''
+        whiteSpace: 'pre-wrap',
     }}>{child.text === '' ? ' ' : child.text}</span>
 }
 
