@@ -40,6 +40,10 @@ export function withCopyPaste(editor: Editor){
             }
         } else {
             // try html, then text
+
+            // TODO html
+            const textData = data.getData('text/plain')
+            Transforms.insertText(editor, textData)
         }
         return true
     }
