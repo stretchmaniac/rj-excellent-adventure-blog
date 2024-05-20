@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import { Editor, createEditor, Node, Transforms, Path, Range, Point, Ancestor } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementProps } from 'slate-react'
 import { BaseEditor } from 'slate'
@@ -16,6 +16,9 @@ import { Link } from '../types/link'
 import { fixedBlogHeader, getFirstNonEmptyRootParLoc, getSummaryText } from '../tools/empty-page'
 import { Media } from '../tools/media'
 import { WaitingPopup } from '../Main'
+import { LinkViewer } from './slate/LinkViewer'
+import { numberArrEq } from '../tools/misc'
+import { HyperlinkOpenTrigger } from './slate/HyperlinkSelect'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -70,6 +73,11 @@ const withNoHangingMedia = (editor: Editor) => {
   return editor
 }
 
+type LinkState = {
+  aElPath: number[]
+  target: Link | null
+}
+
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
       const res = withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(withReact(withHistory(createEditor())))))
@@ -99,10 +107,33 @@ export default function PageDesign(props: PageDesignProps) {
     }
     maintainImageParagraphs(editor)
 
+    const [linkState, setLinkState] = React.useState<LinkState>({
+      target: null,
+      aElPath: []
+    })
+    checkLinkState(editor, linkState, setLinkState)
+
+    const [openLinkTrigger, setOpenLinkTrigger] = React.useState<HyperlinkOpenTrigger | null>(null)
+
     return <div className="page-design-root" ref={rootRef}>
       <ClickToExitPopup {...clickPopupState} />
+      {linkState.target && <LinkViewer 
+        pages={props.allPages}
+        link={linkState.target}
+        onEdit={() => {
+          // select link
+          Transforms.select(editor, linkState.aElPath)
+          setOpenLinkTrigger({
+            existingLink: linkState.target as Link
+          })
+        }}
+        onDelete={() => {
+          Transforms.unwrapNodes(editor, {at: linkState.aElPath, match: (n,p) => (n as any).type === 'a'})
+        }}/>}
       <Slate editor={editor} initialValue={props.designStruct} key={''+props.pageID}>
           <Toolbar getFormatState={getFormatState} 
+            insertLinkTrigger={openLinkTrigger}
+            insertLinkClearTrigger={() => setOpenLinkTrigger(null)}
             showTitleBarButton={!props.isBlogPost}
             allPages={props.allPages}
             getSelectedText={getSelectedText}
@@ -147,6 +178,24 @@ export default function PageDesign(props: PageDesignProps) {
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
     </div>
+}
+
+function checkLinkState(editor: Editor, linkState: LinkState, setLinkState: Dispatch<SetStateAction<LinkState>>){
+  if(editor.selection){
+    // check if selection is included in a link node
+    const match = [...Editor.nodes(editor, {
+      match: (n,p) => (n as any).type === 'a' && nodeContainsRange(editor.selection as Range, n, p)
+    })]
+    if(match.length > 0){
+      const [link, linkPath] = match[0]
+      const target = (link as any).link
+      if(target !== linkState.target || !numberArrEq(linkPath, linkState.aElPath)){
+        setLinkState({target: (link as any).link, aElPath: linkPath})
+      }
+    } else if(linkState.target !== null) {
+      setLinkState({target: null, aElPath: []})
+    }
+  }
 }
 
 export function getNodeAtPath(editor: Editor, absPath: number[]){
@@ -964,7 +1013,7 @@ function setLink(editor: Editor, linkText: string, link: Link){
   // wrap selection in "a" tag
   const isCollapsed = Range.isCollapsed(editor.selection)
   if(isCollapsed){
-    const currentNode = [...Editor.nodes(editor, {mode: 'lowest'})][0]
+    const currentNode = [...Editor.nodes(editor, {mode: 'lowest'})][0][0]
     const newTextNode = {...currentNode, text: linkText}
     Transforms.insertNodes(editor, {type: 'a', link: link, children:[newTextNode]} as any)
   } else {

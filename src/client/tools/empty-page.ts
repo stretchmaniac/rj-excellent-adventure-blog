@@ -24,6 +24,23 @@ function emptyPage(): Page {
     }
 }
 
+export function homePageAlias(): Page {
+    return {
+        id: '-1:home',
+        title: 'Home Page',
+        date: new Date(),
+        isBlogPost: false,
+        linkedFromHeader: false,
+        headerSortOrder: '0',
+        summaryText: '',
+        autoSummary: false,
+        autoSummaryImg: false,
+        summaryImg: null,
+        familyPrivate: false,
+        design: []
+    }
+}
+
 export function emptyBlogPost(): Page {
     return {
         ...emptyPage(),

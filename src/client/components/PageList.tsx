@@ -8,9 +8,11 @@ export default function PageList(props: PageListProps){
             <span className="page-list-nothing-span">no pages</span>
         </div>
     }
-    return <div className='page-list-something-parent'>
+    return <div className='page-list-something-parent' style={props.noBorder ? {border: 'none'} : {}}>
         {props.pages.map((p,i) => 
-            <div className={"page-list-entry" + (i == props.selected ? ' page-list-entry-selected' : '')}
+            <div className={"page-list-entry" + (i === props.pages.length - 1 ? '-last' : '') + 
+                (i == props.selected ? ' page-list-entry-selected' : '')}
+                style={props.noMargin ? {margin: '0', padding: '0'} : {}}
                 onClick={() => props.selectPage(i)}
                 key={i}>
                 {p.title.split('\n').map((line, i) => 
@@ -26,4 +28,6 @@ export type PageListProps = {
     pages: Array<Page>
     selected: number
     selectPage: (index: number) => void
+    noBorder?: boolean
+    noMargin?: boolean
 }

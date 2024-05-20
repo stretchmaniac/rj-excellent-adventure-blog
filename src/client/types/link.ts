@@ -8,3 +8,11 @@ export type InternalLink = {
 }
 
 export type Link = InternalLink | ExternalLink
+
+export function convertShorthandUrl(url: string): string {
+    // prefix with https:// if not already there
+    if(!url.startsWith('http')){
+        url = 'https://' + url
+    }
+    return url
+}

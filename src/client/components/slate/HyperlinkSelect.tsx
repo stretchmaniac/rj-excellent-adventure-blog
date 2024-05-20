@@ -1,64 +1,94 @@
 import React from "react"
-import { Link } from "../../types/link"
+import { ExternalLink, InternalLink, Link } from "../../types/link"
 import './../../assets/stylesheets/slate/toggle-button.scss'
 import { Page } from "../../types/PageType"
 import PageList from "../PageList"
 import { pageContains } from "../../tools/page-search"
+import { homePageAlias } from "../../tools/empty-page"
 
 export default function HyperlinkSelect(props: HyperlinkSelectProps){
     const [awaitingMenu, setAwaitingMenu] = React.useState(false)
     const buttonRef = React.useRef<HTMLButtonElement>(null)
     const selectedText = props.getSelectedText()
 
+    const openAction = (defaultLink: Link | null) => {
+        const pos = [0, 0]
+        if(buttonRef.current){
+            const r = buttonRef.current.getBoundingClientRect()
+            pos[0] = r.left
+            pos[1] = r.top + 20
+        }
+        // menu hook 
+        setAwaitingMenu(true)
+        props.clickToExitPopupHook({
+            position: pos,
+            onCancel: () => {
+                setAwaitingMenu(false)
+                props.clearOpenTrigger()
+            },
+            contents: <HyperlinkSelectContents 
+                initialLink={defaultLink}
+                selectedText={selectedText}
+                parentProps={props}
+                setAwaitingMenu={value => {
+                    setAwaitingMenu(value)
+                    props.clearOpenTrigger()
+                }}/>,
+            disableClickToClose: true
+        })
+    }
+
+    React.useEffect(() => {
+        if(props.openTrigger){
+            openAction(props.openTrigger.existingLink)
+        }
+    }, [props.openTrigger])
+
     return <button className={"toggle-button toggle-" + (awaitingMenu ? 'active' : 'inactive')}
         ref={buttonRef}
         title={props.title}
         onMouseDown={e => e.preventDefault()}
-        onClick={() => {
-            const pos = [0, 0]
-            if(buttonRef.current){
-                const r = buttonRef.current.getBoundingClientRect()
-                pos[0] = r.left
-                pos[1] = r.top + 20
-            }
-            // menu hook 
-            setAwaitingMenu(true)
-            props.clickToExitPopupHook({
-                position: pos,
-                onCancel: () => setAwaitingMenu(false),
-                contents: <HyperlinkSelectContents 
-                    selectedText={selectedText}
-                    parentProps={props}
-                    setAwaitingMenu={setAwaitingMenu}/>,
-                disableClickToClose: true
-            })
-        }}
+        onClick={() => openAction(null)}
         disabled={!props.enabled}>
         {props.children}
     </button>
 }
 
 function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
-    const [internal, setInternal] = React.useState(false)
-    const [internalSearch, setInternalSearch] = React.useState('')
+    const defaultInternal = props.initialLink !== null && !('url' in props.initialLink)
+    let defaultSearch = ''
+    if(defaultInternal){
+        const internal = props.initialLink as InternalLink
+        defaultSearch = internal.isHomePageLink ? 'home' : props.parentProps.allPages.filter(p => p.id === internal.pageId)[0].title
+    }
+
+    const [internalSearch, setInternalSearch] = React.useState(defaultSearch)
     const internalPages = props.parentProps.allPages.filter(p => pageContains(p, internalSearch))
-    internalPages.push({
-        id: '-1:home',
-        title: 'Home Page',
-        date: new Date(),
-        isBlogPost: false,
-        linkedFromHeader: false,
-        headerSortOrder: '0',
-        summaryText: '',
-        autoSummary: false,
-        autoSummaryImg: false,
-        summaryImg: null,
-        familyPrivate: false,
-        design: []
-    })
-    const [internalSelected, setInternalSelected] = React.useState(0)
+    internalPages.push(homePageAlias())
+
+    let defaultInternalSelected = 0
+    let defaultUrl = ''
+    if(defaultInternal){
+        const internal = props.initialLink as InternalLink
+        if(internal.isHomePageLink){
+            defaultInternalSelected = internalPages.length - 1
+        } else {
+            for(let i = 0; i < internalPages.length; i++){
+                if(internalPages[i].id === internal.pageId){
+                    defaultInternalSelected = i
+                    break
+                }
+            }
+        }
+    } else if(props.initialLink) {
+        const external = props.initialLink as ExternalLink
+        defaultUrl = external.url
+    }
+
+    const [internal, setInternal] = React.useState(defaultInternal)
+    const [internalSelected, setInternalSelected] = React.useState(defaultInternalSelected)
     const [linkText, setLinkText] = React.useState('')
-    const [urlText, setUrlText] = React.useState('')
+    const [urlText, setUrlText] = React.useState(defaultUrl)
     React.useEffect(() => {
         setLinkText(props.selectedText)
     }, [])
@@ -88,7 +118,7 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
                 {internalPages.length === 0 ?
                     <span className="insert-hyperlink-no-pages">No pages found</span>
                 :
-                    <div style={{maxHeight: '250px', overflowY: 'auto'}}>
+                    <div style={{maxHeight: '250px', overflowY: 'auto', paddingRight: '2px'}}>
                         <PageList 
                             pages={internalPages}
                             selected={internalSelected}
@@ -129,7 +159,12 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
 export type HyperlinkSelectContentsProps = {
     parentProps: HyperlinkSelectProps
     selectedText: string
+    initialLink: Link | null
     setAwaitingMenu: (value: boolean) => void
+}
+
+export type HyperlinkOpenTrigger = {
+    existingLink: Link
 }
 
 export type HyperlinkSelectProps = {
@@ -138,6 +173,8 @@ export type HyperlinkSelectProps = {
     title: string
     allPages: Array<Page>
     getSelectedText: () => string
+    openTrigger: HyperlinkOpenTrigger | null
+    clearOpenTrigger: () => void
     onInsert: (insertionText: string, link: Link) => void
     closeClickToExitPopup: () => void
     clickToExitPopupHook: (menuOpts: {position: Array<number>, contents: React.ReactNode, onCancel: () => void, disableClickToClose?: boolean}) => void

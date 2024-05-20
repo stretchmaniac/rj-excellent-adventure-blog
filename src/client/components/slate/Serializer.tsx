@@ -1,6 +1,6 @@
 import ReactDOMServer from 'react-dom/server'
 import { fontMap } from '../../tools/font-size'
-import { Link } from '../../types/link'
+import { Link, convertShorthandUrl } from '../../types/link'
 import { MediaChild } from '../PageDesign'
 import { Media, MediaType } from '../../tools/media'
 import React from 'react'
@@ -197,11 +197,7 @@ function serializeLink(child: any, state: SerializeState): React.ReactNode {
     const link = child.link as Link
     let url = ''
     if('url' in link){
-        url = link.url
-        // prefix with https:// if not already there
-        if(!url.startsWith('http')){
-            url = 'https://' + url
-        }
+        url = convertShorthandUrl(link.url)
     } else {
         // local link
         url = link.isHomePageLink ? '../home.html' : 

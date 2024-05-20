@@ -25,7 +25,7 @@ $bc: rgb(206, 206, 206);
     font-size: small;
 }
 
-.page-list-entry {
+.page-list-entry, .page-list-entry-last {
     display: flex;
     flex-direction: column;
     justify-content: left;
@@ -38,6 +38,8 @@ $bc: rgb(206, 206, 206);
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 2px;
+}
+.page-list-entry {
     border-bottom: 1px solid rgb(230,230,230);
 }
 

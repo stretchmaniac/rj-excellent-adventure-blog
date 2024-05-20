@@ -9,7 +9,7 @@ import ToggleButton from './ToggleButton'
 import DropDownSelect from './DropDownSelect'
 import EmojiSelect from './EmojiSelect';
 import ClickToExitPopup from '../ClickToExitPopup';
-import HyperlinkSelect from './HyperlinkSelect';
+import HyperlinkSelect, { HyperlinkOpenTrigger } from './HyperlinkSelect';
 import { Page } from '../../types/PageType';
 import { Link } from '../../types/link';
 import { useSlate } from 'slate-react';
@@ -178,6 +178,8 @@ export default function Toolbar(props: ToolbarProps) {
             <MdOutlineEmojiEmotions className="react-icons" />
         </EmojiSelect>
         <HyperlinkSelect title="link"
+            openTrigger={props.insertLinkTrigger}
+            clearOpenTrigger={props.insertLinkClearTrigger}
             allPages={props.allPages}
             getSelectedText={props.getSelectedText}
             closeClickToExitPopup={props.closeClickToExitPopup}
@@ -254,6 +256,8 @@ export default function Toolbar(props: ToolbarProps) {
 export type ToolbarProps = {
     allPages: Array<Page>
     showTitleBarButton: boolean
+    insertLinkTrigger: HyperlinkOpenTrigger | null
+    insertLinkClearTrigger: () => void
     getSelectedText: () => string
     insertText: (text: string) => void
     insertMediaBox: () => void
