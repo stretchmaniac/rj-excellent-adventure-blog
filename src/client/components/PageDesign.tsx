@@ -52,6 +52,21 @@ const withNoEmptyLink = (editor: Editor) => {
   return editor
 }
 
+const withDefaultFontSize = (editor: Editor) => {
+  // add 'fontSize: medium' to any leaf node that has a 'text' node 
+  // but no existing fontSize attribute
+  const normalizeOriginal = editor.normalizeNode 
+  editor.normalizeNode = ([node, path]) => {
+    if(!('children' in node) && ('text' in node) && !('fontSize' in node)){
+      Transforms.setNodes(editor, {fontSize: 'medium'} as Partial<Node>, {
+        at: path
+      })
+    }
+    normalizeOriginal([node, path])
+  }
+  return editor
+}
+
 const withNoHangingMedia = (editor: Editor) => {
   // delete any media-parent with no media-child
   // delete any media-child/media-child-caption/media-parent-caption whose direct parent is not media-parent
@@ -80,7 +95,9 @@ type LinkState = {
 
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
-      const res = withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(withReact(withHistory(createEditor())))))
+      const res = withDefaultFontSize(withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(
+        withReact(withHistory(createEditor()))
+      ))))
       return res
     })
 
