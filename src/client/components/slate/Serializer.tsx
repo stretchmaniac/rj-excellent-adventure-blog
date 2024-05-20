@@ -353,7 +353,7 @@ function serializeHeaderContainer(container: any, state: SerializeState): React.
         color: 'white',
         paddingTop: '40px',
         paddingBottom: '40px',
-        fontSize: '22px'
+        fontSize: '22px !important'
     }}>
         {container.children && 
             container.children.map(

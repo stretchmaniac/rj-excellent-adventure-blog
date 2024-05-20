@@ -19,6 +19,7 @@ import { WaitingPopup } from '../Main'
 import { LinkViewer } from './slate/LinkViewer'
 import { numberArrEq } from '../tools/misc'
 import { HyperlinkOpenTrigger } from './slate/HyperlinkSelect'
+import { withCopyPaste } from '../tools/slate-copy-paste'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -53,14 +54,25 @@ const withNoEmptyLink = (editor: Editor) => {
 }
 
 const withDefaultFontSize = (editor: Editor) => {
-  // add 'fontSize: medium' to any leaf node that has a 'text' node 
+  // add 'fontSize: medium' to any leaf node that has a 'text' node NOT in an h1 or h2
   // but no existing fontSize attribute
   const normalizeOriginal = editor.normalizeNode 
   editor.normalizeNode = ([node, path]) => {
     if(!('children' in node) && ('text' in node) && !('fontSize' in node)){
-      Transforms.setNodes(editor, {fontSize: 'medium'} as Partial<Node>, {
-        at: path
-      })
+      const wPath = [...path]
+      let inHeader = false
+      while(wPath.length > 0){
+        if(['h1','h2'].includes(getNodeAtPath(editor, wPath).type)){
+          inHeader = true
+        }
+        wPath.pop()
+      }
+
+      if(!inHeader){
+        Transforms.setNodes(editor, {fontSize: 'medium'} as Partial<Node>, {
+          at: path
+        })
+      }
     }
     normalizeOriginal([node, path])
   }
@@ -95,9 +107,9 @@ type LinkState = {
 
 export default function PageDesign(props: PageDesignProps) {
     const [editor] = React.useState(() => {
-      const res = withDefaultFontSize(withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(
+      const res = withCopyPaste(withDefaultFontSize(withNoHangingMedia(withNoEmptyLink(withInlinesAndVoids(
         withReact(withHistory(createEditor()))
-      ))))
+      )))))
       return res
     })
 

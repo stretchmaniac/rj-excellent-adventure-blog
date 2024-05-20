@@ -66,7 +66,7 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
                 color: 'white', 
                 paddingTop: '40px',
                 paddingBottom: '40px',
-                fontSize: '22px'
+                fontSize: '22px !important'
             }} 
             {...props.attributes}>{props.children}</div>
     }
