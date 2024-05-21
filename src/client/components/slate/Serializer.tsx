@@ -335,13 +335,19 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
     }
 
     const fontSize = child.fontSize ? fontMap(child.fontSize) + 'px' : ''
-    const emptyText = child.text.trim() === ''
     const font = child.font ? child.font : ''
+    let text = child.text 
+    if(text.startsWith('\n')){
+        text = ' ' + text
+    }
+    if(text.endsWith('\n')){
+        text = text + ' '
+    }
     return <span style={{
         fontSize: fontSize,
         fontFamily: font,
         whiteSpace: 'pre-wrap',
-    }}>{child.text === '' ? ' ' : child.text}</span>
+    }}>{text === '' ? ' ' : text}</span>
 }
 
 function serializeHeaderContainer(container: any, state: SerializeState): React.ReactNode {
