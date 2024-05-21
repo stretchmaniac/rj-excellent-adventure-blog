@@ -83,7 +83,7 @@ export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: st
     const extWithDot = imageMediaUrl.substring(extDotI)
     const arr = imageMediaUrl.substring(0, extDotI).split('/media/')
     const host = arr[0]
-    const baseUrl = arr[1]
+    const baseUrl = encodeURIComponent(arr[1])
     let srcset = ''
     for(let i = 0; i < IMAGE_SIZE_NAMES.length; i++){
         const name = IMAGE_SIZE_NAMES[i]
