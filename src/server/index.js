@@ -481,19 +481,13 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
 app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
-    const child = spawn('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)])
-
-    let consoleOut = ''
-    child.stdout.setEncoding('utf-8')
-    child.stdout.on('data', data => consoleOut += data.toString())
-
-    child.stderr.setEncoding('utf-8')
-    child.stderr.on('data', data => console.log(data.toString()))
-
-    child.on('close', () => {
-        res.type('txt')
-        res.send(consoleOut.trim())
+    const child = spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)], {
+        encoding: 'utf-8',
+        shell: 'pwsh.exe'
     })
+
+    res.type('txt')
+    res.send(child.stdout.trim())
 })
 
 app.listen(port)
