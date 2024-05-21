@@ -17,6 +17,7 @@ import { selectionCompatibleWithLink } from '../PageDesign';
 import { Editor, Transforms } from 'slate';
 import { Media, registerMedia } from '../../tools/media';
 import { chooseFiles } from '../../tools/http';
+import { WaitingPopup } from '../../Main';
 
 export default function Toolbar(props: ToolbarProps) {
     const editor = useSlate()
@@ -232,9 +233,13 @@ export default function Toolbar(props: ToolbarProps) {
             title="multi image/movie/photosphere"
             active={false}
             onChange={active => {
+                props.setWaitingPopup({popupOpen: true, message: 'Please use system dialog to select files.'})
                 chooseFiles(true).then(files => {
+                    props.setWaitingPopup({popupOpen: false, message: ''})
                     const mediaPromises = files.map(f => registerMedia(f))
+                    props.setWaitingPopup({popupOpen: true, message: 'Please wait while files are processed.'})
                     Promise.allSettled(mediaPromises).then(results => {
+                        props.setWaitingPopup({popupOpen: false, message: ''})
                         props.bulkInsertMedia([...results].map(r => (r as any).value))
                     })
                 })
@@ -257,6 +262,7 @@ export type ToolbarProps = {
     allPages: Array<Page>
     showTitleBarButton: boolean
     insertLinkTrigger: HyperlinkOpenTrigger | null
+    setWaitingPopup: (popup: WaitingPopup) => void
     insertLinkClearTrigger: () => void
     getSelectedText: () => string
     insertText: (text: string) => void

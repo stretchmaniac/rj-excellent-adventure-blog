@@ -161,6 +161,7 @@ export default function PageDesign(props: PageDesignProps) {
         }}/>}
       <Slate editor={editor} initialValue={props.designStruct} key={''+props.pageID}>
           <Toolbar getFormatState={getFormatState} 
+            setWaitingPopup={props.setWaitingPopup}
             insertLinkTrigger={openLinkTrigger}
             insertLinkClearTrigger={() => setOpenLinkTrigger(null)}
             showTitleBarButton={!props.isBlogPost}
