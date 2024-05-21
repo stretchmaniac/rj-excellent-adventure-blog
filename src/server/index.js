@@ -511,7 +511,7 @@ function folderNamePageLike(folderName) {
 function pageFolderName(page){
     return getDateInputStr(page.date) + 
             '_' + 
-            page.title.replaceAll(/\s/g, '_') +
+            page.title.replaceAll(/[^a-zA-Z0-9_]/g, '_') +
             '_rj' + page.id.substring(0, 8)
 }
 
