@@ -120,6 +120,11 @@ function serializeMediaChild(child: any, state: SerializeState): React.ReactNode
                 data-pitch={content.photosphereOptions?.initialPitch}
                 data-yaw={content.photosphereOptions?.initialYaw}></div>    
         </div>}
+        {content && content.type === MediaType.VIDEO && <video
+            controls
+            className={size + '-box'}>
+            <source src={localImageUrl(content.stableRelativePath)}/>
+        </video>}
     </div>
 }
 

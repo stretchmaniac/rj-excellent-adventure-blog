@@ -44,6 +44,7 @@ export default function MediaChildBox(props: MediaChildProps) {
     }, [props.media.content?.type])
 
     const showToolbar = selected && focused || props.media.content?.type === MediaType.PHOTOSPHERE
+        || props.media.content?.type === MediaType.VIDEO
 
     return <div {...props.attributes}
                 contentEditable={false}
@@ -67,6 +68,11 @@ export default function MediaChildBox(props: MediaChildProps) {
             <div className={props.media.size + '-pannellum'}>
                 <div ref={pannellumRef}></div>    
             </div>}
+        {props.media.content !== null && props.media.content.type === MediaType.VIDEO && <video
+            controls
+            className={props.media.size + '-box'}>
+            <source src={props.media.content.stableRelativePath}/>
+        </video>}
         {showToolbar && <div className='media-toolbar'>
             <button title='move left' className='media-tool-button' disabled={!hasLeft(props)}
                 onClick={() => moveLeft(editor, props)}>
@@ -139,7 +145,9 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <span className='media-tool-button-text'>XL</span>
             </button>
         </div>}
-        {showToolbar && props.media.content !== null && <div className='media-toolbar-3rd-row'>
+        {showToolbar && props.media.content !== null && 
+            props.media.content.type !== MediaType.VIDEO && 
+            <div className='media-toolbar-3rd-row'>
             <button title='image' 
                 className={(props.media.content.type === MediaType.IMAGE ? 'selected ' : '') + 'media-tool-button'}
                 onClick={() => changeMediaType(MediaType.IMAGE, editor, props)}>

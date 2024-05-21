@@ -25,9 +25,12 @@ export type Media = {
 
 export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Media> {
     return new Promise((resolve, reject) => {
+        const mediaType = ['mp4', 'MP4', 'webm', 'WEBM', 'avi', 'AVI', 'mov', 'MOV', 'wmv', 'WMV'].filter(
+            t => unstableAbsoluteOriginalPath.endsWith(t)
+        ).length > 0 ? MediaType.VIDEO : MediaType.IMAGE
         copyResource(unstableAbsoluteOriginalPath, 'media', null, false).then(path => {
             resolve({
-                type: MediaType.IMAGE,
+                type: mediaType,
                 unstableAbsoluteOriginalPath: unstableAbsoluteOriginalPath,
                 stableRelativePath: 'http://localhost:3000/' + path,
                 resizeBehavior: {}

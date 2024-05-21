@@ -93,6 +93,10 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         } else if(mediaType === 'PHOTOSPHERE'){
             // copy _ps folder
             fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
+        } else if(mediaType === 'VIDEO'){
+            // copy original 
+            const src = media.fileName
+            fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
         }
         
     }
