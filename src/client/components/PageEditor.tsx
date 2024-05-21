@@ -4,7 +4,8 @@ import './../assets/stylesheets/page-editor.scss'
 import ToggleButtonGroup from './ToggleButtonGroup';
 import PageSettings from './PageSettings';
 import PageDesign from './PageDesign';
-import { WaitingPopup } from '../Main';
+import { ImportPopup, WaitingPopup } from '../Main';
+import { Editor, Node } from 'slate';
 
 export default function PageEditor(props: PageEditorProps){
     const page = props.page;
@@ -43,7 +44,8 @@ export default function PageEditor(props: PageEditorProps){
                         page={page}
                         editPage={newPage => props.onPageEdit(newPage)}
                         deletePage={props.deletePage}
-                        showConfirmPopup={props.showConfirmPopup}/>
+                        showConfirmPopup={props.showConfirmPopup}
+                        setImportPopup={props.setImportPopup}/>
                 : ''}
             </div>
         }
@@ -56,6 +58,7 @@ export type PageEditorProps = {
     onPageEdit: (newPage: Page) => void
     deletePage: () => void
     previewHook: () => void
+    setImportPopup: (popup: ImportPopup) => void
     setWaitingPopup: (popup: WaitingPopup) => void
     showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

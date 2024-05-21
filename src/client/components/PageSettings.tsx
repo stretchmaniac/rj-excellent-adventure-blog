@@ -7,6 +7,8 @@ import { chooseFiles } from '../tools/http'
 import { registerMedia } from '../tools/media'
 import { IoIosWarning } from "react-icons/io";
 import { getSummaryImg, getSummaryText } from '../tools/empty-page'
+import { BiImport } from 'react-icons/bi'
+import { ImportPopup } from '../Main'
 
 export default function PageSettings(props: PageSettingsProps) {
     let dateStr = ''
@@ -134,6 +136,20 @@ export default function PageSettings(props: PageSettingsProps) {
             <input type="checkbox" checked={props.page.familyPrivate}
                 onChange={e => props.editPage({...props.page, familyPrivate: e.target.checked})}/>
             </div>*/}
+        <button className="import-button"
+            onClick={() => {
+                props.setImportPopup({
+                    popupOpen: true,
+                    existingPage: props.page,
+                    popupCallback: (cancelled, p) => {
+                        if(!cancelled && p !== null){
+                            props.editPage(p)
+                        }
+                    }
+                })
+            }}>
+            <BiImport /> Import from Blogger
+        </button>
         <button className="delete-button"
             onClick={() => props.showConfirmPopup(
                 'Are you sure you want to delete this page?',
@@ -153,5 +169,6 @@ export type PageSettingsProps = {
     page: Page
     editPage: (newPage: Page) => void
     deletePage: () => void
+    setImportPopup: (popup: ImportPopup) => void
     showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

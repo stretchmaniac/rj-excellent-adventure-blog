@@ -13,6 +13,7 @@ import { loadData, mergeData, setData, setMirrorDirectory, setPreview } from './
 import { WaitingPopup } from './components/WaitingPopup'
 import { makePreview } from './tools/preview'
 import { MoreToolsPopup } from './components/MoreToolsPopup'
+import { ImportPopup } from './components/ImportPopup'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -32,6 +33,12 @@ type ConfirmPopup = {
 type UnsavedLoadPopup = {
     popupOpen: boolean,
     popupCallback: (choice: string) => void // "merge", "load"
+}
+
+export type ImportPopup = {
+    popupOpen: boolean,
+    existingPage: Page | null,
+    popupCallback: (cancelled: boolean, importedPage: Page | null) => void
 }
 
 export type WaitingPopup = {
@@ -133,6 +140,11 @@ export function Main() {
         message: ''
     })
     const [moreToolsPopupOpen, setMoreToolsPopupOpen] = React.useState(false)
+    const [importPopup, setImportPopup] = React.useState<ImportPopup>({
+        popupOpen: false,
+        existingPage: null,
+        popupCallback: () => {}
+    })
 
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
@@ -217,11 +229,23 @@ export function Main() {
                     confirmColor: confirmColor,
                     popupCallback: callback
                 })}
+                setImportPopup={popup => {
+                    setImportPopup({
+                        popupOpen: popup.popupOpen,
+                        existingPage: popup.existingPage,
+                        popupCallback: (cancelled, p) => {
+                            setImportPopup({popupOpen: false, existingPage: null, popupCallback: () => {}})
+                            popup.popupCallback(cancelled, p)
+                        }
+                    })
+                }}
             />
         </div>
         {moreToolsPopupOpen && <MoreToolsPopup pages={pages} close={() => setMoreToolsPopupOpen(false)}/>}
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
+        {importPopup.popupOpen && <ImportPopup existingPage={importPopup.existingPage as Page} 
+            onComplete={importPopup.popupCallback}/>}
         {newPagePopup.popupOpen ? 
             <NewPagePopup 
                 headerText={newPagePopup.popupHeader}
