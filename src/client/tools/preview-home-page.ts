@@ -5,7 +5,7 @@ import { Media } from "./media";
 import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgSrcSet } from "./preview";
 
 export function makeStringLiteral(s: string){
-    return "'" + s.replace(/'/g, "\\'") + "'";
+    return "`" + s.replace(/'/g, "\\'") + "`";
 }
 
 export function homePageJs(pages: Page[], idMap: Map<string, string>): string {
@@ -210,6 +210,7 @@ ${getHeaderCssFragment('')}
     padding-right: 15px;
     width: (100% - 30px);
     line-height: 38px;
+    white-space: pre-wrap;
 }
 
 .home-post-link-row {

@@ -119,6 +119,9 @@ export function getFirstNonEmptyRootParLoc(page: Page): TextAndLocation {
                 if('text' in child){
                     contents += child.text
                 }
+                if(child.type === 'a'){
+                    contents += child.children[0].text
+                }
             }
             if(contents.trim().length > 0){
                 return {
@@ -146,7 +149,11 @@ export function getSummaryText(page: Page): TextAndLocation {
             designLoc: null
         }
     }
-    return getFirstNonEmptyRootParLoc(page)
+    const res = getFirstNonEmptyRootParLoc(page)
+    return {
+        text: res.text.trim(),
+        designLoc: res.designLoc
+    }
 }
 
 export function getSummaryImg(page: Page): Media | null {
