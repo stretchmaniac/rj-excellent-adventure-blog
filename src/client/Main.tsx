@@ -145,6 +145,17 @@ export function Main() {
         existingPage: null,
         popupCallback: () => {}
     })
+    const [importSearchPaths, setImportSearchPathsRaw] = React.useState<string>('')
+    React.useEffect(() => {
+        const searchPaths = localStorage.getItem('importSearchPaths')
+        if(!!searchPaths){
+            setImportSearchPathsRaw(searchPaths)
+        }
+    }, [])
+    const setImportSearchPaths = (paths: string) => {
+        setImportSearchPathsRaw(paths)
+        localStorage.setItem('importSearchPaths', paths)
+    }
 
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
@@ -245,7 +256,10 @@ export function Main() {
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
         {importPopup.popupOpen && <ImportPopup existingPage={importPopup.existingPage as Page} 
-            onComplete={importPopup.popupCallback}/>}
+            onComplete={importPopup.popupCallback}
+            importSearchPaths={importSearchPaths}
+            setImportSearchPaths={setImportSearchPaths}
+            />}
         {newPagePopup.popupOpen ? 
             <NewPagePopup 
                 headerText={newPagePopup.popupHeader}

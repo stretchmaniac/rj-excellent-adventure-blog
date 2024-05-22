@@ -2,15 +2,24 @@ import { MediaChild } from "../components/PageDesign"
 import { Page } from "../types/PageType"
 import { ExternalLink } from "../types/link"
 import { emptyBlogPostWithTitleDate } from "./empty-page"
-import { Media } from "./media"
+import { searchCachedImageFolders } from "./http"
+import { Media, registerMedia } from "./media"
 
-export function importBlogger(existingPage: Page, html: string): Page | null {
+export type BloggerImportResult = {
+    design: any[],
+    autoSummaryImg: boolean,
+    summaryImg: Promise<Media | null>
+}
+
+// ALL nodes of type media-children will have content attribute 
+// populated by Promise<Media | null> instead of Media!
+export function importBlogger(existingPage: Page, html: string): BloggerImportResult | null {
     const parser = new DOMParser()
     const htmlDoc = parser.parseFromString(html, 'text/html')    
     const body = htmlDoc.querySelector('body')
     if(body !== null){
         const context: ParseContext = {
-            summaryImg: null,
+            summaryImg: new Promise((res, rej) => res(null)),
             imageSizingModeNew: html.includes('width="1100"'),
             inParagraph: false,
             bold: false,
@@ -30,23 +39,24 @@ export function importBlogger(existingPage: Page, html: string): Page | null {
             finalDesign[1].children.pop()
         }
         finalDesign[1].children.push(...design)
-        const p: Page = {
-            ...existingPage,
-            design: finalDesign
+        const result: BloggerImportResult = {
+            design: finalDesign,
+            autoSummaryImg: false,
+            summaryImg: new Promise((res, rej) => res(null))
         }
         if(context.summaryImg !== null){
-            p.autoSummaryImg = false
-            p.summaryImg = context.summaryImg
+            result.autoSummaryImg = false
+            result.summaryImg = context.summaryImg
         }
 
-        return p
+        return result
     }
 
     return null
 }
 
 type ParseContext = {
-    summaryImg: Media | null,
+    summaryImg: Promise<Media | null>,
     imageSizingModeNew: boolean,
     inParagraph: boolean,
     bold: boolean,
@@ -346,7 +356,7 @@ function parseA(node: Element, context: ParseContext): Object | undefined {
                 size: size,
                 content: media,
                 children: [{text: ''}]
-            } as MediaChild]
+            }]
         }
 
     } else if(aEl.textContent && aEl.textContent.trim().length > 0) {
@@ -392,12 +402,20 @@ function parseImg(node: Element, context: ParseContext): Object | undefined {
                 size: size,
                 content: media,
                 children: [{text: ''}]
-            } as MediaChild]
+            }]
         }
     }
     console.log('skipping <img>', imgEl)
 }
 
-function findAndRegisterImg(name: string, context: ParseContext): Media | null {
-    return null
+function findAndRegisterImg(name: string, context: ParseContext): Promise<Media | null> {
+    return new Promise((resolve, reject) => {
+        searchCachedImageFolders(name).then(result => {
+            if(!result.found){
+                resolve(null)
+            } else {
+                registerMedia(result.absolutePath).then(media => resolve(media))
+            }
+        })
+    })
 }

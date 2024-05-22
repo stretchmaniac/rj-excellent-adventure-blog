@@ -1,4 +1,4 @@
-import { copyResource } from "./http"
+import { copyResource, isPhotosphere } from "./http"
 
 export enum MediaType {
     IMAGE = 'IMAGE',
@@ -29,12 +29,21 @@ export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Med
             t => unstableAbsoluteOriginalPath.endsWith(t)
         ).length > 0 ? MediaType.VIDEO : MediaType.IMAGE
         copyResource(unstableAbsoluteOriginalPath, 'media', null, false).then(path => {
-            resolve({
+            const res = {
                 type: mediaType,
                 unstableAbsoluteOriginalPath: unstableAbsoluteOriginalPath,
                 stableRelativePath: 'http://localhost:3000/' + path,
                 resizeBehavior: {}
-            })
+            }
+            if(mediaType === MediaType.IMAGE){
+                // check whether it is a photosphere or not
+                isPhotosphere(res.stableRelativePath).then(yesPhotosphere => {
+                    res.type = yesPhotosphere ? MediaType.PHOTOSPHERE : MediaType.IMAGE
+                    resolve(res)
+                })
+            } else {
+                resolve(res)
+            }
         })
     })
 }

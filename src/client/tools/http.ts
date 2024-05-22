@@ -2,6 +2,67 @@ import { BlogState } from "../types/blog-state"
 import { ReferencedMedia, sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
+export function isPhotosphere(stableRelativePath: string): Promise<boolean> {
+    const lastSlash = stableRelativePath.lastIndexOf('/')
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/check-if-photosphere', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({fileName: stableRelativePath.substring(lastSlash + 1, stableRelativePath.length)})
+        })
+        .then(response => response.text())
+        .then(data => resolve(JSON.parse(data).isPhotosphere))
+        .then(error => {})
+    })
+}
+
+export function cacheImageSearchFolders(folders: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/cache-image-search-folders', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({folders: folders})
+        })
+        .then(response => response.text())
+        .then(data => resolve())
+        .then(error => {})
+    })
+}
+
+export type ImageCacheResult = {
+    found: boolean,
+    absolutePath: string
+}
+
+export function searchCachedImageFolders(fileName: string): Promise<ImageCacheResult> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/search-cached-image-folders', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({fileName: fileName})
+        })
+        .then(response => response.text())
+        .then(data => {
+            const res = JSON.parse(data)
+            if(res.success){
+                resolve({found: true, absolutePath: res.path})
+            } else {
+                resolve({found: false, absolutePath: ''})
+            }
+        })
+        .then(error => {})
+    })
+}
+
 export function setPreview(preview: GeneratedPreview): Promise<void> {
     const mapToArr = (map: Map<string, string>) => {
         const res: string[] = []
@@ -35,9 +96,7 @@ export function setPreview(preview: GeneratedPreview): Promise<void> {
         })
         .then(response => response.text())
         .then(data => resolve())
-        .then(error => {
-            reject()
-        })
+        .then(error => {})
     })
 }
 
@@ -53,9 +112,7 @@ export function cleanupMedia(referencedMedia: ReferencedMedia[]): Promise<void> 
         })
         .then(response => response.text())
         .then(data => resolve())
-        .then(error => {
-            resolve()
-        })
+        .then(error => {})
     })
 }
 
@@ -70,9 +127,7 @@ export function chooseFiles(multiple: boolean): Promise<string[]> {
             }
         }).then(response => response.text())
         .then(data => resolve(data.split('\n').map(s => s.trim()).filter(s => s.length > 0)))
-        .then(error => {
-            resolve([])
-        })
+        .then(error => {})
     })
 }
 
@@ -88,9 +143,7 @@ export function runCmdTask(type: string): Promise<void> {
         })
         .then(response => response.text())
         .then(data => resolve())
-        .then(error => {
-            resolve()
-        })
+        .then(error => {})
     })
 }
 
@@ -106,9 +159,7 @@ export function copyResource(path: string, targetFolder: string, rename: string 
         })
         .then(response => response.text())
         .then(data => resolve(JSON.parse(data).path))
-        .then(error => {
-            resolve('')
-        })
+        .then(error => {})
     })
 }
 
@@ -123,9 +174,7 @@ export function chooseFolder(): Promise<string> {
         })
         .then(response => response.text())
         .then(data => resolve(data))
-        .then(error => {
-            resolve('')
-        })
+        .then(error => {})
     })
 }
 
@@ -145,9 +194,7 @@ export function setMirrorDirectory(dir: string): Promise<boolean> {
             const res = JSON.parse(data)
             resolve(res.success)
         })
-        .then(error => {
-            resolve(false)
-        })
+        .then(error => {})
     })
 }
 
@@ -177,9 +224,7 @@ export function setData(state: BlogState) : Promise<void> {
         })
         .then(response => response.text())
         .then(data => resolve())
-        .then(error => {
-            resolve()
-        })
+        .then(error => {})
     })
 }
 
@@ -224,14 +269,7 @@ export function loadData(): Promise<BlogState> {
                 reject(res.reason)
             }
         })
-        .then(error => {
-            resolve({
-                pages: [],
-                config: {
-                    localSaveFolder: null
-                }
-            })
-        })
+        .then(error => {})
     })
 }
 

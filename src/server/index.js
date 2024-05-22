@@ -279,6 +279,62 @@ app.post('/media-cleanup', cors(corsOptions), function(req, res){
     res.send(JSON.stringify({success: true}))
 })
 
+app.post('/check-if-photosphere', cors(corsOptions), function(req, res){
+    if(rootDir === null){
+        res.send(JSON.stringify({success: false, reason: 'No mirror directory set', isPhotosphere: false}))
+        return
+    }
+    const info = JSON.parse(req.body)
+    const fileName = info.fileName 
+    const extI = fileName.lastIndexOf('.')
+    const woExt = fileName.substring(0, extI)
+    const absPath = rootDir + '/media/' + woExt + '_ps/config.json'
+    const isPhotosphere = fs.existsSync(absPath)
+    res.send(JSON.stringify({isPhotosphere: isPhotosphere}))
+})
+
+// this is a map string name => list of file names
+let cachedSearchFolderContents = {}
+app.post('/cache-image-search-folders', cors(corsOptions), function(req, res){
+    const info = JSON.parse(req.body)
+    const folders = info.folders.map(f => f.endsWith('/') || f.endsWith('\\') ? f.substring(0, f.length - 1) : f)
+
+    cachedSearchFolderContents = {}
+
+    for(let i = 0; i < folders.length; i++){
+        const f = folders[i]
+        if(!fs.existsSync(f)){
+            console.log(`cache-image-search-folders: folder ${f} does not exist!`)
+            continue
+        }
+        const allRead = fs.readdirSync(f, { withFileTypes: true })
+        const childFileNames = allRead.filter(dirent => !dirent.isDirectory())
+            .map(dirent => dirent.name)
+        const childFolderNames = allRead.filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+        // do recursive search
+        folders.push(...childFolderNames.map(n => f + '/' + n))
+        console.log('caching files from folder', f)
+        cachedSearchFolderContents[f] = childFileNames
+    }
+
+    res.send(JSON.stringify({success: true}))
+})
+
+app.post('/search-cached-image-folders', cors(corsOptions), function(req, res){
+    const info = JSON.parse(req.body)
+    const fileName = info.fileName 
+    let absPath = ''
+    for(let folder in cachedSearchFolderContents){
+        const files = cachedSearchFolderContents[folder]
+        if(files.includes(fileName)){
+            absPath = folder + '/' + fileName 
+            break
+        }
+    }
+    res.send(JSON.stringify({success: absPath !== '', path: absPath}))
+})
+
 const IMAGE_SIZE_NAMES = ['small', 'medium', 'large', 'x-large']
 const IMAGE_SIZE_WIDTHS = [700, 1200, 1800, 2400]
 app.post('/copy-resource', cors(corsOptions), function(req, res){
