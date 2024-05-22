@@ -77,6 +77,8 @@ function parseNode(node: Element | ChildNode, context: ParseContext): (Object | 
         return [parseTable(node as Element, context)]  
     } else if(['B', 'I', 'S', 'U'].includes(tag)){
        return [parseMarkTagNaked(tag, node as Element, context)]  
+    } else if(tag === 'BLOCKQUOTE'){
+        return [parseBlockQuote(node as Element, context)]
     } else if(node.nodeName === '#text'){
        return [{
             type: 'paragraph',
@@ -87,6 +89,20 @@ function parseNode(node: Element | ChildNode, context: ParseContext): (Object | 
     }
 
     return []
+}
+
+function parseBlockQuote(node: Element, context: ParseContext): (Object | undefined) {
+    const contents = []
+    for(let n of node.childNodes){
+        const nRes = parseNode(n, context).filter(s => !!s)
+        contents.push(...nRes)
+    }
+    if(contents.length > 0){
+        return {
+            type: 'blockquote',
+            children: contents
+        }
+    }
 }
 
 function parseList(tagName: string, node: Element, context: ParseContext): Object | undefined {
