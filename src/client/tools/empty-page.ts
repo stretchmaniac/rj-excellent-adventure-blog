@@ -244,6 +244,8 @@ function sampleFirstParagraph(){
         "Wherefore art thou, Gustav? How thy honks used to linger among the weedy ponds, uncouth and weighty.",
         "Both Rick and I purchased laser loon T-shirts on Saturday at the Minnesota \"Gray ducks that are not ducks but also not Geese\" festival.",
         "Our campsite this week was a unique one. Rick jerry-rigged pool noodle pontoons on the bottom of the camper and we floated on the lake!",
+        "🪿",
+        "Once more unto the beach, dear friends, once more. Or should you not like the beach, a lake."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

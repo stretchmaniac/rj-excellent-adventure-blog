@@ -314,7 +314,7 @@ app.post('/cache-image-search-folders', cors(corsOptions), function(req, res){
             .map(dirent => dirent.name)
         // do recursive search
         folders.push(...childFolderNames.map(n => f + '/' + n))
-        console.log('caching files from folder', f)
+        console.log(`cached ${childFileNames.length} files from ${f}`)
         cachedSearchFolderContents[f] = childFileNames
     }
 
