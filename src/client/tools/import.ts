@@ -19,7 +19,7 @@ export function importBlogger(existingPage: Page, html: string): Page | null {
             strikethrough: false,
             fontSize: 'medium'
         }
-        const parseNodes = body.children
+        const parseNodes = body.childNodes
         const design = []
         for(const n of parseNodes){
             design.push(...parseNode(n, context).filter(p => p !== undefined && p !== ''))
@@ -56,33 +56,32 @@ type ParseContext = {
     fontSize: string
 }
 
-function parseNode(node: Element, context: ParseContext): any[]{
-    const tag = node.tagName
+function parseNode(node: Element | ChildNode, context: ParseContext): (Object | undefined)[]{
+    const tag = (node as any).tagName
     if(tag === 'P'){
-        return [parseP(node, context)]
+        return [parseP(node as Element, context)]
     } else if(tag === 'A'){
-        return [parseA(node, context)]
+        return [parseA(node as Element, context)]
     } else if(tag === 'IMG'){
-        return [parseImg(node, context)]  
+        return [parseImg(node as Element, context)]  
+    } else if(tag === 'UL'){
+        return [parseList('UL', node as Element, context)]
+    } else if(tag === 'OL'){
+        return [parseList('OL', node as Element, context)]  
     } else if(tag === 'BR'){
         // we are purposefully ignoring br elements
         return []  
     } else if(tag === 'DIV'){
-        const res = []
-        if(node.childNodes.length === node.children.length){
-            // flatten div element
-            for(const n of node.children){
-                res.push(...parseNode(n, context))
-            }
-        } else {
-            // treat as paragraph
-            res.push(parseP(node, context))
-        }
-        return res
+        return parseDiv(node as Element, context)
     } else if(tag === 'TABLE'){
-        return [parseTable(node, context)]  
+        return [parseTable(node as Element, context)]  
     } else if(['B', 'I', 'S', 'U'].includes(tag)){
-       return [parseMarkTagNaked(tag, node, context)]  
+       return [parseMarkTagNaked(tag, node as Element, context)]  
+    } else if(node.nodeName === '#text'){
+       return [{
+            type: 'paragraph',
+            children: [parseTextNode(node, context)] 
+       }] 
     } else {
         console.log('unrecognized element tag', tag, node)
     }
@@ -90,25 +89,117 @@ function parseNode(node: Element, context: ParseContext): any[]{
     return []
 }
 
-function parseTable(node: Element, context: ParseContext){
+function parseList(tagName: string, node: Element, context: ParseContext): Object | undefined {
+    const legalChildren = [...node.children].filter(c => ['UL','OL','LI'].includes(c.tagName))
+    const ulChildren = legalChildren.map(c => {
+        if(c.tagName === 'UL'){
+            return parseList('UL', c, context)
+        } else if(c.tagName === 'OL'){
+            return parseList('OL', c, context)
+        } else {
+            return parseLi(c, context)
+        }
+    }).filter(s => !!s)
+    if(ulChildren.length > 0){
+        return {
+            type: 'list',
+            listType: tagName === 'UL' ? 'ul' : 'ol',
+            children: ulChildren
+        }
+    }
+}
+
+function parseLi(node: Element, context: ParseContext): Object {
+    const contents = parseDiv(node, context).filter(s => !!s)
+    if(contents.length === 0){
+        contents.push({
+            type: 'paragraph',
+            children: [{text: ''}]
+        })
+    }
+    return {
+        type: 'li',
+        children: contents
+    }
+}
+
+function parseDiv(node: Element, context: ParseContext) : (Object | undefined)[] {
+    const res: any[] = []
+    const div = node as Element
+    let inTextLike = true
+    let textLikeBlock: (ChildNode | Element)[] = []
+    let elLikeBlocks: (ChildNode | Element)[] = []
+    function textLike(n: ChildNode | Element){
+        if('tagName' in n && n.tagName === 'A'){
+            const parsed = parseA(n as Element, context)
+            return parsed && (parsed as any).type === 'a'
+        }
+        return n.nodeName === '#text' || ('tagName' in n && 
+            ['U','S','I','B'].includes(n.tagName))
+    }
+    function renderTextLike(){
+        // create <p> node around textLikeBlock and render via parseP
+        const p = document.createElement('P')
+        for(const t of textLikeBlock){
+            p.appendChild(t)
+        }
+        res.push(parseP(p, context))
+        textLikeBlock = []
+    }
+    function renderElLike(){
+        // render elLikeBlock by flattening
+        for(const el of elLikeBlocks){
+            res.push(...parseNode(el, context).filter(s => !!s))
+        }
+        elLikeBlocks = []
+    }
+    for(const n of div.childNodes){
+        if(textLike(n)){
+            if(inTextLike){
+                textLikeBlock.push(n)
+            } else {
+                renderElLike()
+                textLikeBlock = [n]
+                inTextLike = true
+            }
+        } else {
+            if(inTextLike){
+                renderTextLike()
+                elLikeBlocks = [n]
+                inTextLike = false
+            } else {
+                elLikeBlocks.push(n)
+            }
+        }
+    }
+    if(textLikeBlock.length > 0){ renderTextLike() }
+    if(elLikeBlocks.length > 0){ renderElLike() }
+    
+    return res
+}
+
+function parseTable(node: Element, context: ParseContext): Object | undefined {
     const tableEl = node as HTMLTableElement
     const cells = tableEl.getElementsByTagName('td')
     // currently only recognize pattern is cells.length == 2 for image + caption
-    if(cells.length === 2 && cells[0].children.length === 1 && cells[0].children[0].tagName === 'A'){
-        const parsedA = parseA(cells[0].children[0], context)
-        if(parsedA.type === 'media-parent'){
+    if(cells.length === 2 && cells[0].children.length === 1 && 
+        (cells[0].children[0].tagName === 'A' || cells[0].children[0].tagName === 'IMG')){
+        const parsedA = cells[0].children[0].tagName === 'A' ? parseA(cells[0].children[0], context) : 
+            parseImg(cells[0].children[0], context)
+        if(parsedA && (parsedA as any).type === 'media-parent'){
             // add a caption
-            parsedA.children.push({
+            (parsedA as any).children.push({
                 type: 'media-parent-caption',
                 children: [{...parseP(cells[1], {...context, italic: true, fontSize: 'small'}), textAlign: 'center'}]
             })
             return parsedA
         }
     }
-    return ''
+    
+    console.log('unrecognized table', cells)
 }
 
-function parseMarkTagInPar(tagName: string, node: Element, context: ParseContext): any[] {
+function parseMarkTagInPar(tagName: string, node: Element, context: ParseContext): Object[] {
     const res = []
     let name = ''
     if(tagName === 'B'){
@@ -137,7 +228,7 @@ function parseMarkTagInPar(tagName: string, node: Element, context: ParseContext
     return res
 }
 
-function parseMarkTagNaked(tagName: string, node: Element, context: ParseContext): any {
+function parseMarkTagNaked(tagName: string, node: Element, context: ParseContext): Object {
     // surround in p el
     const res = {
         type: 'paragraph',
@@ -149,7 +240,7 @@ function parseMarkTagNaked(tagName: string, node: Element, context: ParseContext
     return res
 }
 
-function parseTextNode(node: ChildNode, context: ParseContext): any {
+function parseTextNode(node: ChildNode, context: ParseContext): Object {
     const res: any = {
         text: node.textContent,
         fontSize: context.fontSize
@@ -169,7 +260,7 @@ function parseTextNode(node: ChildNode, context: ParseContext): any {
     return res
 }
 
-function parseP(node: Element, context: ParseContext){
+function parseP(node: Element, context: ParseContext): Object {
     const parsedEl = {
         type: 'paragraph',
         children: [] as any[]
@@ -181,7 +272,10 @@ function parseP(node: Element, context: ParseContext){
                 parsedEl.children.push(parseTextNode(n, {...context, inParagraph: true}))
             }
         } else if(n.nodeName === 'A'){
-            parsedEl.children.push(parseA(n as Element, {...context, inParagraph: true}))
+            const a = parseA(n as Element, {...context, inParagraph: true})
+            if(a && (a as any).type === 'a'){
+                parsedEl.children.push(a)
+            }
         } else if(['B', 'I', 'U', 'S'].includes(n.nodeName)){
             parsedEl.children.push(...parseMarkTagInPar(n.nodeName, n as Element, {...context, inParagraph: true}))
         } else if(n.nodeName === 'BR'){
@@ -196,9 +290,24 @@ function parseP(node: Element, context: ParseContext){
     return parsedEl
 }
 
-function parseA(node: Element, context: ParseContext): any {
+const oldImgSizeMap: any = {
+    '640': 'x-large',
+    '400': 'large',
+    '320': 'medium',
+    '200': 'small'
+}
+const newImgSizeMap: any = {
+    '1100': 'x-large',
+    '640': 'large',
+    '400': 'medium',
+    '320': 'small',
+    '200': 'x-small'
+}
+
+function parseA(node: Element, context: ParseContext): Object | undefined {
     const aEl = node as HTMLLinkElement
-    if(['jpg', 'JPG', 'jpeg', 'JPEG', 'bmp', 'BMP', 'png', 'PNG'].filter(ext => aEl.href.endsWith(ext)).length > 0){
+    if(['jpg', 'JPG', 'jpeg', 'JPEG', 'bmp', 'BMP', 'png', 'PNG'].filter(ext => aEl.href.endsWith(ext)).length > 0 &&
+            aEl.children.length === 1 && aEl.children[0].tagName === 'IMG'){
         // this is actually an image
         const ref = aEl.href 
         const lastSlash = ref.lastIndexOf('/')
@@ -209,20 +318,7 @@ function parseA(node: Element, context: ParseContext): any {
             // strip size from child element
             const img = aEl.children[0] as HTMLImageElement
             const w = img.width 
-            const oldMap: any = {
-                '640': 'x-large',
-                '400': 'large',
-                '320': 'medium',
-                '200': 'small'
-            }
-            const newMap: any = {
-                '1100': 'x-large',
-                '640': 'large',
-                '400': 'medium',
-                '320': 'small',
-                '200': 'x-small'
-            }
-            size = context.imageSizingModeNew ? newMap[w + ''] : oldMap[w + '']
+            size = context.imageSizingModeNew ? newImgSizeMap[w + ''] : oldImgSizeMap[w + '']
             if(!size){
                 size = 'medium'
             }
@@ -237,7 +333,7 @@ function parseA(node: Element, context: ParseContext): any {
             } as MediaChild]
         }
 
-    } else {
+    } else if(aEl.textContent && aEl.textContent.trim().length > 0) {
         // this should be preserved as a link
         const link: ExternalLink = {
             url: aEl.href
@@ -248,10 +344,10 @@ function parseA(node: Element, context: ParseContext): any {
             children: [{text: aEl.textContent}]
         }
     }
-    return ''
+    console.log('<a> tag ignored', aEl)
 }
 
-function parseImg(node: Element, context: ParseContext){
+function parseImg(node: Element, context: ParseContext): Object | undefined {
     const imgEl = node as HTMLImageElement
     if(imgEl.style.display === 'none'){
         // this is a thumbnail image
@@ -262,8 +358,28 @@ function parseImg(node: Element, context: ParseContext){
         if(media !== null){
             context.summaryImg = media
         }
+    } else {
+        // treat as actual image
+        const src = imgEl.src 
+        const lastSlash = src.lastIndexOf('/')
+        const name = lastSlash === -1 ? src : src.substring(lastSlash + 1)
+        const media = findAndRegisterImg(name, context)
+        let size = 'medium'
+        if(imgEl.width){
+            size = context.imageSizingModeNew ? newImgSizeMap[imgEl.width + ''] : oldImgSizeMap[imgEl.width + '']
+            if(!size){ size = 'medium' }
+        }
+        return {
+            type: 'media-parent',
+            children: [{
+                type: 'media-child',
+                size: size,
+                content: media,
+                children: [{text: ''}]
+            } as MediaChild]
+        }
     }
-    return ''
+    console.log('skipping <img>', imgEl)
 }
 
 function findAndRegisterImg(name: string, context: ParseContext): Media | null {

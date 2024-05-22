@@ -220,9 +220,32 @@ export function emptyBlogPostWithTitleDate(title: string, date: Date) : Page {
     p.design = fixedBlogHeader(title, date)
     p.design[1].children.push({
         type: 'paragraph',
-        children: [{text: 'Gustav is back!'}]
+        children: [{text: sampleFirstParagraph()}]
     })
     return p
+}
+
+function sampleFirstParagraph(){
+    const options = [
+        "Sometime the ugly duckling turns out to be a swan, but sometimes it's just a Canadian Goose. Even as a young bird Gustav learned that looks aren't everything.",
+        "This week, a squirrel ate through the wall of the black tank. It was a crappy situation.",
+        "A new record this week -- Julie booked a campsite 5 years in the future!",
+        "Gustav is BACK!",
+        "The truck is now pushing the camper instead of pulling it. Rick did the math and we get 0.5 mpg better efficiency.",
+        "The water at Lake Aquawetloch Pond is extremely moist.",
+        "Did you know that there's a tunnel from Florida to Mississippi? Apparently Alabama doesn't allow alligators to be strapped on the hoods of cars on the interstate.",
+        "We've taken up bird-watching in our free time. Julie got binoculars, and now we can see Gustav's black, beady eyes in great detail whenever he strolls past.",
+        "The ladder leaks, the adder speaks. The latter possibly got blown up by some propane. And hit an airplane.",
+        "Today we took apart the slide for the 73rd time. Turns out the manufacturer made the rollers square instead of cylindrical.",
+        "In a predictable turn of events, Stretch learned the value of existing friendships when Gustav refused to acknowledge his existence.",
+        "Canadian geese can dive 30 feet underwater 24 hours after hatching. Gustav, of course, did not, citing \"plenty of food elsewhere\".",
+        "Today we hiked around the \"Grand Canyon of Kentucky\" which turned out to be ditch filled with Bourbon.",
+        "Our greatest fears: 1) No dump station, 2) No gas station, 3) Hurricanes and 4) A low bridge not on the GPS.",
+        "Wherefore art thou, Gustav? How thy honks used to linger among the weedy ponds, uncouth and weighty.",
+        "Both Rick and I purchased laser loon T-shirts on Saturday at the Minnesota \"Gray ducks that are not ducks but also not Geese\" festival.",
+        "Our campsite this week was a unique one. Rick jerry-rigged pool noodle pontoons on the bottom of the camper and we floated on the lake!",
+    ]
+    return options[Math.floor(Math.random() * options.length)]
 }
 
 export function emptyStaticPage(): Page {

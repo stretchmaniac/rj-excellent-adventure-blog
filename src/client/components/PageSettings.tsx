@@ -143,6 +143,7 @@ export default function PageSettings(props: PageSettingsProps) {
                     existingPage: props.page,
                     popupCallback: (cancelled, p) => {
                         if(!cancelled && p !== null){
+                            console.log('finished design', p.design)
                             props.editPage(p)
                         }
                     }
