@@ -316,18 +316,27 @@ function parseP(node: Element, context: ParseContext): Object {
     return parsedEl
 }
 
-const oldImgSizeMap: any = {
-    '640': 'x-large',
-    '400': 'large',
-    '320': 'medium',
-    '200': 'small'
-}
-const newImgSizeMap: any = {
-    '1100': 'x-large',
-    '640': 'large',
-    '400': 'medium',
-    '320': 'small',
-    '200': 'x-small'
+const oldImgSizeWidths = [640, 400, 320, 200]
+const oldImgSizeNames = ['x-large', 'large', 'medium', 'small']
+
+const newImgSizeWidths = [1100, 640, 400, 320, 200]
+const newImgSizeNames = ['x-large', 'large', 'medium', 'small', 'x-small']
+
+function sizeFromWidth(imageSizingModeNew: boolean, width: number): string {
+    const sizeWidths = imageSizingModeNew ? newImgSizeWidths : oldImgSizeWidths
+    const sizeNames = imageSizingModeNew ? newImgSizeNames : oldImgSizeNames
+
+    let nearestWidthIndex = 0
+    let widthError = Math.abs(width - sizeWidths[nearestWidthIndex])
+    for(let i = 0; i < sizeWidths.length; i++){
+        let error = Math.abs(width - sizeWidths[i])
+        if(error < widthError){
+            nearestWidthIndex = i
+            widthError = error
+        }
+    }
+
+    return sizeNames[nearestWidthIndex]
 }
 
 function parseA(node: Element, context: ParseContext): Object | undefined {
@@ -343,9 +352,10 @@ function parseA(node: Element, context: ParseContext): Object | undefined {
         if(aEl.children.length > 0 && aEl.children[0].tagName === 'IMG'){
             // strip size from child element
             const img = aEl.children[0] as HTMLImageElement
-            const w = img.width 
-            size = context.imageSizingModeNew ? newImgSizeMap[w + ''] : oldImgSizeMap[w + '']
-            if(!size){
+            const w = img.width
+            if(w && typeof w === 'number'){
+                size = sizeFromWidth(context.imageSizingModeNew, w)
+            } else {
                 size = 'medium'
             }
         }
@@ -391,9 +401,8 @@ function parseImg(node: Element, context: ParseContext): Object | undefined {
         const name = lastSlash === -1 ? src : src.substring(lastSlash + 1)
         const media = findAndRegisterImg(name, context)
         let size = 'medium'
-        if(imgEl.width){
-            size = context.imageSizingModeNew ? newImgSizeMap[imgEl.width + ''] : oldImgSizeMap[imgEl.width + '']
-            if(!size){ size = 'medium' }
+        if(imgEl.width && typeof imgEl.width === 'number'){
+            size = sizeFromWidth(context.imageSizingModeNew, imgEl.width)
         }
         return {
             type: 'media-parent',
