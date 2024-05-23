@@ -196,9 +196,12 @@ function monthHtml(bin: MonthBin, idMap: Map<string, string>){
         let shortDate = getShortReadableDateString(p.date)
         // remove year
         shortDate = shortDate.substring(0, shortDate.length - 5)
+        const par = document.createElement('p')
+        par.appendChild(document.createTextNode(p.title))
+        const escapedTitle = par.innerHTML
         itemHtml += `
             <li class='inner-list-item' id='${p.id}'>
-                ${shortDate}: <a class="list-link" href="${idMap.get(p.id)}/page.html">${p.title}</a>
+                ${shortDate}: <a class="list-link" href="${idMap.get(p.id)}/page.html">${escapedTitle}</a>
             </li>
         `
     }
