@@ -10,8 +10,10 @@ export function ImportPopup(props: ImportPopupProps){
     const [html, setHtml] = React.useState('')
     const [parseFailed, setParseFailed] = React.useState(false)
     const [importMediaFinishedCount, setImportMediaFinishedCount] = React.useState(0)
-    const [importMediaFailedCount, setImportMediaFailedCount] = React.useState(0)
+    const [importMediaFailedNames, setImportMediaFailedNames] = React.useState<string[]>([])
     const [importMediaCount, setImportMediaCount] = React.useState(0)
+    const [finishedPage, setFinishedPage] = React.useState<Page | null>(null)
+    const [loading, setLoading] = React.useState(false)
     return <div className='popup-fullscreen'>
             <div className='popup-root'>
                 <div className='popup-header'>
@@ -41,15 +43,33 @@ export function ImportPopup(props: ImportPopupProps){
                         />
                     </div>
                     {importMediaCount !== 0 &&
-                        <span>{`${importMediaFinishedCount} / ${importMediaCount} images processed (${importMediaFailedCount} failed)`}</span>
+                        <div className='input-row'>
+                            <span className='input-label'>
+                                {`${importMediaFinishedCount} / ${importMediaCount} images processed`}
+                            </span>
+                            <span style={{
+                                    whiteSpace:'pre-wrap',
+                                    maxHeight: '150px',
+                                    minWidth: '200px',
+                                    overflowY: 'auto'
+                                }} 
+                                className='text-preview-block'>
+                                {importMediaFailedNames.join('\n')}
+                            </span>
+                        </div>
                     }
                 </div>
                 <div className='popup-buttons'>
-                    <button 
+                    {finishedPage === null && !loading && <button 
                         onClick={() => props.onComplete(true, null)}
-                        className='popup-button popup-cancel'>Cancel</button>
+                        className='popup-button popup-cancel'>Cancel</button>}
                     <button 
                         onClick={() => {
+                            if(finishedPage !== null){
+                                props.onComplete(false, finishedPage)
+                                return
+                            }
+                            setLoading(true)
                             const searchFolders = props.importSearchPaths.split('\n').map(s => s.trim())
                             cacheImageSearchFolders(searchFolders).then(() => {
                                 const importRes = importBlogger(props.existingPage, html)
@@ -57,31 +77,32 @@ export function ImportPopup(props: ImportPopupProps){
                                     setParseFailed(true)
                                 } else {
                                     setImportMediaCount(countMedia(importRes))
-                                    const allPromises: Promise<Media|null>[] = []
+                                    const allPromises: Promise<Media|string>[] = []
                                     let finishCount = 0
-                                    let failedCount = 0
+                                    let failedNames: string[] = []
                                     // replace all promises with results of promise
                                     enumerateMediaChildren(importRes.design, child => {
                                         allPromises.push(child.content)
-                                        child.content.then((result: Media | null) => {
+                                        child.content.then((result: Media | string) => {
                                             child.content = result
                                             finishCount++
-                                            if(result === null){
-                                                failedCount++
+                                            if(typeof result === 'string'){
+                                                failedNames.push('Failed: ' + result)
+                                                child.content = null
                                             }
                                             setImportMediaFinishedCount(finishCount)
-                                            setImportMediaFailedCount(failedCount)
+                                            setImportMediaFailedNames(failedNames)
                                         })
                                     })
-                                    let summaryImgResult: Media | null = null 
+                                    let summaryImgResult: Media | string = '' 
                                     importRes.summaryImg.then(res => {
                                         summaryImgResult = res
                                         finishCount++
-                                        if(res === null){
-                                            failedCount++
+                                        if(typeof res === 'string'){
+                                            failedNames.push('Failed: ' + res)
                                         }
                                         setImportMediaFinishedCount(finishCount)
-                                        setImportMediaFailedCount(failedCount)
+                                        setImportMediaFailedNames(failedNames)
                                     })
                                     allPromises.push(importRes.summaryImg)
                                     // wait for media to finish loading, then callback
@@ -90,14 +111,16 @@ export function ImportPopup(props: ImportPopupProps){
                                             ...props.existingPage,
                                             design: importRes.design,
                                             autoSummaryImg: importRes.autoSummaryImg,
-                                            summaryImg: summaryImgResult
+                                            summaryImg: (typeof summaryImgResult === 'string') ? null : summaryImgResult
                                         }
-                                        props.onComplete(false, p)
+                                        setFinishedPage(p)
+                                        setLoading(false)
                                     })
                                 }
                             })
                         }}
-                        className='popup-button popup-continue'>Import</button>
+                        className='popup-button popup-continue'
+                        disabled={loading}>{finishedPage !== null ? 'Close' : 'Import'}</button>
                 </div>
             </div>
         </div>

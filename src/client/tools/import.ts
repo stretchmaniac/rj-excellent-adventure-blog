@@ -8,18 +8,18 @@ import { Media, registerMedia } from "./media"
 export type BloggerImportResult = {
     design: any[],
     autoSummaryImg: boolean,
-    summaryImg: Promise<Media | null>
+    summaryImg: Promise<Media | string>
 }
 
 // ALL nodes of type media-children will have content attribute 
-// populated by Promise<Media | null> instead of Media!
+// populated by Promise<Media | string> instead of Media!
 export function importBlogger(existingPage: Page, html: string): BloggerImportResult | null {
     const parser = new DOMParser()
     const htmlDoc = parser.parseFromString(html, 'text/html')    
     const body = htmlDoc.querySelector('body')
     if(body !== null){
         const context: ParseContext = {
-            summaryImg: new Promise((res, rej) => res(null)),
+            summaryImg: new Promise((res, rej) => res('Missing thumbnail image')),
             imageSizingModeNew: html.includes('width="1100"'),
             inParagraph: false,
             bold: false,
@@ -42,7 +42,7 @@ export function importBlogger(existingPage: Page, html: string): BloggerImportRe
         const result: BloggerImportResult = {
             design: finalDesign,
             autoSummaryImg: false,
-            summaryImg: new Promise((res, rej) => res(null))
+            summaryImg: new Promise((res, rej) => res(''))
         }
         if(context.summaryImg !== null){
             result.autoSummaryImg = false
@@ -56,7 +56,7 @@ export function importBlogger(existingPage: Page, html: string): BloggerImportRe
 }
 
 type ParseContext = {
-    summaryImg: Promise<Media | null>,
+    summaryImg: Promise<Media | string>,
     imageSizingModeNew: boolean,
     inParagraph: boolean,
     bold: boolean,
@@ -408,11 +408,11 @@ function parseImg(node: Element, context: ParseContext): Object | undefined {
     console.log('skipping <img>', imgEl)
 }
 
-function findAndRegisterImg(name: string, context: ParseContext): Promise<Media | null> {
+function findAndRegisterImg(name: string, context: ParseContext): Promise<Media | string> {
     return new Promise((resolve, reject) => {
         searchCachedImageFolders(name).then(result => {
             if(!result.found){
-                resolve(null)
+                resolve(name)
             } else {
                 registerMedia(result.absolutePath).then(media => resolve(media))
             }

@@ -245,7 +245,9 @@ function sampleFirstParagraph(){
         "Both Rick and I purchased laser loon T-shirts on Saturday at the Minnesota \"Gray ducks that are not ducks but also not Geese\" festival.",
         "Our campsite this week was a unique one. Rick jerry-rigged pool noodle pontoons on the bottom of the camper and we floated on the lake!",
         "🪿",
-        "Once more unto the beach, dear friends, once more. Or should you not like the beach, a lake."
+        "Once more unto the beach, dear friends, once more. Or should you like not the beach, a lake.",
+        "Wednesday was St. Patrick's day, and the locals though it would be a fun idea to paintball our camper green and parade it down Main Street. Mom was not impressed.",
+        "Illinois has actually closed down every interstate within its borders for construction. To compensate for the dried-up revenue stream, smaller roads such as Spring Road in Elmhurst are now I-Pass only.",
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

@@ -327,8 +327,13 @@ app.post('/search-cached-image-folders', cors(corsOptions), function(req, res){
     let absPath = ''
     for(let folder in cachedSearchFolderContents){
         const files = cachedSearchFolderContents[folder]
-        if(files.includes(fileName)){
-            absPath = folder + '/' + fileName 
+        for(let f of files){
+            if(fileName.includes(f)){
+                absPath = folder + '/' + fileName 
+                break
+            }
+        }
+        if(absPath !== ''){
             break
         }
     }
