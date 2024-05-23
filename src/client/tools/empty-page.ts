@@ -182,7 +182,7 @@ export function getSummaryImg(page: Page): Media | null {
     return null
 }
 
-export function fixedBlogHeader(title: string, date: Date) {
+export function fixedBlogHeader(title: string, date: Date, footer: any[]) {
     return [
         {
             type: 'header-container',
@@ -208,17 +208,17 @@ export function fixedBlogHeader(title: string, date: Date) {
                     readOnly: true,
                     children: [{text: ''}]  
                 }
-            ]
+            , ...footer]
         }
     ]
 }
 
-export function emptyBlogPostWithTitleDate(title: string, date: Date) : Page {
+export function emptyBlogPostWithTitleDate(title: string, date: Date, footer: any[]) : Page {
     const p = emptyBlogPost()
     p.title = title
     p.date = date
-    p.design = fixedBlogHeader(title, date)
-    p.design[1].children.push({
+    p.design = fixedBlogHeader(title, date, footer)
+    p.design[1].children.splice(2, 0, {
         type: 'paragraph',
         children: [{text: sampleFirstParagraph()}]
     })

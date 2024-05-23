@@ -7,11 +7,14 @@ import { getAllReferencedMedia } from '../tools/empty-page'
 import { Page } from '../types/PageType'
 import React from 'react'
 import { FaRegCircleCheck } from "react-icons/fa6";
+import { BlogConfig } from '../types/blog-config'
 
 export function MoreToolsPopup(props: MoreToolsPopupProps) {
     const [tidyMediaFinished, setTidyMediaFinished] = React.useState(false)
     const [imgUpdate, setImgUpdate] = React.useState(0)
     const [resourceTestRes, setResourceTestRes] = React.useState<ResourceTestResult | null>(null)
+    const [footerParseFailed, setFooterParseFailed] = React.useState(false)
+    const [footerParsed, setFooterParsed] = React.useState<any[]>(props.config.fixedBlogPostFooterDesign)
 
     React.useEffect(() => {
         testResources().then(v => setResourceTestRes(v))
@@ -140,6 +143,29 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                             <img src={"http://localhost:3000/fixed-assets/header.jpg?t=" + imgUpdate}/>
                         </div>
                     </div>
+                    <div className='input-row'>
+                        <span className='input-label'>Blog post footer</span>
+                        <div className='sub-input-row'>
+                            <textarea
+                                rows={15}
+                                defaultValue={JSON.stringify(props.config.fixedBlogPostFooterDesign, null, 2)}
+                                onChange={e => {
+                                    try {
+                                        const v = JSON.parse(e.target.value)
+                                        for(const el of v){
+                                            if(!el.readOnly){
+                                                el.readOnly = true
+                                            }
+                                        }
+                                        setFooterParsed(v)
+                                        setFooterParseFailed(false)
+                                    } catch(e) {
+                                        setFooterParseFailed(true)
+                                    }
+                                }} />
+                        </div>
+                        {footerParseFailed && <span className='input-label' style={{color: 'red'}}>JSON parse failed</span>}
+                    </div>
                     {!resourceTestRes && 
                         <div>Loading...</div>
                     }
@@ -188,7 +214,10 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                 </div>
                 <div className='popup-buttons'>
                     <button 
-                        onClick={() => props.close()}
+                        onClick={() => {
+                            props.close()
+                            props.setConfig({...props.config, fixedBlogPostFooterDesign: footerParsed})
+                        }}
                         className='popup-button popup-cancel'>Close</button>
                 </div>
             </div>
@@ -198,4 +227,6 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
 export type MoreToolsPopupProps = {
     close: () => void
     pages: Page[]
+    config: BlogConfig
+    setConfig: (newConfig: BlogConfig) => void
 }

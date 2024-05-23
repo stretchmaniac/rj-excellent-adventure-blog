@@ -34,7 +34,7 @@ export function importBlogger(existingPage: Page, html: string): BloggerImportRe
             design.push(...parseNode(n, context).filter(p => p !== undefined && p !== ''))
         }
         
-        const finalDesign = emptyBlogPostWithTitleDate(existingPage.title, existingPage.date).design
+        const finalDesign = emptyBlogPostWithTitleDate(existingPage.title, existingPage.date, []).design
         while(finalDesign[1].children.length > 2){
             finalDesign[1].children.pop()
         }

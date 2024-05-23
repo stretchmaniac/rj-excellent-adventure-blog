@@ -206,6 +206,9 @@ export function mergeData(state: BlogState) : Promise<void> {
                 pages: sortPages([...loaded.pages, ...state.pages]),
                 config: loaded.config
             }
+            if(!merged.config.fixedBlogPostFooterDesign){
+                merged.config.fixedBlogPostFooterDesign = state.config.fixedBlogPostFooterDesign
+            }
     
             setData(merged).then(() => resolve())
         })

@@ -130,7 +130,7 @@ export default function PageDesign(props: PageDesignProps) {
 
     const rootRef = React.useRef<HTMLDivElement>(null)
     if(props.isBlogPost){
-      maintainFixedHeader(editor, props.pageTitle, props.pageDate)
+      maintainFixedHeaderAndFooter(editor, props.pageTitle, props.pageDate, props.footer, props.setFooter)
     } else {
       maintainFixedHeaderContentStructure(editor)
     }
@@ -365,18 +365,23 @@ function maintainFixedHeaderContentStructure(editor: Editor){
   }
 }
 
-function maintainFixedHeader(editor: Editor, title: string, date: Date){
-  const exp = fixedBlogHeader(title, date)
+function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: Date, footer: any[], setFooter: (newFooter: any[]) => void){
+  const exp = fixedBlogHeader(title, date, footer)
   // exp consists of two children
   //  - child #1 of type header-container
   //  - child #2 of type content-container
+  // child #2 has 2 read-only children at the top (date, empty paragraph), then footer.length read-only
+  // children at the bottom
 
   const matches = editor.children.length === 2 &&
     compareElRecursive(exp[0], editor.children[0]) &&
-    exp[1].children.map(
-      (c, i) => (editor.children[1] as any)?.children.length > i && 
-                  compareElRecursive(c, (editor.children[1] as any)?.children[i])
-    ).filter(s => !s).length === 0  
+    (editor.children[1] as any)?.children.length >= exp[1].children.length &&
+    compareElRecursive(exp[1].children[0], (editor.children[1] as any).children[0]) &&
+    compareElRecursive(exp[1].children[1], (editor.children[1] as any).children[1]) &&
+    footer.map((_, i) => compareElRecursive(
+      exp[1].children[exp[1].children.length - 1 - i], 
+      (editor.children[1] as any).children[(editor.children[1] as any).children.length - 1 - i]
+    )).filter(s => !s).length === 0 
 
   if(!matches){
     editor.withoutNormalizing(() => {
@@ -410,7 +415,7 @@ function maintainFixedHeader(editor: Editor, title: string, date: Date){
       // header-container node
       Transforms.insertNodes(editor, exp[0] as any, {at: [0]})
 
-      const contentNodeRes = [...Editor.nodes(editor, {
+      let contentNodeRes = [...Editor.nodes(editor, {
         at: [],
         match: (n, p) => (n as any).type === 'content-container'
       })][0]
@@ -420,11 +425,25 @@ function maintainFixedHeader(editor: Editor, title: string, date: Date){
         Transforms.insertNodes(editor, {type: 'paragraph', children:[{text:''}]}, {at: [...contentPath, 0]})
       }
 
-      // prepend exp[1] in content-container
-      Transforms.insertNodes(editor, exp[1].children as any, {
+      // prepend first two children of exp[1] in content-container
+      Transforms.insertNodes(editor, exp[1].children.slice(0, 2) as any, {
         at: [...contentPath, 0]
       })
+      // append last footer.length children of exp[1] in content-container
+      contentNodeRes = [...Editor.nodes(editor, {
+        at: [],
+        match: (n, p) => (n as any).type === 'content-container'
+      })][0]
+      Transforms.insertNodes(editor, exp[1].children.slice(2), {
+        at: [...contentPath, (contentNodeRes[0] as any).children.length],
+      })
     })
+    // to deal with normalization issues, set the footer as the footer.length elements of editor.children[1]
+    const realizedFooter = (editor.children[1] as any).children.slice(-footer.length)
+    if(footer.map((f,i) => compareElRecursive(f, realizedFooter[i])).filter(s => !s).length > 0){
+      console.log('Modifying footer to uphold normalization conditions', realizedFooter)
+      setFooter(realizedFooter)
+    }
   }
 
   return matches
@@ -1195,6 +1214,8 @@ export type PageDesignProps = {
   pageDate: Date
   isBlogPost: boolean
   designStruct: any[]
+  footer: any[]
+  setFooter: (newFooter: any[]) => void
   onChange: (design: any[]) => void
   previewHook: () => void
   setWaitingPopup: (popup: WaitingPopup) => void

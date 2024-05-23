@@ -46,14 +46,28 @@ export type WaitingPopup = {
     message: string
 }
 
+export function defaultFooter(): any[]{
+    return [
+        {
+            type: 'paragraph',
+            readOnly: true,
+            children: [
+                {text: 'This', bold: true},
+                {text: ' is a read-only footer. Change me in the "more tools" dialog in the upper-right hand corner of your screen.'}
+            ]
+        }
+    ]
+}
+
 export function Main() {
     const [pages, setPagesRaw] = React.useState<Page[]>([])
     const [config, setConfig] = React.useState<BlogConfig>({
-        localSaveFolder: null
+        localSaveFolder: null,
+        fixedBlogPostFooterDesign: defaultFooter()
     })
 
     // mergeBehavior one of "load", "merge"
-    const setConfigWithSideEffects = (newConfig: BlogConfig, mergeBehavior: string) => {
+    const setLocalSaveFolderWithSideEffects = (newConfig: BlogConfig, mergeBehavior: string) => {
         // save to local storage
         if(newConfig.localSaveFolder !== null){
             localStorage.setItem('localSaveFolder', newConfig.localSaveFolder)
@@ -84,7 +98,7 @@ export function Main() {
         // check local storage for 'localSaveFolder' and apply
         const folder = localStorage.getItem('localSaveFolder')
         if(!!folder){
-            setConfigWithSideEffects({
+            setLocalSaveFolderWithSideEffects({
                 ...config,
                 localSaveFolder: folder
             }, 'load')
@@ -114,6 +128,12 @@ export function Main() {
     const setPages = (newPages: Array<Page>) => {
         sortPages(newPages)
         setPagesRaw(newPages)
+        setPagesDirty(true)
+    }
+
+    // localSaveFolder must NOT be changed in newConfig (from config)
+    const setConfigWithSideEffects = (newConfig: BlogConfig) => {
+        setConfig(newConfig)
         setPagesDirty(true)
     }
 
@@ -173,7 +193,7 @@ export function Main() {
     }
 
     return <div className="root">
-        <Header config={config} setConfig={setConfigWithSideEffects}
+        <Header config={config} setConfig={setLocalSaveFolderWithSideEffects}
             pages={pages}
             showMoreToolsPopup={() => setMoreToolsPopupOpen(true)}
             setWaitingPopup={setWaitingPopup}
@@ -211,6 +231,8 @@ export function Main() {
             <PageEditor 
                 page={selectedPage}
                 allPages={pages}
+                footer={config.fixedBlogPostFooterDesign}
+                setFooter={(newFooter) => setConfigWithSideEffects({...config, fixedBlogPostFooterDesign: newFooter})}
                 setWaitingPopup={setWaitingPopup}
                 previewHook={() => showPreview(selectedPage)}
                 onPageEdit={p => {
@@ -252,7 +274,8 @@ export function Main() {
                 }}
             />
         </div>
-        {moreToolsPopupOpen && <MoreToolsPopup pages={pages} close={() => setMoreToolsPopupOpen(false)}/>}
+        {moreToolsPopupOpen && <MoreToolsPopup pages={pages} config={config} 
+            setConfig={setConfigWithSideEffects} close={() => setMoreToolsPopupOpen(false)}/>}
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
         {importPopup.popupOpen && <ImportPopup existingPage={importPopup.existingPage as Page} 
@@ -269,7 +292,7 @@ export function Main() {
                     }
                     else {
                         const newPage = newPagePopup.newBlogPost ? 
-                            emptyBlogPostWithTitleDate(title, date) :
+                            emptyBlogPostWithTitleDate(title, date, config.fixedBlogPostFooterDesign) :
                             emptyStaticPageWithTitleDate(title, date)
                         newPagePopup.popupCallback(newPage)
                     }

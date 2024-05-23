@@ -25,6 +25,8 @@ export default function PageEditor(props: PageEditorProps){
                 </div>
                 {tab === 0 ? 
                     <PageDesign 
+                        footer={props.footer}
+                        setFooter={props.setFooter}
                         page={page}
                         allPages={props.allPages}
                         designStruct={page.design}
@@ -55,6 +57,8 @@ export default function PageEditor(props: PageEditorProps){
 export type PageEditorProps = {
     page: Page | null,
     allPages: Array<Page>
+    footer: any[]
+    setFooter: (newFooter: any[]) => void
     onPageEdit: (newPage: Page) => void
     deletePage: () => void
     previewHook: () => void
