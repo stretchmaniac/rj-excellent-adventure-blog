@@ -215,7 +215,7 @@ function parseTable(node: Element, context: ParseContext): Object | undefined {
         if(parsedA && (parsedA as any).type === 'media-parent'){
             // add a caption
             (parsedA as any).children.push({
-                type: 'media-parent-caption',
+                type: 'media-child-caption',
                 children: [{...parseP(cells[1], {...context, italic: true, fontSize: 'small'}), textAlign: 'center'}]
             })
             return parsedA
