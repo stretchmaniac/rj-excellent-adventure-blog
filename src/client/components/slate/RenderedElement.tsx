@@ -89,7 +89,9 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
     if(t === 'a'){
         const link = (el as any).link as Link
         const href = 'url' in link ? link.url : '#'
-        return <a href={href} {...props.attributes}>{props.children}</a>
+        return <a href={href} 
+            target={link.openInNewTab ? '_blank' : ''} 
+            rel={link.openInNewTab ? 'noopener noreferrer' : ''} {...props.attributes}>{props.children}</a>
     }
     if(t === 'blockquote'){
         return <blockquote {...props.attributes}>{props.children}</blockquote>

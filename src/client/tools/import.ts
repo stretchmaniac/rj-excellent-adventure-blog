@@ -372,7 +372,8 @@ function parseA(node: Element, context: ParseContext): Object | undefined {
     } else if(aEl.textContent && aEl.textContent.trim().length > 0) {
         // this should be preserved as a link
         const link: ExternalLink = {
-            url: aEl.href
+            url: aEl.href,
+            openInNewTab: true
         }
         return {
             type: 'a',

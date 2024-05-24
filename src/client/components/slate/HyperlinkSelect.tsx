@@ -85,6 +85,7 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
         defaultUrl = external.url
     }
 
+    const [openInNewTab, setOpenInNewTab] = React.useState(true)
     const [internal, setInternal] = React.useState(defaultInternal)
     const [internalSelected, setInternalSelected] = React.useState(defaultInternalSelected)
     const [linkText, setLinkText] = React.useState('')
@@ -93,6 +94,11 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
         setLinkText(props.selectedText)
     }, [])
     return <div onClick={e => e.stopPropagation()}  className="insert-hyperlink-parent">
+        <div className="insert-hyperlink-input-row insert-hyperlink-checkbox-row">
+            <input type="checkbox" checked={openInNewTab} 
+                    onChange={e => setOpenInNewTab(e.target.checked)}/>
+            <span className="insert-hyperlink-label">open in new tab</span>
+        </div>
         <div className="insert-hyperlink-input-row insert-hyperlink-checkbox-row">
             <input type="checkbox" checked={internal} 
                     onChange={e => setInternal(e.target.checked)}/>
@@ -143,10 +149,12 @@ function HyperlinkSelectContents(props: HyperlinkSelectContentsProps){
                 onClick={() => {
                     const isHome = internalPages[internalSelected].id === '-1:home'
                     const link: Link = internal ? {
+                        openInNewTab: openInNewTab,
                         isHomePageLink: isHome, 
                         pageId: isHome ? null : internalPages[internalSelected].id
                     } : {
-                        url: urlText
+                        url: urlText,
+                        openInNewTab: openInNewTab
                     }
                     props.parentProps.onInsert(linkText, link)
                     props.parentProps.closeClickToExitPopup()

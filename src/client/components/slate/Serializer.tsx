@@ -208,7 +208,9 @@ function serializeLink(child: any, state: SerializeState): React.ReactNode {
         url = link.isHomePageLink ? '../home.html' : 
                 '../' + state.idMap.get(link.pageId as string) + '/page.html'
     }
-    return <a href={url}>
+    return <a href={url} 
+        target={link.openInNewTab ? '_blank' : ''} 
+        rel={link.openInNewTab ? 'noopener noreferrer' : ''}>
         {child.children && 
             child.children.map((c: any,i:number) => serializeInternal(c, descState(state, child.children, i)))
         }

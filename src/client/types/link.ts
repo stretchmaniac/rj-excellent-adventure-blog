@@ -1,10 +1,12 @@
 export type ExternalLink = {
     url: string
+    openInNewTab: boolean
 }
 
 export type InternalLink = {
     isHomePageLink: boolean
     pageId: string | null // null if isHomePageLink == true
+    openInNewTab: boolean
 }
 
 export type Link = InternalLink | ExternalLink
