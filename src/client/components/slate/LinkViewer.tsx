@@ -8,7 +8,8 @@ export function LinkViewer(props: LinkViewerProps) {
     return <div className='link-viewer-root'>
         <div className='link-container'>
             {'url' in props.link ?
-                <a href={convertShorthandUrl(props.link.url)}>
+                <a href={convertShorthandUrl(props.link.url)}
+                    target="_blank" rel="noopener noreferrer">
                     {convertShorthandUrl(props.link.url)}
                 </a>
             :
