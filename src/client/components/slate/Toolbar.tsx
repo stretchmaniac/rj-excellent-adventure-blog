@@ -18,6 +18,7 @@ import { Editor, Transforms } from 'slate';
 import { Media, registerMedia } from '../../tools/media';
 import { chooseFiles } from '../../tools/http';
 import { WaitingPopup } from '../../Main';
+import React from 'react';
 
 export default function Toolbar(props: ToolbarProps) {
     const editor = useSlate()
@@ -33,6 +34,7 @@ export default function Toolbar(props: ToolbarProps) {
     }
 
     const formatState = props.getFormatState()
+    const [previewLoading, setPreviewLoading] = React.useState(false)
 
     return <div className="toolbar-root">
         <ToggleButton title="bold" 
@@ -253,7 +255,10 @@ export default function Toolbar(props: ToolbarProps) {
             <MdTitle className='react-icons'/>
         </ToggleButton>}
         <div className='toolbar-right-side'>
-            <button onClick={() => props.previewHook()}>Preview</button>
+            <button onClick={() => {
+                setPreviewLoading(true)
+                props.previewHook().then(() => setPreviewLoading(false))
+            }} disabled={previewLoading}>{previewLoading ? 'Loading...' : 'Preview'}</button>
         </div>
     </div>
 }
@@ -272,7 +277,7 @@ export type ToolbarProps = {
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void
     clickToExitPopupHook: (menuOpts: {position: Array<number>, contents: React.ReactNode, onCancel: () => void, disableClickToClose?: boolean}) => void
-    previewHook: () => void
+    previewHook: () => Promise<void>
 }
 
 export type FormatState = {

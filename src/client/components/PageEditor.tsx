@@ -61,7 +61,7 @@ export type PageEditorProps = {
     setFooter: (newFooter: any[]) => void
     onPageEdit: (newPage: Page) => void
     deletePage: () => void
-    previewHook: () => void
+    previewHook: () => Promise<void>
     setImportPopup: (popup: ImportPopup) => void
     setWaitingPopup: (popup: WaitingPopup) => void
     showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void

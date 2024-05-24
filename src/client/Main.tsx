@@ -180,15 +180,18 @@ export function Main() {
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
 
-    function showPreview(pageSource: Page | null){
-        const preview = makePreview(pages)
-        setPreview(preview).then(() => {
-            if(pageSource){
-                window.open(`http://localhost:3000/preview/${preview.pageIdToFolderName.get(pageSource.id)}/page.html`, '_blank')
-            } else {
-                // default to home
-                window.open('http://localhost:3000/preview/home.html', '_blank')
-            }
+    function showPreview(pageSource: Page | null): Promise<void> {
+        return new Promise((res, rej) => {
+            const preview = makePreview(pages)
+            setPreview(preview).then(() => {
+                if(pageSource){
+                    window.open(`http://localhost:3000/preview/${preview.pageIdToFolderName.get(pageSource.id)}/page.html`, '_blank')
+                } else {
+                    // default to home
+                    window.open('http://localhost:3000/preview/home.html', '_blank')
+                }
+                res()
+            })
         })
     }
 

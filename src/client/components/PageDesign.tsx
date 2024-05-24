@@ -1217,6 +1217,6 @@ export type PageDesignProps = {
   footer: any[]
   setFooter: (newFooter: any[]) => void
   onChange: (design: any[]) => void
-  previewHook: () => void
+  previewHook: () => Promise<void>
   setWaitingPopup: (popup: WaitingPopup) => void
 }
