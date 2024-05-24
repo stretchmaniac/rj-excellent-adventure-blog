@@ -7,13 +7,16 @@ export function withCopyPaste(editor: Editor){
         if(dataStr !== ''){
             const fragmentRaw = JSON.parse(decodeURIComponent(window.atob(dataStr)))
             // strip any parent 'content-container' or 'header-container' nodes
-            const fragment = []
+            let fragment: any[] = []
             for(const f of fragmentRaw){
                 if(['content-container', 'header-container'].includes(f.type)){
                     fragment.push(...f.children)
                 } else {
                     fragment.push(f)
                 }
+            }
+            while(fragment.length === 1 && 'children' in fragment[0] && fragment[0].type !== 'media-child'){
+                fragment = fragment[0].children
             }
 
             // if the selection is contained within a 'media-child' entity, only 
@@ -27,7 +30,6 @@ export function withCopyPaste(editor: Editor){
                     // look for first media-child in fragment and copy over
                     const srcChild = findMediaChild(fragment)
                     if(srcChild){
-                        console.log('srcChild', srcChild)
                         Transforms.setNodes(editor, {content: srcChild.content} as Partial<Node>, {
                             at: pUp
                         })
