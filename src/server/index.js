@@ -169,8 +169,16 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     if(!checkFailed){
         // check page folders
         for(const folder in expectedFiles){
-            const copiedNames = fs.readdirSync(`${rootDir}/preview/${folder}`)
-            const expNames = expectedFiles[folder]
+            // recursive: true specifically for photospheres
+            const copiedNames = fs.readdirSync(`${rootDir}/preview/${folder}`, {recursive: true})
+            const expNamesRaw = expectedFiles[folder]
+            const expNames = [...expNamesRaw]
+            for(const expName of expNamesRaw){
+                const fullDir = `${rootDir}/media/${expName}`
+                if(fs.existsSync(fullDir) && fs.lstatSync(fullDir).isDirectory()){
+                    expNames.push(...fs.readdirSync(fullDir, {recursive: true}).map(s => `${expName}\\${s}`))
+                }
+            }
             const filtered1 = copiedNames.filter(name => !expNames.includes(name))
             const filtered2 = expNames.filter(name => !copiedNames.includes(name))
             checkFailed = filtered1.length > 0 || filtered2.length > 0
