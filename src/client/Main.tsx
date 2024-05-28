@@ -14,6 +14,7 @@ import { WaitingPopup } from './components/WaitingPopup'
 import { makePreview } from './tools/preview'
 import { MoreToolsPopup } from './components/MoreToolsPopup'
 import { ImportPopup } from './components/ImportPopup'
+import { flushSync } from 'react-dom'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -120,8 +121,8 @@ export function Main() {
     }, [pagesDirty])
     React.useEffect(() => {
         if(!configInit){ return }
-        setPagesDirty(false)
         setData({pages: pages, config: config})
+        flushSync(() => setPagesDirty(false))
     }, [pageUpdateCount])
 
     // keep pages in order by date
