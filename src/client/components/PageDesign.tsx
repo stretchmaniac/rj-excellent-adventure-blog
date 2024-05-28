@@ -119,8 +119,11 @@ export default function PageDesign(props: PageDesignProps) {
 
     const renderLeaf = React.useCallback((p: RenderLeafProps) => <RenderedLeaf {...p}/>, [])
     const renderEl = React.useCallback((p: RenderElementProps) => 
-      <RenderedElement usualProps={p} setWaitingPopup={props.setWaitingPopup} targetEmphasizedPPath={getFirstNonEmptyRootParLoc(props.page).designLoc}/>,
-    [props.page])
+      <RenderedElement usualProps={p} 
+        setWaitingPopup={props.setWaitingPopup} 
+        targetEmphasizedPPath={getFirstNonEmptyRootParLoc(props.page).designLoc}
+        pannellumPackage={props.pannellumPackage}/>,
+    [props.page, props.pannellumPackage])
     const [clickPopupState, setClickPopupState] = React.useState<ClickToExitPopupProps>({
       open: false,
       contents: '',
@@ -1206,6 +1209,15 @@ export type MediaChild = {
   children: Array<any>
 }
 
+export type PannellumPackage = {
+  div: HTMLDivElement,
+  viewer: any,
+  scheduleScreenshot: (sceneID: string, embedContainer: HTMLDivElement) => Promise<string>, // returns a data url
+  queueEmpty: boolean
+  setViewer: (viewer: any) => void
+  viewerSetScheduled: boolean
+}
+
 export type PageDesignProps = {
   page: Page
   allPages: Array<Page>
@@ -1215,6 +1227,7 @@ export type PageDesignProps = {
   isBlogPost: boolean
   designStruct: any[]
   footer: any[]
+  pannellumPackage: PannellumPackage
   setFooter: (newFooter: any[]) => void
   onChange: (design: any[]) => void
   previewHook: () => Promise<void>

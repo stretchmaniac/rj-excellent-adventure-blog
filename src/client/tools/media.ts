@@ -48,6 +48,17 @@ export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Med
     })
 }
 
+// see https://stackoverflow.com/questions/9388412/data-uri-to-object-url-with-createobjecturl-in-chrome-ff
+export function dataURItoBlob(dataURI: string) {
+    var mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    var binary = atob(dataURI.split(',')[1]);
+    var array = [];
+    for (var i = 0; i < binary.length; i++) {
+       array.push(binary.charCodeAt(i));
+    }
+    return new Blob([new Uint8Array(array)], {type: mime});
+  }
+
 export function hasImageExt(fileName: string): boolean {
     const exts = ['.png', '.jpg', '.jpeg', '.bmp']
     for(const ext of exts){

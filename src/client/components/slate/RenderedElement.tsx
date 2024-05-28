@@ -1,6 +1,6 @@
 import { ReactEditor, RenderElementProps, useSlate } from "slate-react";
 import { Link } from "../../types/link";
-import { MediaChild, getNodeAtPath } from "../PageDesign";
+import { MediaChild, PannellumPackage, getNodeAtPath } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Node } from "slate";
@@ -15,6 +15,7 @@ export type CustomRenderedElementProps = {
     usualProps: RenderElementProps,
     setWaitingPopup: (popup: WaitingPopup) => void
     targetEmphasizedPPath: number[] | null
+    pannellumPackage: PannellumPackage
 }
 
 export default function RenderedElement(bigProps: CustomRenderedElementProps) {
@@ -30,6 +31,7 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
     if(t === 'media-child'){
         const [parent, parentPath] = Editor.parent(editor, elPath)
         return <MediaChildBox
+            pannellumPackage={bigProps.pannellumPackage}
             attributes={props.attributes}
             media={el as MediaChild}
             mediaIndex={elPath[elPath.length - 1]}

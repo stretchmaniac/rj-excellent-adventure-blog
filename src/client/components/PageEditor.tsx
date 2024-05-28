@@ -5,12 +5,76 @@ import ToggleButtonGroup from './ToggleButtonGroup';
 import PageSettings from './PageSettings';
 import PageDesign from './PageDesign';
 import { ImportPopup, WaitingPopup } from '../Main';
-import { Editor, Node } from 'slate';
+
+type PannellumScreenshotQueueItem = {
+    id: string
+    container: HTMLDivElement
+    promiseResolve: (dataUrl: string) => void
+}
 
 export default function PageEditor(props: PageEditorProps){
     const page = props.page;
 
     const [tab, setTab] = React.useState(0)
+    const [pannellumDiv, setPannellumDiv] = React.useState(document.createElement('div'))
+    const [pannellumViewer, setPannellumViewer] = React.useState<any>(null)
+    const [pannellumQueueEmpty, setPannellumQueueEmpty] = React.useState(true)
+
+    const pannellumScreenshotQueue: PannellumScreenshotQueueItem[] = []
+    const evalScreenshotQueue = () => {
+        if(pannellumScreenshotQueue.length == 0){
+            // nothing to do!
+            setPannellumQueueEmpty(true)
+            return
+        }
+        const first = pannellumScreenshotQueue[0]
+        if(pannellumViewer === null){
+            setTimeout(() => evalScreenshotQueue(), 100) // try again later
+        } else {
+            // attach to container
+            if(pannellumDiv.parentElement){
+                pannellumDiv.parentElement.removeChild(pannellumDiv)
+            }
+            first.container.appendChild(pannellumDiv)
+            // load the scene
+            pannellumViewer.resize()
+            pannellumViewer.loadScene(first.id)
+            pannellumViewer.resize()
+            pannellumViewer.on('load', () => {
+                // for some reason, pannellum 'load' event is not completely loaded...
+                // not sure what exactly is happening, but it appears that if we wait *any* amount
+                // of time (e.g., 1ms also works here) pannellum clears itself out here
+                setTimeout(() => {
+                    // take screenshot
+                    first.promiseResolve(pannellumViewer.getRenderer().render(
+                        pannellumViewer.getPitch() / 180 * Math.PI,
+                        pannellumViewer.getYaw() / 180 * Math.PI,
+                        pannellumViewer.getHfov() / 180 * Math.PI,
+                        {'returnImage': true}
+                    ))
+                    // remove first from queue
+                    pannellumScreenshotQueue.splice(0, 1)
+                    // remove load event listeners
+                    pannellumViewer.off('load')
+                    // do next in queue
+                    evalScreenshotQueue()
+                }, 10)
+            })
+        }
+    }
+    const pannellumScheduleScreenshot = (id: string, container: HTMLDivElement) => {
+        return new Promise<string>((resolve, reject) => {
+            pannellumScreenshotQueue.push({
+                id: id,
+                container: container,
+                promiseResolve: resolve
+            })
+            if(pannellumScreenshotQueue.length === 1){
+                setPannellumQueueEmpty(false)
+                evalScreenshotQueue()
+            }
+        })
+    }
 
     return <div className={"page-editor-root" + (page == null ? " empty" : "")}>
         {page == null ? 
@@ -36,6 +100,16 @@ export default function PageEditor(props: PageEditorProps){
                         isBlogPost={page.isBlogPost}
                         previewHook={props.previewHook}
                         setWaitingPopup={props.setWaitingPopup}
+                        pannellumPackage={{
+                            div: pannellumDiv, 
+                            viewer: pannellumViewer, 
+                            setViewer: viewer => {
+                                setPannellumViewer(viewer)
+                            },
+                            viewerSetScheduled: false,
+                            scheduleScreenshot: pannellumScheduleScreenshot,
+                            queueEmpty: pannellumQueueEmpty
+                        }}
                         onChange={d => props.onPageEdit({
                             ...page,
                             design: d

@@ -1,5 +1,5 @@
 import React from "react"
-import { MediaChild } from "../PageDesign"
+import { MediaChild, PannellumPackage } from "../PageDesign"
 import { BiImageAdd } from "react-icons/bi"
 import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
 import { MdDelete, MdOutlineFileUpload, MdPushPin } from "react-icons/md";
@@ -10,7 +10,7 @@ import { ReactEditor, RenderElementProps, useFocused, useSelected, useSlate } fr
 import './../../assets/stylesheets/slate/media-child-box.scss'
 import { Editor, Path, Transforms } from "slate";
 import { chooseFiles } from "../../tools/http";
-import { Media, MediaType, registerMedia } from "../../tools/media";
+import { Media, MediaType, dataURItoBlob, registerMedia } from "../../tools/media";
 import 'pannellum/build/pannellum.css'
 import 'pannellum'
 import { WaitingPopup } from "../../Main";
@@ -19,11 +19,13 @@ export default function MediaChildBox(props: MediaChildProps) {
     const editor = useSlate()
     const selected = useSelected()
     const focused = useFocused()
-    const pannellumRef = React.createRef<HTMLDivElement>()
-    const [pannellumViewer, setPannellumViewer] = React.useState(null)
+    const pannellumContainerRef = React.createRef<HTMLDivElement>()
+    const [pannellumSceneId, setPannellumSceneId] = React.useState('')
+    const [pannellumPreviewDataUrl, setPannellumPreviewDataUrl] = React.useState('')
+    const [pannellumViewParams, setPannellumViewParams] = React.useState<number[]>([])
 
     React.useEffect(() => {
-        if(pannellumRef.current && props.media.content?.type === MediaType.PHOTOSPHERE){
+        if(pannellumContainerRef.current && props.media.content?.type === MediaType.PHOTOSPHERE){
             const options = props.media.content.photosphereOptions
             let initPitch = 0
             let initYaw = 0
@@ -31,17 +33,57 @@ export default function MediaChildBox(props: MediaChildProps) {
                 initPitch = options.initialPitch
                 initYaw = options.initialYaw
             }
-            const res = (window as any).pannellum.viewer(pannellumRef.current, {
+            // register pannellum scene
+            const id = crypto.randomUUID()
+            const sceneObj: any = {}
+            sceneObj[id] = {
                 "type": "equirectangular",
                 "panorama": props.media.content?.stableRelativePath,
                 "autoLoad": true,
                 "pitch": initPitch,
                 "yaw": initYaw,
-                "mouseZoom": false
-            })
-            setPannellumViewer(res)
+                "mouseZoom": false,
+                "preview": ''
+            }
+            let viewer = props.pannellumPackage.viewer
+            if(props.pannellumPackage.viewer === null && !props.pannellumPackage.viewerSetScheduled){
+                props.pannellumPackage.viewerSetScheduled = true
+                // attach pannellum div to pannellumContainer
+                pannellumContainerRef.current.appendChild(props.pannellumPackage.div)
+                // create new viewer
+                viewer = (window as any).pannellum.viewer(props.pannellumPackage.div, {
+                    "default": {
+                        "firstScene": id,
+                        "sceneFadeDuration": 0
+                    }, 
+                    "scenes": sceneObj
+                })
+                console.log('loading scene to new viewer', sceneObj, id)
+                const parent = pannellumContainerRef.current
+                viewer.on('load', () => {
+                    // set global viewer
+                    props.pannellumPackage.setViewer(viewer)
+                    // remove div from parent
+                    parent.removeChild(props.pannellumPackage.div)
+                })
+            } else if(props.pannellumPackage.viewer !== null){
+                props.pannellumPackage.viewer.addScene(id, sceneObj[id])
+                console.log('loading scene to existing viewer', id)
+                setPannellumViewParams([initPitch, initYaw, props.pannellumPackage.viewer.getHfov()])
+                props.pannellumPackage.scheduleScreenshot(id, pannellumContainerRef.current).then(url => {
+                    setPannellumPreviewDataUrl(url)
+                })
+            }
+            setPannellumSceneId(id)
+
+            return () => {
+                if(viewer){
+                    console.log('removing scene', id)
+                    viewer.removeScene(id)
+                }
+            }
         }
-    }, [props.media.content?.type])
+    }, [props.media.content?.type, props.pannellumPackage.viewer])
 
     const showToolbar = selected && focused || props.media.content?.type === MediaType.PHOTOSPHERE
         || props.media.content?.type === MediaType.VIDEO
@@ -65,9 +107,53 @@ export default function MediaChildBox(props: MediaChildProps) {
             src={props.media.content.stableRelativePath}
             />}
         {props.media.content !== null && props.media.content.type === MediaType.PHOTOSPHERE && 
-            <div className={props.media.size + '-pannellum'}>
-                <div ref={pannellumRef}></div>    
-            </div>}
+            <div style={{backgroundImage: `url('${pannellumPreviewDataUrl}')`, backgroundSize: 'cover'}}>
+                <div className={props.media.size + '-pannellum'} ref={pannellumContainerRef}
+                    onMouseDown={() => {
+                        // detach pannellum div from current parent, add to this div,
+                        // then load the scene we desire
+                        if(pannellumContainerRef.current && pannellumContainerRef.current.children.length === 0 && 
+                            props.pannellumPackage.viewer && props.pannellumPackage.queueEmpty){
+                            const div = props.pannellumPackage.div
+                            if(div.parentElement){
+                                div.parentElement.removeChild(div)
+                            }
+                            pannellumContainerRef.current.appendChild(div)
+                            const viewer = props.pannellumPackage.viewer
+                            viewer.off('animatefinished')
+                            viewer.resize()
+                            const dragFix = div.querySelector('.pnlm-dragfix') as HTMLDivElement
+                            dragFix.style.backgroundColor = 'black'
+                            if(pannellumViewParams.length > 0){
+                                const [pitch, yaw, hfov] = pannellumViewParams
+                                viewer.loadScene(pannellumSceneId, 
+                                    pitch,
+                                    yaw,
+                                    hfov
+                                )
+                            } else {
+                                viewer.loadScene(pannellumSceneId)
+                            }
+                            viewer.on('load', () => dragFix.style.backgroundColor = '')
+                            console.log('loading scene', pannellumSceneId)
+                            viewer.resize()
+
+                            viewer.on('animatefinished', (view: any) => {
+                                const {pitch, yaw, hfov} = view
+                                const dataUrl = viewer.getRenderer().render(
+                                    pitch / 180.0 * Math.PI,
+                                    yaw / 180.0 * Math.PI,
+                                    hfov / 180.0 * Math.PI,
+                                    {'returnImage': true}
+                                )
+                                setPannellumPreviewDataUrl(dataUrl)
+                                setPannellumViewParams([pitch, yaw, hfov] as number[])
+                            })
+                        }
+                    }}>
+                </div>
+            </div>
+            }
         {props.media.content !== null && props.media.content.type === MediaType.VIDEO && <video
             controls
             className={props.media.size + '-box'}>
@@ -163,13 +249,11 @@ export default function MediaChildBox(props: MediaChildProps) {
             <button title='save current orientation as default'
                 className='media-tool-button'
                 onClick={() => {
-                    if(pannellumViewer){
-                        setPhotospherePinLocation(
-                            (pannellumViewer as any).getPitch(), 
-                            (pannellumViewer as any).getYaw(), 
-                            editor, props
-                        )
-                    }
+                    setPhotospherePinLocation(
+                        props.pannellumPackage.viewer.getPitch(), 
+                        props.pannellumPackage.viewer.getYaw(), 
+                        editor, props
+                    )
                 }}>
                 <MdPushPin className='media-tool-icon'/>
             </button>
@@ -385,6 +469,7 @@ export type MediaChildProps = {
     mediaIndex: number
     parentNode: any
     parentPath: Path
+    pannellumPackage: PannellumPackage
     children: React.ReactNode
     setWaitingPopup: (popup: WaitingPopup) => void
 }
