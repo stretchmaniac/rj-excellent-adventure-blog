@@ -144,6 +144,12 @@ export default function PageDesign(props: PageDesignProps) {
       aElPath: []
     })
     checkLinkState(editor, linkState, setLinkState)
+    React.useEffect(() => {
+      setLinkState({
+        target: null,
+        aElPath: []
+      })
+    }, [props.pageID])
 
     const [openLinkTrigger, setOpenLinkTrigger] = React.useState<HyperlinkOpenTrigger | null>(null)
 
