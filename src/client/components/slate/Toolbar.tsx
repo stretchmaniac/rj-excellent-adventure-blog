@@ -1,6 +1,6 @@
 import './../../assets/stylesheets/slate/toolbar.scss'
 import { BiBold, BiItalic, BiUnderline, BiStrikethrough, BiSolidQuoteAltLeft  } from 'react-icons/bi'
-import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted, MdTitle  } from "react-icons/md";
+import { MdFormatListNumbered, MdOutlineFormatLineSpacing, MdOutlineEmojiEmotions, MdOutlineLink, MdFormatListBulleted, MdTitle, MdErrorOutline  } from "react-icons/md";
 import { VscTextSize } from "react-icons/vsc"
 import { FaHouseChimney, FaRegImage, FaRegImages } from "react-icons/fa6";
 import { GrTextAlignCenter, GrTextAlignLeft, GrTextAlignRight } from "react-icons/gr";
@@ -35,6 +35,7 @@ export default function Toolbar(props: ToolbarProps) {
 
     const formatState = props.getFormatState()
     const [previewLoading, setPreviewLoading] = React.useState(false)
+    const [previewFileCheckFailed, setPreviewFileCheckFailed] = React.useState(false)
 
     return <div className="toolbar-root">
         <ToggleButton title="bold" 
@@ -257,8 +258,12 @@ export default function Toolbar(props: ToolbarProps) {
         <div className='toolbar-right-side'>
             <button onClick={() => {
                 setPreviewLoading(true)
-                props.previewHook().then(() => setPreviewLoading(false))
+                props.previewHook().then(success => {
+                    setPreviewLoading(false)
+                    setPreviewFileCheckFailed(!success)
+                })
             }} disabled={previewLoading}>{previewLoading ? 'Loading...' : 'Preview'}</button>
+            {previewFileCheckFailed && <MdErrorOutline className='error-icon' title='File check failed for preview folder. Try Again.'/>}
         </div>
     </div>
 }
@@ -277,7 +282,7 @@ export type ToolbarProps = {
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void
     clickToExitPopupHook: (menuOpts: {position: Array<number>, contents: React.ReactNode, onCancel: () => void, disableClickToClose?: boolean}) => void
-    previewHook: () => Promise<void>
+    previewHook: () => Promise<boolean>
 }
 
 export type FormatState = {

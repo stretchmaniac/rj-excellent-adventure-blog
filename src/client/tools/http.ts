@@ -63,7 +63,7 @@ export function searchCachedImageFolders(fileName: string): Promise<ImageCacheRe
     })
 }
 
-export function setPreview(preview: GeneratedPreview): Promise<void> {
+export function setPreview(preview: GeneratedPreview): Promise<boolean> {
     const mapToArr = (map: Map<string, string>) => {
         const res: string[] = []
         for(const key of map.keys()){
@@ -95,7 +95,7 @@ export function setPreview(preview: GeneratedPreview): Promise<void> {
             body: JSON.stringify(jsonPreview)
         })
         .then(response => response.text())
-        .then(data => resolve())
+        .then(data => resolve(JSON.parse(data).success))
         .then(error => {})
     })
 }

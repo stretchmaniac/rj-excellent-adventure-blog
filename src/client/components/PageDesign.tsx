@@ -1237,6 +1237,6 @@ export type PageDesignProps = {
   pannellumPackage: PannellumPackage
   setFooter: (newFooter: any[]) => void
   onChange: (design: any[]) => void
-  previewHook: () => Promise<void>
+  previewHook: () => Promise<boolean>
   setWaitingPopup: (popup: WaitingPopup) => void
 }

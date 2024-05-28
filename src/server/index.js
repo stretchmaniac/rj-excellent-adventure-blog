@@ -42,7 +42,12 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         fs.mkdirSync(rootDir + '/preview')
     }
     const data = JSON.parse(req.body)
+    const rootDirExpectedFiles = ['home.html', 'home.js', 'home.css', 'older-posts.html', 'older-posts.css', 'older-posts.js']
     // write html files, css files, and js files to preview directory
+    for(const exp of rootDirExpectedFiles){
+        // remove the files first, so that if the copy step fails we notice
+        fs.rmSync(rootDir + '/preview/' + exp)
+    }
     fs.writeFileSync(rootDir + '/preview/home.html', data.homeHtml)
     fs.writeFileSync(rootDir + '/preview/home.css', data.homeCss)
     fs.writeFileSync(rootDir + '/preview/home.js', data.homeJs)
@@ -51,17 +56,17 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
     fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
 
+    const expectedFiles = {} // map string => string[]
+
     // re-create page folders
     const pageIdToFolderName = arrToMap(data.pageIdToFolderName)
     for(const folder of pageIdToFolderName.values()){
-        if(fs.existsSync(rootDir + '/preview/' + folder)){
-            // remove all files in folder (removing folder entirely had issues -- see https://github.com/nodejs/node/issues/32001 )
-            fs.readdirSync(rootDir + '/preview/' + folder)
-                .forEach(f => fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true}))
-        } else {
+        expectedFiles[folder] = []
+        if(!fs.existsSync(rootDir + '/preview/' + folder)){
             fs.mkdirSync(rootDir + '/preview/' + folder)
         }
     }
+
     // delete page folders not in use
     const inUse = [...pageIdToFolderName.values()]
     const unusedFolderNames = fs.readdirSync(rootDir + '/preview', { withFileTypes: true })
@@ -72,7 +77,8 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         fs.rmSync(rootDir + '/preview/' + unused, {recursive: true, force: true})
     }
 
-    // copy images to page folders 
+    let previewImgCopyCount = 0
+    // copy images to page folders, if not already present
     const imgCopyMap = arrToMap(data.imageCopyMap)
     for(const media of imgCopyMap.keys()){
         const mediaSrc = media.fileName
@@ -88,19 +94,32 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
                 srcNames.push(base + '_' + name + extWithPeriod)
             }
             for(const src of srcNames){
-                fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+                expectedFiles[dest].push(src)
+                if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + src)){
+                    previewImgCopyCount++
+                    fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+                }
             }
         } else if(mediaType === 'PHOTOSPHERE'){
-            // copy _ps folder
-            fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
+            // copy _ps folder, if not already present
+            expectedFiles[dest].push(base + '_ps')
+            if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + base + '_ps')){
+                previewImgCopyCount++
+                fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
+            }
         } else if(mediaType === 'VIDEO'){
             // copy original 
             const src = media.fileName
-            fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+            expectedFiles[dest].push(src)
+            if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + src)){
+                previewImgCopyCount++
+                fs.copyFileSync(rootDir + '/media/' + src, rootDir + '/preview/' + dest + '/' + src)
+            }
         }
         
     }
     // copy fixed-assets folder
+    rootDirExpectedFiles.push(...fs.readdirSync(rootDir + '/fixed-assets'))
     fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
 
     // copy page html, css and js files to page folder
@@ -111,12 +130,62 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     for(let i = 0; i < orderedIds.length; i++){
         const id = orderedIds[i]
         const folderName = pageIdToFolderName.get(id)
+        expectedFiles[folderName].push('page.html', 'styles.css', 'page.js')
         fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.html', orderedPageHtml[i])
         fs.writeFileSync(rootDir + '/preview/' + folderName + '/styles.css', orderedPageCss[i])
         fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.js', orderedPageJs[i])
     }
 
-    res.send(JSON.stringify({success: true}))
+    // delete any file/folder that is not explicitly accounted for here
+    let previewImgDeleteCount = 0
+    for(let folder in expectedFiles){
+        fs.readdirSync(rootDir + '/preview/' + folder)
+            .forEach(f => {
+                if(!expectedFiles[folder].includes(f)){
+                    previewImgDeleteCount++
+                    fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true})
+                }
+            })
+    }
+
+    console.log('preview generation copy count:', previewImgCopyCount)
+    console.log('preview generation delete count (not counting page folders):', previewImgDeleteCount)
+
+    // do file name check on all copied files (apparently Dad has bad hardware)
+    let checkFailed = false
+    // root dir
+    const copiedRootDirFiles = fs.readdirSync(`${rootDir}/preview`)
+        .filter(f => !(f in expectedFiles))
+    const f1 = copiedRootDirFiles.filter(name => !rootDirExpectedFiles.includes(name))
+    const f2 = rootDirExpectedFiles.filter(name => !copiedRootDirFiles.includes(name))
+    checkFailed = f1.length > 0 || f2.length > 0
+    if(checkFailed){
+        if(f1.length > 0){
+            console.log(`Preview copy error: unexpected files ${f1} found in preview root directory`)
+        } else {
+            console.log(`Preview copy error: expected files ${f2} not found in preview root directory`)
+        }
+    }
+    if(!checkFailed){
+        // check page folders
+        for(const folder in expectedFiles){
+            const copiedNames = fs.readdirSync(`${rootDir}/preview/${folder}`)
+            const expNames = expectedFiles[folder]
+            const filtered1 = copiedNames.filter(name => !expNames.includes(name))
+            const filtered2 = expNames.filter(name => !copiedNames.includes(name))
+            checkFailed = filtered1.length > 0 || filtered2.length > 0
+            if(checkFailed){
+                if(filtered1.length > 0){
+                    console.log(`Preview copy error: unexpected files ${filtered1} found in preview folder ${folder}`)
+                } else {
+                    console.log(`Preview copy error: expected files ${filtered2} not found in preview folder ${folder}`)
+                }
+                break
+            }
+        }
+    }
+
+    res.send(JSON.stringify({success: !checkFailed}))
 })
 
 function arrToMap(arr){
