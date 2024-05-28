@@ -207,6 +207,7 @@ export default function PageDesign(props: PageDesignProps) {
             className="slate-editable"
             renderLeaf={renderLeaf}
             renderElement={renderEl}
+            scrollSelectionIntoView={() => {}}
             spellCheck
             onKeyDown={e => handleKeyDown(editor, e)}/>
       </Slate>
