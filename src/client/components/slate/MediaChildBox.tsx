@@ -63,8 +63,6 @@ export default function MediaChildBox(props: MediaChildProps) {
                 viewer.on('load', () => {
                     // set global viewer
                     props.pannellumPackage.setViewer(viewer)
-                    // remove div from parent
-                    parent.removeChild(props.pannellumPackage.div)
                 })
             } else if(props.pannellumPackage.viewer !== null){
                 props.pannellumPackage.viewer.addScene(id, sceneObj[id])

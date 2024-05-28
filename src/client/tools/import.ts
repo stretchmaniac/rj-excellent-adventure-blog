@@ -347,7 +347,7 @@ function parseA(node: Element, context: ParseContext): Object | undefined {
         const ref = aEl.href 
         const lastSlash = ref.lastIndexOf('/')
         const name = lastSlash === -1 ? ref : ref.substring(lastSlash + 1)
-        const media = findAndRegisterImg(name, context)
+        const media = findAndRegisterImg(decodeURI(name), context)
         let size = 'medium'
         if(aEl.children.length > 0 && aEl.children[0].tagName === 'IMG'){
             // strip size from child element
@@ -388,10 +388,10 @@ function parseImg(node: Element, context: ParseContext): Object | undefined {
     const imgEl = node as HTMLImageElement
     if(imgEl.style.display === 'none'){
         // this is a thumbnail image
-        const src = imgEl.src 
+        const src = decodeURI(imgEl.src) 
         const lastSlash = src.lastIndexOf('/')
         const name = lastSlash === -1 ? src : src.substring(lastSlash + 1)
-        const media = findAndRegisterImg(name, context)
+        const media = findAndRegisterImg(decodeURI(name), context)
         if(media !== null){
             context.summaryImg = media
         }
@@ -400,7 +400,7 @@ function parseImg(node: Element, context: ParseContext): Object | undefined {
         const src = imgEl.src 
         const lastSlash = src.lastIndexOf('/')
         const name = lastSlash === -1 ? src : src.substring(lastSlash + 1)
-        const media = findAndRegisterImg(name, context)
+        const media = findAndRegisterImg(decodeURI(name), context)
         let size = 'medium'
         if(imgEl.width && typeof imgEl.width === 'number'){
             size = sizeFromWidth(context.imageSizingModeNew, imgEl.width)
