@@ -248,6 +248,7 @@ function sampleFirstParagraph(){
         "Once more unto the beach, dear friends, once more. Or should you like not the beach, a lake.",
         "Wednesday was St. Patrick's day, and the locals though it would be a fun idea to paintball our camper green and parade it down Main Street. Mom was not impressed.",
         "Illinois has actually closed down every interstate within its borders for construction. To compensate for the dried-up revenue stream, smaller roads such as Spring Road in Elmhurst are now I-Pass only.",
+        "The confoundingly-fashionable Koval parents are now officially influencers. We've always influenced lots of things, like Gustav's attention and the flow of crud at a dump station. But now we are proud to announce our official sponsor, Zip Tie America (TM)!",
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

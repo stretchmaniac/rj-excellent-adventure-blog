@@ -268,7 +268,9 @@ function chooseFile(editor: Editor, props: MediaChildProps){
             return
         }
         const chosenFileName = files[0]
+        props.setWaitingPopup({popupOpen: true, message: 'Image loading...'})
         registerMedia(chosenFileName).then(media => {
+            props.setWaitingPopup({popupOpen: false, message: ''})
             editContent(editor, props, media)
         })
     })
