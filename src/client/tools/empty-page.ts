@@ -249,6 +249,12 @@ function sampleFirstParagraph(){
         "Wednesday was St. Patrick's day, and the locals though it would be a fun idea to paintball our camper green and parade it down Main Street. Mom was not impressed.",
         "Illinois has actually closed down every interstate within its borders for construction. To compensate for the dried-up revenue stream, smaller roads such as Spring Road in Elmhurst are now I-Pass only.",
         "The confoundingly-fashionable Koval parents are now officially influencers. We've always influenced lots of things, like Gustav's attention and the flow of crud at a dump station. But now we are proud to announce our official sponsor, Zip Tie America (TM)!",
+        "The infestation this week was beavers. We found three in the skylight, two between the window pane and screen, and another one chewing on the electrical wires.",
+        "Mired in cattails, the pool noodle bobs ungracefully in the ebbing tide. Covered as it is in mud, one might mistake it " +
+            "for an rather uniform log but for three neon splotches of yellow-green. Gustav visits regularly. Most believe that Gustav " +
+            "has an unbreakable association between man and food that extends to man's creations. Others (more optimistically anthropomorphizing) think " +
+            "that Gustav understands \"noodle\" to be a food and is waiting dutifully for man's designation to bear fruit in reality. I " +
+            "for one guess that Gustav is looking for a replacement brain -- his noodle is certainly smaller. If only it would fit in that little head of his."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

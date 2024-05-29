@@ -210,7 +210,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt']
+    const missing = ['pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt', 'aws']
     // test for powershell 7
     try {
         spawnSync('pwsh', ['-version'])
@@ -256,6 +256,18 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
         if(res.stderr.startsWith('nona: No output prefix')){
             found.push('hugin')
             missing.splice(missing.indexOf('hugin'), 1)
+        }
+    }
+    catch(e) { }
+    // test for aws cli
+    try {
+        const res = spawnSync('aws', ['--version'], {encoding: 'utf-8'})
+        if(res.stderr.trim().length === 0){
+            found.push('aws')
+            missing.splice(missing.indexOf('aws'), 1)
+
+            // check for aws credentials
+            // TODO
         }
     }
     catch(e) { }

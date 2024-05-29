@@ -29,7 +29,8 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'numpy': 'numpy for Python',
         'open sans': 'Open Sans Font',
         'lora': 'Lora Font',
-        'rock salt': 'Rock Salt Font'
+        'rock salt': 'Rock Salt Font',
+        'aws': 'AWS Command Line Interface (CLI)'
     } as any
     const testResourceDownloadLinkMap = {
         'powershell': 'https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4',
@@ -39,7 +40,8 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'python': 'https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe',
         'open sans': 'https://gwfh.mranftl.com/api/fonts/open-sans?download=zip&subsets=latin&variants=300,500,600,700,800,300italic,regular,italic,500italic,600italic,700italic,800italic&formats=woff2',
         'lora': 'https://gwfh.mranftl.com/api/fonts/lora?download=zip&subsets=latin&variants=500,600,700,regular,italic,500italic,600italic,700italic&formats=woff2',
-        'rock salt': 'https://gwfh.mranftl.com/api/fonts/rock-salt?download=zip&subsets=latin&variants=regular&formats=woff2'
+        'rock salt': 'https://gwfh.mranftl.com/api/fonts/rock-salt?download=zip&subsets=latin&variants=regular&formats=woff2',
+        'aws': 'https://awscli.amazonaws.com/AWSCLIV2.msi'
     } as any
     const testResourcesExtraActions = {
         'pillow': {
