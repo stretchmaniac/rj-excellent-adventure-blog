@@ -3,7 +3,7 @@ import { WaitingPopup } from '../Main';
 import { chooseFolder } from '../tools/http';
 import { BlogConfig } from '../types/blog-config'
 import './../assets/stylesheets/header.scss'
-import { MdErrorOutline } from "react-icons/md";
+import { MdErrorOutline, MdPublish } from "react-icons/md";
 import { Page } from '../types/PageType';
 
 export function Header(props: HeaderProps) {
@@ -27,6 +27,13 @@ export function Header(props: HeaderProps) {
                 title='more tools'
                 onClick={() => props.showMoreToolsPopup()}>
                 <FaWrench />
+            </button>
+            <div className='div-divider'></div>
+            <button className='header-button header-icon-button'
+                style={{padding: '0px 2px 0px 2px'}}
+                title='open publish dialog'
+                onClick={props.setPublishPopupOpen}>
+                <MdPublish style={{width:'20px',height:'20px'}}/>
             </button>
         </div>
     </div>
@@ -65,6 +72,7 @@ function chooseMirrorFolder(props: HeaderProps){
 export type HeaderProps = {
     showUnsavedLoadPopup: (callback: (choice:string) => void) => void
     setWaitingPopup: (popup: WaitingPopup) => void
+    setPublishPopupOpen: () => void
     showMoreToolsPopup: () => void
     config: BlogConfig
     setConfig: (c: BlogConfig, mergeBehavior: string) => void

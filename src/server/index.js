@@ -24,12 +24,27 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
     const type = req.body
     if(type === 'install pillow'){
         spawnSync('python', ['-m', 'pip', 'install', 'Pillow'])
+        res.send(JSON.stringify({success: true}))
     }
-    if(type === 'install numpy'){
+    else if(type === 'install numpy'){
         spawnSync('python', ['-m', 'pip', 'install', 'numpy'])
+        res.send(JSON.stringify({success: true}))
     }
-
-    res.send()
+    else if(type === 'aws sync dryrun'){
+        const output = spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--dryrun'], { encoding: 'utf-8' })
+        if(output.stderr.trim().length > 0){
+            res.send(JSON.stringify({success: false, output: output.stderr.trim()}))
+        } else {
+            res.send(JSON.stringify({success: true, output: output.stdout.trim()}))
+        }
+    }
+    else if(type === 'aws sync'){
+        spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com'], { encoding: 'utf-8' })
+        res.send(JSON.stringify({success: true}))
+    }
+    else {
+        res.send(JSON.stringify({success: false, message: `Unknown command type "${type}"`}))
+    }
 })
 
 app.post('/serve-preview', cors(corsOptions), async function(req, res){

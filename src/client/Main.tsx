@@ -15,6 +15,7 @@ import { makePreview } from './tools/preview'
 import { MoreToolsPopup } from './components/MoreToolsPopup'
 import { ImportPopup } from './components/ImportPopup'
 import { flushSync } from 'react-dom'
+import { PublishPopup } from './components/PublishPopup'
 
 type NewPagePopupInfo = {
     popupOpen: boolean
@@ -161,6 +162,7 @@ export function Main() {
         message: ''
     })
     const [moreToolsPopupOpen, setMoreToolsPopupOpen] = React.useState(false)
+    const [publishPopupOpen, setPublishPopupOpen] = React.useState(false)
     const [importPopup, setImportPopup] = React.useState<ImportPopup>({
         popupOpen: false,
         existingPage: null,
@@ -199,6 +201,7 @@ export function Main() {
     return <div className="root">
         <Header config={config} setConfig={setLocalSaveFolderWithSideEffects}
             pages={pages}
+            setPublishPopupOpen={() => setPublishPopupOpen(true)}
             showMoreToolsPopup={() => setMoreToolsPopupOpen(true)}
             setWaitingPopup={setWaitingPopup}
             showUnsavedLoadPopup={callback => {
@@ -281,6 +284,8 @@ export function Main() {
         {moreToolsPopupOpen && <MoreToolsPopup pages={pages} config={config} 
             setConfig={setConfigWithSideEffects} close={() => setMoreToolsPopupOpen(false)}/>}
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
+        {publishPopupOpen && <PublishPopup close={() => setPublishPopupOpen(false)} 
+            previewDirectory={config.localSaveFolder as string}/>}
         {unsavedLoadPopup.popupOpen && <UnsavedLoadPopup onComplete={unsavedLoadPopup.popupCallback}/>}
         {importPopup.popupOpen && <ImportPopup existingPage={importPopup.existingPage as Page} 
             onComplete={importPopup.popupCallback}

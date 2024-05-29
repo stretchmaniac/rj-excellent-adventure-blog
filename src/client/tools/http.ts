@@ -131,7 +131,7 @@ export function chooseFiles(multiple: boolean): Promise<string[]> {
     })
 }
 
-export function runCmdTask(type: string): Promise<void> {
+export function runCmdTask(type: string): Promise<any> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/cmd-task', {
             method: 'POST',
@@ -142,7 +142,7 @@ export function runCmdTask(type: string): Promise<void> {
             body: type
         })
         .then(response => response.text())
-        .then(data => resolve())
+        .then(data => resolve(JSON.parse(data)))
         .then(error => {})
     })
 }
