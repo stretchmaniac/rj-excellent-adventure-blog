@@ -2,7 +2,7 @@ import { Page } from "../types/PageType";
 import { getReadableDateString } from "./date";
 import { getSummaryImg, getSummaryText } from "./empty-page";
 import { Media } from "./media";
-import { getHeaderCssFragment, getHeaderHtmlFragment, getPreviewImgSrcSet } from "./preview";
+import { getHeaderCssFragment, getHeaderHtmlFragment, getNoIndexMetaTag, getPreviewImgSrcSet } from "./preview";
 
 export function makeStringLiteral(s: string){
     return "`" + s.replace(/'/g, "\\'") + "`";
@@ -264,6 +264,7 @@ export function homePageHtml(pages: Page[], idMap: Map<string, string>): string 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    ${getNoIndexMetaTag()}
     <title>Rick & Julie's Excellent Adventure</title>
     <link rel="stylesheet" type="text/css" href="./home.css">
   </head>

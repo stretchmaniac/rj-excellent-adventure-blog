@@ -1,7 +1,7 @@
 import { Page } from "../types/PageType";
 import { getShortReadableDateString } from "./date";
 import { getPageSearchTextArr } from "./page-search";
-import { getHeaderCssFragment, getHeaderHtmlFragment } from "./preview";
+import { getHeaderCssFragment, getHeaderHtmlFragment, getNoIndexMetaTag } from "./preview";
 import { makeStringLiteral } from "./preview-home-page";
 
 export function homePageOlderPostsJs(pages: Page[]): string{
@@ -157,6 +157,7 @@ export function homePageOlderPostsHtml(pages: Page[], idMap: Map<string, string>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    ${getNoIndexMetaTag()}
     <title>Rick & Julie's Excellent Adventure</title>
     <link rel="stylesheet" type="text/css" href="./older-posts.css">
   </head>

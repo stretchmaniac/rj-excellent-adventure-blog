@@ -97,6 +97,11 @@ export function getPreviewImgSrcSet(imageMedia: Media | null, pageFolderName: st
     return srcset
 }
 
+// https://developers.google.com/search/docs/crawling-indexing/block-indexing
+export function getNoIndexMetaTag(): string {
+    return '<meta name="robots" content="noindex">'
+}
+
 const CLIENT_IMAGE_SIZE_NAMES = ['x-small', 'small', 'medium', 'large', 'x-large']
 const CLIENT_IMAGE_SIZE_WIDTHS = [335, 400, 506, 800, 1125] // in css pixels
 export function getPreviewImgSizes(imgSize: string): string{
