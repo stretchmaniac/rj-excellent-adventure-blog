@@ -30,7 +30,12 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'open sans': 'Open Sans Font',
         'lora': 'Lora Font',
         'rock salt': 'Rock Salt Font',
-        'aws': 'AWS Command Line Interface (CLI)'
+        'aws': 'AWS Command Line Interface (CLI)',
+        'aws creds': 'AWS CLI Credentials ("aws sts get-caller-identity")'
+    } as any
+    const testResourceExtraDescription = {
+        'aws creds': 'Run \"aws configure\" in a CMD window, and provide the access tokens received from Alan. ' +
+            'For \"Default region name\", type \"us-east-1\". For \"Default output format\" type \"table\".'
     } as any
     const testResourceDownloadLinkMap = {
         'powershell': 'https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4',
@@ -194,6 +199,9 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                                         &nbsp;
                                         {m in testResourcesExtraActions && 
                                             <button onClick={testResourcesExtraActions[m].action}>{testResourcesExtraActions[m].title}</button>
+                                        }
+                                        {m in testResourceExtraDescription && 
+                                            <div>{testResourceExtraDescription[m]}</div>
                                         }
                                     </li>)}
                                 </ul>
