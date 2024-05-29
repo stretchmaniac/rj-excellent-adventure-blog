@@ -267,13 +267,46 @@ export function loadData(): Promise<BlogState> {
                 // convert any "date" field to actual date object
                 convertDateRecursive(res.blogState)
                 sortPages(res.blogState.pages)
-                resolve(res.blogState)
+                const legacyPromises: Promise<boolean>[] = []
+                convertLegacyMediaRecursive(res.blogState, legacyPromises)
+                Promise.all(legacyPromises).then(() => {
+                    resolve(res.blogState)
+                })
             } else {
                 reject(res.reason)
             }
         })
         .then(error => {})
     })
+}
+
+function convertLegacyMediaRecursive(obj: any, donePromises: Promise<boolean>[]) {
+    if(!obj){
+        return
+    }
+    // these are properties that have existed on Media since the beginning
+    if('unstableAbsoluteOriginalPath' in obj && 'stableRelativePath' in obj && 'type' in obj && 
+        ['IMAGE', 'PHOTOSPHERE', 'VIDEO'].includes(obj.type)
+    ){
+        // this is a Media object
+        // delete resizeBehavior, if present (never did anything)
+        if('resizeBehavior' in obj){
+            delete obj.resizeBehavior
+        }
+        // if hasCompressedPhotosphereFolder doesn't exist, check for it
+        if(!('hasCompressedPhotosphereFolder' in obj)){
+            const ps = isPhotosphere(obj.stableRelativePath)
+            ps.then(isPS => obj.hasCompressedPhotosphereFolder = isPS)
+            donePromises.push(ps)
+        }
+    } else {
+        // recurse through object
+        for(const prop in obj){
+            if((typeof obj[prop]) === 'object'){
+                convertLegacyMediaRecursive(obj[prop], donePromises)
+            }
+        }
+    }
 }
 
 function convertDateRecursive(obj: any){

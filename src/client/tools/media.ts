@@ -6,21 +6,19 @@ export enum MediaType {
     PHOTOSPHERE = 'PHOTOSPHERE'
 }
 
-export type MediaResizeParams = {
-    // todo 
-}
-
 export type PhotosphereOptions = {
     initialPitch: number,
     initialYaw: number
 }
 
+// DO NOT change Media attribute names without also changing
+// http.ts/convertLegacyMediaRecursive
 export type Media = {
-    type: MediaType,
+    type: MediaType
+    hasCompressedPhotosphereFolder: boolean
     photosphereOptions?: PhotosphereOptions
     unstableAbsoluteOriginalPath: string, // may become obsolete at any point, do NOT use for building website
-    stableRelativePath: string, // path of copied resource within save folder
-    resizeBehavior: MediaResizeParams
+    stableRelativePath: string // path of copied resource within save folder
 }
 
 export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Media> {
@@ -29,16 +27,19 @@ export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Med
             t => unstableAbsoluteOriginalPath.endsWith(t)
         ).length > 0 ? MediaType.VIDEO : MediaType.IMAGE
         copyResource(unstableAbsoluteOriginalPath, 'media', null, false).then(path => {
-            const res = {
+            const res: Media = {
                 type: mediaType,
                 unstableAbsoluteOriginalPath: unstableAbsoluteOriginalPath,
                 stableRelativePath: 'http://localhost:3000/' + path,
-                resizeBehavior: {}
+                hasCompressedPhotosphereFolder: false
             }
             if(mediaType === MediaType.IMAGE){
                 // check whether it is a photosphere or not
                 isPhotosphere(res.stableRelativePath).then(yesPhotosphere => {
                     res.type = yesPhotosphere ? MediaType.PHOTOSPHERE : MediaType.IMAGE
+                    if(yesPhotosphere){
+                        res.hasCompressedPhotosphereFolder = true
+                    }
                     resolve(res)
                 })
             } else {

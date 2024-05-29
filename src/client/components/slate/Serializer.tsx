@@ -116,7 +116,8 @@ function serializeMediaChild(child: any, state: SerializeState): React.ReactNode
         {content && content.type === MediaType.PHOTOSPHERE && <div 
             className={size + '-pannellum'}>
             <div className='pannellum-div' 
-                data-imgfolder={stripExt(localImageUrl(content.stableRelativePath)) + '_ps'}
+                data-imgfolder={content.hasCompressedPhotosphereFolder ? stripExt(localImageUrl(content.stableRelativePath)) + '_ps' : ''}
+                data-imgbackupsrc={localImageUrl(content.stableRelativePath)}
                 data-pitch={content.photosphereOptions?.initialPitch}
                 data-yaw={content.photosphereOptions?.initialYaw}></div>    
         </div>}

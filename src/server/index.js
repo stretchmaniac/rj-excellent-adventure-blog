@@ -102,10 +102,19 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             }
         } else if(mediaType === 'PHOTOSPHERE'){
             // copy _ps folder, if not already present
-            expectedFiles[dest].push(base + '_ps')
-            if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + base + '_ps')){
-                previewImgCopyCount++
-                fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
+            if(fs.existsSync(rootDir + '/media/' + base + '_ps')){
+                expectedFiles[dest].push(base + '_ps')
+                if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + base + '_ps')){
+                    previewImgCopyCount++
+                    fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
+                }
+            } else {
+                // if not _ps folder, copy original image
+                expectedFiles[dest].push(mediaSrc)
+                if(!fs.existsSync(`${rootDir}/preview/${dest}/${mediaSrc}`)){
+                    previewImgCopyCount++
+                    fs.cpSync(`${rootDir}/media/${mediaSrc}`, `${rootDir}/preview/${dest}/${mediaSrc}`)
+                }
             }
         } else if(mediaType === 'VIDEO'){
             // copy original 
@@ -358,8 +367,12 @@ app.post('/media-cleanup', cors(corsOptions), function(req, res){
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
     for(let f of folderNames){
-        if(f.match(/_.*-.*-.*-.*_ps/g) && referencedPhotosphereUUIDs.filter(uuid => f.includes(uuid)).length === 0 &&
-                referencedImageUUIDs.filter(uuid => f.includes(uuid)).length === 0){ // images might still switch over to photospheres
+        // if there is no files in the folder, delete the folder
+        const contents = fs.readdirSync(`${rootDir}/media/${f}`)
+        if(contents.length === 0 || 
+            (f.match(/_.*-.*-.*-.*_ps/g) && 
+                referencedPhotosphereUUIDs.filter(uuid => f.includes(uuid)).length === 0 &&
+                referencedImageUUIDs.filter(uuid => f.includes(uuid)).length === 0)){ // images might still switch over to photospheres
             console.log('removing media folder:', rootDir + '/media/' + f)
             fs.rmSync(rootDir + '/media/' + f, {recursive: true, force: true})
         }
@@ -500,6 +513,10 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
                 dest,
                 rootDir + '/' + newPath
             ]).on('close', () => {
+                // if dest folder is empty, remove the folder -- the photosphere failed
+                if(fs.readdirSync(dest).length === 0){
+                    fs.rmdirSync(dest)
+                }
                 resolve()
             }).on('error', (err) => {
                 console.log(err)

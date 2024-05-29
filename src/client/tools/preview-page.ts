@@ -141,24 +141,39 @@ function loadPannellumDivs(){
     const pitch = pan.dataset.pitch;
     const yaw = pan.dataset.yaw;
 
-    // load config files for photosphere
-    fetch(folder + '/config.json', {
-      method: 'GET',
-      headers: {
-        "Content-Type": 'text/plain'
+    if(folder === ''){
+      // we have no photosphere folder, resort to backup image (this might not be an actual photosphere)
+      const config = {
+        autoLoad: true,
+        pitch: pitch ? parseFloat(pitch) : 0,
+        yaw: yaw ? parseFloat(yaw) : 0,
+        mouseZoom: false,
+        type: 'equirectangular',
+        panorama: pan.dataset.imgbackupsrc
       }
-    }).then(response => response.text())
-    .then(data => {
-      const config = JSON.parse(data);
-      // specify some other options
-      config.autoLoad = true;
-      config.pitch = pitch ? parseFloat(pitch) : 0;
-      config.yaw = yaw ? parseFloat(yaw) : 0;
-      config.basePath = './' + folder;
-      config.mouseZoom = false;
 
       window.pannellum.viewer(pan, config)
-    })
+      
+    } else {
+      // load config files for photosphere
+      fetch(folder + '/config.json', {
+        method: 'GET',
+        headers: {
+          "Content-Type": 'text/plain'
+        }
+      }).then(response => response.text())
+      .then(data => {
+        const config = JSON.parse(data);
+        // specify some other options
+        config.autoLoad = true;
+        config.pitch = pitch ? parseFloat(pitch) : 0;
+        config.yaw = yaw ? parseFloat(yaw) : 0;
+        config.basePath = './' + folder;
+        config.mouseZoom = false;
+
+        window.pannellum.viewer(pan, config)
+      })
+    }
   }
 }
 

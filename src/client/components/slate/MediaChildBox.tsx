@@ -2,7 +2,7 @@ import React from "react"
 import { MediaChild, PannellumPackage } from "../PageDesign"
 import { BiImageAdd } from "react-icons/bi"
 import { TbColumnInsertLeft, TbColumnInsertRight } from "react-icons/tb";
-import { MdDelete, MdOutlineFileUpload, MdPushPin } from "react-icons/md";
+import { MdDelete, MdErrorOutline, MdOutlineFileUpload, MdPushPin } from "react-icons/md";
 import { ImEnlarge2, ImShrink2 } from "react-icons/im";
 import { FaAngleLeft, FaAngleRight, FaParagraph, FaRegImage } from "react-icons/fa6";
 import { PiSphere } from "react-icons/pi";
@@ -256,6 +256,12 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <MdPushPin className='media-tool-icon'/>
             </button>
         </div>}
+        {props.media.content?.type === MediaType.PHOTOSPHERE && !props.media.content?.hasCompressedPhotosphereFolder &&
+            <div style={{position:'absolute', right:'5px', bottom: '5px'}}
+                title='This image is not in a photosphere format. If you keep it, no compression or adaptive loading will be done; the full-resolution image will be copied to the blog.'>
+                <MdErrorOutline className='error-icon media-tool-icon'/>
+            </div>
+        }
     </div>
 }
 
