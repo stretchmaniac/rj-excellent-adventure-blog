@@ -254,7 +254,8 @@ function sampleFirstParagraph(){
             "for an rather uniform log but for three neon splotches of yellow-green. Gustav visits regularly. Most believe that Gustav " +
             "has an unbreakable association between man and food that extends to man's creations. Others (more optimistically anthropomorphizing) think " +
             "that Gustav understands \"noodle\" to be a food and is waiting dutifully for man's designation to bear fruit in reality. I " +
-            "for one guess that Gustav is looking for a replacement brain -- his noodle is certainly smaller. If only it would fit in that little head of his."
+            "for one guess that Gustav is looking for a replacement brain -- his noodle is certainly smaller. If only it would fit in that little head of his.",
+        "The local HOA requires a 3\" lawn, neatly maintained and weeded. Our only option was the roof... and now our camper is a giant Chia Pet!"
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

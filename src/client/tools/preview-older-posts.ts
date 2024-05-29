@@ -186,9 +186,13 @@ export function homePageOlderPostsHtml(pages: Page[], idMap: Map<string, string>
 
 function monthHtml(bin: MonthBin, idMap: Map<string, string>){
     let stateString = ''
-    if(bin.states.length > 0){
-        const maxThree = bin.states.slice(0, Math.min(3, bin.states.length))
-        stateString = ' (' + maxThree.join(', ') + ')'
+    if(bin.states.length > 0 && bin.states.length <= 3){
+        stateString = ' (' + bin.states.join(', ') + ')'
+    } else if(bin.states.length > 0 && bin.states.length <= 10) {
+        stateString = ` (${bin.stateAbbreviations.join(', ')})`
+    } else if(bin.states.length > 10){
+        const max10 = bin.stateAbbreviations.slice(0, 10)
+        stateString = ` (${max10.join(', ')}, ...)`
     }
 
     let itemHtml = ''
@@ -221,6 +225,7 @@ type MonthBin = {
     year: number
     dateDisplayStr: string
     states: string[]
+    stateAbbreviations: string[]
     orderedPages: Page[]
 }
 function binToMonths(pages: Page[]){
@@ -245,6 +250,7 @@ function binToMonths(pages: Page[]){
                 year: year,
                 dateDisplayStr: dateDisplay(month, year),
                 states: [],
+                stateAbbreviations: [],
                 orderedPages: [p]
             })
         } else {
@@ -254,6 +260,7 @@ function binToMonths(pages: Page[]){
     }
     for(let bin of result){
         bin.states = getStatesInTitles(bin.orderedPages)
+        bin.stateAbbreviations = bin.states.map(state => stateAbbreviations[states.indexOf(state)])
     }
 
     return result
@@ -271,6 +278,19 @@ const states = [
     'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 
     'Northwest Territories', 'Nova Scotia', 'Nunavut', 'Ontario', 'Prince Edward Island', 'Quebec', 
     'Saskatchewan', 'Yukon Territory'
+]
+const stateAbbreviations = [
+    'AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT',
+    'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS',
+    'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO',
+    'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 
+    'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA',
+    'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA',
+    'VT', 'WA', 'WI', 'WV', 'WY',
+
+    'AB', 'BC', 'MB', 'NB', 'NL',
+    'NT', 'NS', 'NU', 'ON', 'PE', 'QC',
+    'SK', 'YT'
 ]
 function getStatesInTitles(pages: Page[]): string[] {
     const res: string[] = []
