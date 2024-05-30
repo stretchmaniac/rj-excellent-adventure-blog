@@ -355,6 +355,7 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
         fontSize: fontSize,
         fontFamily: font,
         whiteSpace: 'break-spaces',
+        overflowWrap: 'break-word'
     }}>{text === '' ? ' ' : text}</span>
 }
 

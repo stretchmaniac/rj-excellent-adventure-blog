@@ -17,7 +17,9 @@ export default function RenderedLeaf(props: RenderLeafProps){
         result = <s>{result}</s>
     }
 
-    const style: any = {}
+    const style: any = {
+        overflowWrap: 'break-word'
+    }
     if(leaf.fontSize){
         style.fontSize = fontMap(leaf.fontSize) + 'px'
     }
