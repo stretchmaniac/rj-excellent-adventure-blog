@@ -118,7 +118,8 @@ ${getHeaderCssFragment('')}
     margin-top: 10px;
     margin-bottom: 10px;
     margin-left: 28px;
-    width: 350px;
+    margin-right: 15px;
+    max-width: 400px;
     position: relative;
 }
 
