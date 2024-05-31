@@ -42,6 +42,21 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
         spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--delete'], { encoding: 'utf-8' })
         res.send(JSON.stringify({success: true}))
     }
+    else if(type === 'aws invalidate'){
+        // DO NOT UNDER ANY CIRCUMSTANCES INCLUDE {shell: true} as an option here.
+        // The shell will expand /* into a list of files (possibly very large), and we pay
+        // by the path (first 1000 / month are free -- we're banking on that!).
+        // See https://stackoverflow.com/questions/48014957/quotes-in-node-js-spawn-arguments
+        const output = spawnSync('aws', 
+            ['cloudfront', 'create-invalidation', '--distribution-id', 'E1N993CVREF4LL', '--paths', '/*'], 
+            { encoding: 'utf-8' }
+        )
+        if(output.stderr.trim().length > 0){
+            res.send(JSON.stringify({success: false, output: output.stderr.trim()}))
+        } else {
+            res.send(JSON.stringify({success: true, output: output.stdout.trim()}))
+        }
+    }
     else {
         res.send(JSON.stringify({success: false, message: `Unknown command type "${type}"`}))
     }

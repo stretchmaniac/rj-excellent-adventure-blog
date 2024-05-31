@@ -12,6 +12,10 @@ export function PublishPopup(props: PublishPopupProps) {
 
     const [awsSyncLoading, setAwsSyncLoading] = React.useState(false)
     const [awsSyncComplete, setAwsSyncComplete] = React.useState(false)
+
+    const [awsInvalidateLoading, setAwsInvalidateLoading] = React.useState(false)
+    const [awsInvalidateOutput, setAwsInvalidateOutput] = React.useState('')
+    const [awsInvalidateError, setAwsInvalidateError] = React.useState(false)
     return <div className='popup-fullscreen'>
         <div className='popup-root'>
             <div className='popup-header'>
@@ -55,9 +59,31 @@ export function PublishPopup(props: PublishPopupProps) {
                     </button>
                     <div className='publish-command-text'>aws s3 sync "{props.previewDirectory}\preview" s3://wherearerickandjulie.alankoval.com --delete</div>
                 </div>
+                {awsSyncComplete ? <p><span style={{color: 'green'}}>Sync Complete</span></p> : ''}
                 <p>
-                    {awsSyncComplete ? <span style={{color: 'green'}}>Sync Complete</span> : ''}
+                    The following command will invalidate all files in AWS Cloudfront caches, meaning that wherearerickandjulie.alankoval.com 
+                    will be updated right away.
                 </p>
+                <div className='publish-command-row'>
+                    <button className='publish-command-button'
+                        onClick={() => {
+                            setAwsInvalidateLoading(true)
+                            runCmdTask('aws invalidate').then(result => {
+                                setAwsInvalidateError(!result.success)
+                                setAwsInvalidateOutput(processDryRunOutput(result.output))
+                                setAwsInvalidateLoading(false)
+                            })
+                        }}>
+                        {awsInvalidateLoading ? 'Loading...' : 'Run Command'}
+                    </button>
+                    <div className='publish-command-text'>aws cloudfront create-invalidation --distribution-id E1N993CVREF4LL --paths "/*"</div>
+                </div>
+                <p>
+                    Output:
+                </p>
+                <div className='publish-command-output' style={awsInvalidateError ? {color: '#960000'} : {}}>
+                    {awsInvalidateOutput}
+                </div>
             </div>
             <div className='popup-buttons'>
                 <button 
