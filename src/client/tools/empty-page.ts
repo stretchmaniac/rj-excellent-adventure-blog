@@ -257,7 +257,17 @@ function sampleFirstParagraph(){
             "for one guess that Gustav is looking for a replacement brain -- his noodle is certainly smaller. If only it would fit in that little head of his.",
         "The local HOA requires a 3\" lawn, neatly maintained and weeded. Our only option was the roof... and now our camper is a giant Chia Pet!",
         "We should have known that the camp store was NOT the place to get deli ham. But we were hungry, and it looked so tasty!",
-        "Aaahhhhh... the camper life. Sipping home-made iced tea, cherishing our noisy (we mean \"joyful\" of course) neighbors, and bathing in that sweet balm of retirement."
+        "Aaahhhhh... the camper life. Sipping home-made iced tea, cherishing our noisy (we mean \"joyful\" of course) neighbors, and bathing in that sweet balm of retirement.",
+        "Let's discuss representations of numbers in decimal form. It's an easy topic -- since everyone knows how to write a number -- but one that may " +
+            "reveal gaps in your understanding. The most popular question is whether 0.99999... is in fact the same number as 1.0. You probably already know " +
+            "the answer. Yes, it is. But why? Were you thinking that 0.99999... divided by three is 0.33333... which we all seem to agree is a third? Would you " +
+            "attempt a subtraction 1.0 - .99999... and wrestle with the existence of number with infinitely-many zeros after the decimal and then a one? " + 
+            "But why should 0.33333... be a third, when multiplied by three it's 0.99999... which (a priori) might be short of 1.0? Ask yourself this -- how many " +
+            "decimal representations of a number are there? The answer is the following: there is exactly one decimal representation for zero and any irrational number. " +
+            "Otherwise there are exactly two representations for every rational. To understand why, one must wrap their head around the fact that numbers aren't actually " +
+            "strings of digits. They are non-unique limits of (infinite) sequences of rational numbers. Equivalent digit representations are sequences in disguise " +
+            "so that (sum_n^N a_n 10^n) - (sum_n^N b_n 10^n) = sum_n^N (a_n - b_n) 10^n tends to 0 as N tends to infinity. And this bit of seeming word salad is as pristine a representation " +
+            "of math that you'll ever get -- a completely satisfying and utterly incomprehensible (to the uninitiated) solution to a problem that no normal person would bother to ask."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

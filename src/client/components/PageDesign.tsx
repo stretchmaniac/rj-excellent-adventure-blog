@@ -518,7 +518,9 @@ function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
     }
   }
   if(formatState.list === 'ol' || formatState.list === 'ul'){
-    // when in a list, make new list item when enter is pressed, UNLESS control is clicked
+    // When in a list, make new list item when enter is pressed.
+    // If the current list item is empty, transition to previous level (act as shift-tab)
+
     // get path of list item above selection
     const lis = [...Editor.nodes(editor, {
       match: (n, path) => (n as any).type === 'li'
@@ -529,7 +531,10 @@ function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
         longestMatch = lis[i]
       }
     }
-    if(!e.shiftKey && e.code === 'Enter'){
+    const longestMatchChildren = (longestMatch[0] as any).children
+    const longestMatchEmpty = longestMatchChildren.length === 1 && longestMatchChildren[0].type === 'paragraph' &&
+      longestMatchChildren[0].children.length === 1 && longestMatchChildren[0].children[0].text === ''
+    if(!e.shiftKey && e.code === 'Enter' && !longestMatchEmpty){
       const newPath = incrementPath(longestMatch[1])
       Transforms.insertNodes(editor, {
         type: 'li',
@@ -557,7 +562,10 @@ function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
         })
       }
     }
-    else if(e.shiftKey && e.code === 'Tab'){
+    else if(e.shiftKey && e.code === 'Tab' || e.code === 'Enter' && longestMatchEmpty){
+      if(e.code === 'Enter'){
+        e.preventDefault()
+      }
       const [listParent, listParentPath] = Editor.parent(editor, longestMatch[1])
       let resultPath = []
       if(listParent.children.length === 1){
