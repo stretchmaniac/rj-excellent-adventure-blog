@@ -30,17 +30,19 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
                     </div>
                 </div>
                 <div class="image-viewer-overlay" style="display:none">
-                  <div class="image-viewer-box">
-                    <div class="image-viewer-img-container">
-                      <img class="image-viewer-img"/>
+                  <div class="image-viewer-non-controls">
+                    <div class="image-viewer-box">
+                      <div class="image-viewer-img-container">
+                        <img class="image-viewer-img"/>
+                      </div>
                     </div>
+                  </div>
+                  <div class="image-viewer-controls-box">
                     <div class="image-viewer-controls">
                       <button class="image-view-back-to-blog-button" onClick="closeImageOverlay()">Back to Blog</button>
-                      <div class="image-viewer-controls-middle">
-                        <button class="image-viewer-previous-button" onClick="imageOverlayPreviousButton()">Previous</button>
-                        <div class="image-viewer-counter">1/10</div>
-                        <button class="image-viewer-next-button" onClick="imageOverlayNextButton()">Next</button>
-                      </div>
+                      <button class="image-viewer-previous-button" onClick="imageOverlayPreviousButton()">Previous</button>
+                      <div class="image-viewer-counter">1/10</div>
+                      <button class="image-viewer-next-button" onClick="imageOverlayNextButton()">Next</button>
                     </div>
                   </div>
                 </div>
@@ -62,31 +64,35 @@ ${getHeaderCssFragment('../')}
   font-family: 'Open Sans';
 }
 
-@media screen and (max-width: 600px) {
-  .image-viewer-controls-middle {
-    transform: translate(50px, 0px);
-  }
+.image-viewer-non-controls {
+  width: 100%;
+  flex-grow: 1;
+  position: relative;
 }
 
-.image-viewer-controls-middle {
+.image-viewer-controls-box {
   display: flex;
-  flex-direction: row;
+  width: 100%;
+  justify-content: center;
 }
 
 .image-viewer-controls {
   display: flex;
   flex-direction: row;
   justify-content: center;
+  background-color: white;
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .image-view-back-to-blog-button {
-  position: absolute;
-  left: 15px;
+  margin-right: 20px;
 }
 
 .image-viewer-img {
-  max-width: calc(100vw - 30px);
+  max-width: calc(100vw - 20px);
   max-height: calc(100vh - 50px);
+  display: block;
 }
 
 .image-viewer-box {
@@ -105,8 +111,10 @@ ${getHeaderCssFragment('../')}
   width: 100%;
   height: 100%;
   position: absolute;
-  background-color: rgba(0,0,0,.4);
+  background-color: black;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-footer {
@@ -228,6 +236,9 @@ let currentImgSrcIndex = 0;
 
 function closeImageOverlay(omitHistoryEntry){
   const el = document.querySelector('.image-viewer-overlay');
+  if(document.fullscreenElement){
+    document.exitFullscreen();
+  }
   if(el.style.display !== 'none'){
     el.style.display = 'none';
     // add history state so back button will take us back to open popup
@@ -238,15 +249,13 @@ function closeImageOverlay(omitHistoryEntry){
 }
 
 function imageOverlayNextButton(){
-  if(openImageOverlayByIndex(currentImgSrcIndex + 1)){
-    currentImgSrcIndex++;
-  }
+  currentImgSrcIndex = (currentImgSrcIndex + 1) % imgSrcs.length;
+  openImageOverlayByIndex(currentImgSrcIndex);
 }
 
 function imageOverlayPreviousButton(){
-  if(openImageOverlayByIndex(currentImgSrcIndex - 1)){
-    currentImgSrcIndex--;
-  }
+  currentImgSrcIndex = (currentImgSrcIndex + imgSrcs.length - 1) % imgSrcs.length;
+  openImageOverlayByIndex(currentImgSrcIndex);
 }
 
 function openImageOverlay(srcsetTarget) {
@@ -268,11 +277,13 @@ function openImageOverlayByIndex(imageIndex, omitHistoryEntry){
   const src = imgSrcs[imageIndex];
   const el = document.querySelector('.image-viewer-overlay');
   if(el.style.display === 'none'){
-    el.style.display = 'block';
+    el.style.display = 'flex';
     // add history state so back button will take us out of the popup
     if(!omitHistoryEntry){
       history.pushState({imageViewerOpen: true, imageViewerIndex: imageIndex}, '');
     }
+    // request full screen for image-viewer-overlay
+    el.requestFullscreen();
   }
   document.querySelector('.image-viewer-img').src = src;
   document.querySelector('.image-viewer-counter').textContent = (1 + imageIndex) + ' / ' + imgSrcs.length; 
@@ -340,6 +351,8 @@ window.onload = () => {
   const overlay = document.querySelector('.image-viewer-overlay');
   const box = document.querySelector('.image-viewer-box');
   box.onclick = (e) => e.stopPropagation();
+  const controls = document.querySelector('.image-viewer-controls');
+  controls.onclick = (e) => e.stopPropagation();
   overlay.onclick = () => closeImageOverlay(); 
 
   // populate imgSrcs with images in the blog
