@@ -31,7 +31,7 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
         res.send(JSON.stringify({success: true}))
     }
     else if(type === 'aws sync dryrun'){
-        const output = spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--dryrun'], { encoding: 'utf-8' })
+        const output = spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--dryrun', '--delete'], { encoding: 'utf-8' })
         if(output.stderr.trim().length > 0){
             res.send(JSON.stringify({success: false, output: output.stderr.trim()}))
         } else {
@@ -39,7 +39,7 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
         }
     }
     else if(type === 'aws sync'){
-        spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com'], { encoding: 'utf-8' })
+        spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--delete'], { encoding: 'utf-8' })
         res.send(JSON.stringify({success: true}))
     }
     else {

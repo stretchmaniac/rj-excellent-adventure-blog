@@ -33,7 +33,7 @@ export function PublishPopup(props: PublishPopupProps) {
                             })
                         }}
                         >{awsSyncDryrunLoading ? 'Loading...' : 'Run Command'}</button>
-                    <div className='publish-command-text'>aws s3 sync "{props.previewDirectory}\preview" s3://wherearerickandjulie.alankoval.com --dryrun</div>
+                    <div className='publish-command-text'>aws s3 sync "{props.previewDirectory}\preview" s3://wherearerickandjulie.alankoval.com --dryrun --delete</div>
                 </div>
                 <p>
                     Output:
@@ -53,7 +53,7 @@ export function PublishPopup(props: PublishPopupProps) {
                         }}>
                         {awsSyncLoading ? 'Loading...' : 'Run Command'}
                     </button>
-                    <div className='publish-command-text'>aws s3 sync "{props.previewDirectory}\preview" s3://wherearerickandjulie.alankoval.com</div>
+                    <div className='publish-command-text'>aws s3 sync "{props.previewDirectory}\preview" s3://wherearerickandjulie.alankoval.com --delete</div>
                 </div>
                 <p>
                     {awsSyncComplete ? <span style={{color: 'green'}}>Sync Complete</span> : ''}
