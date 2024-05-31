@@ -256,7 +256,8 @@ function sampleFirstParagraph(){
             "that Gustav understands \"noodle\" to be a food and is waiting dutifully for man's designation to bear fruit in reality. I " +
             "for one guess that Gustav is looking for a replacement brain -- his noodle is certainly smaller. If only it would fit in that little head of his.",
         "The local HOA requires a 3\" lawn, neatly maintained and weeded. Our only option was the roof... and now our camper is a giant Chia Pet!",
-        "We should have known that the camp store was NOT the place to get deli ham. But we were hungry, and it looked so tasty!"
+        "We should have known that the camp store was NOT the place to get deli ham. But we were hungry, and it looked so tasty!",
+        "Aaahhhhh... the camper life. Sipping home-made iced tea, cherishing our noisy (we mean \"joyful\" of course) neighbors, and bathing in that sweet balm of retirement."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }

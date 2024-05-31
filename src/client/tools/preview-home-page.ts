@@ -132,12 +132,13 @@ function infiniteScrollCheck(){
 window.onload = () => {
     populatePageRows(INITIAL_POSTS);
     updateTopButton();
+
+    document.querySelector('.root').onscroll = () => {
+        updateTopButton();
+        infiniteScrollCheck();
+    }
 }
 window.onresize = () => populatePageRows(0);
-window.onscroll = () => {
-    updateTopButton();
-    infiniteScrollCheck();
-}
 `;
 }
 

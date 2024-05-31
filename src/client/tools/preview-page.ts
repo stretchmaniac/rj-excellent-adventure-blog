@@ -29,6 +29,21 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
                       <div class="page-footer-text">stretch powered</div>
                     </div>
                 </div>
+                <div class="image-viewer-overlay" style="display:none">
+                  <div class="image-viewer-box">
+                    <div class="image-viewer-img-container">
+                      <img class="image-viewer-img"/>
+                    </div>
+                    <div class="image-viewer-controls">
+                      <button class="image-view-back-to-blog-button" onClick="closeImageOverlay()">Back to Blog</button>
+                      <div class="image-viewer-controls-middle">
+                        <button class="image-viewer-previous-button" onClick="imageOverlayPreviousButton()">Previous</button>
+                        <div class="image-viewer-counter">1/10</div>
+                        <button class="image-viewer-next-button" onClick="imageOverlayNextButton()">Next</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </main>
         <script src="page.js"></script>
@@ -40,6 +55,53 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
 export function pageCss(page: Page): string {
 return `
 ${getHeaderCssFragment('../')}
+
+.image-viewer-counter {
+  width: 70px;
+  text-align: center;
+  font-family: 'Open Sans';
+}
+
+.image-viewer-controls-middle {
+  display: flex;
+  flex-direction: row;
+}
+
+.image-viewer-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.image-view-back-to-blog-button {
+  position: absolute;
+  left: 15px;
+}
+
+.image-viewer-img {
+  max-width: calc(100vw - 30px);
+  max-height: calc(100vh - 50px);
+}
+
+.image-viewer-box {
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 5px;
+  background-color: white;
+  padding: 5px;
+}
+
+.image-viewer-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  background-color: rgba(0,0,0,.4);
+  z-index: 1;
+}
 
 .page-footer {
   display: flex;
@@ -155,6 +217,63 @@ blockquote {
 
 export function pageJs(page: Page): string{
 return `
+let imgSrcs = [];
+let currentImgSrcIndex = 0;
+
+function closeImageOverlay(omitHistoryEntry){
+  const el = document.querySelector('.image-viewer-overlay');
+  if(el.style.display !== 'none'){
+    el.style.display = 'none';
+    // add history state so back button will take us back to open popup
+    if(!omitHistoryEntry){
+      history.pushState({imageViewerOpen: false}, '');
+    }
+  }
+}
+
+function imageOverlayNextButton(){
+  if(openImageOverlayByIndex(currentImgSrcIndex + 1)){
+    currentImgSrcIndex++;
+  }
+}
+
+function imageOverlayPreviousButton(){
+  if(openImageOverlayByIndex(currentImgSrcIndex - 1)){
+    currentImgSrcIndex--;
+  }
+}
+
+function openImageOverlay(srcsetTarget) {
+  let imageIndex = -1;
+  for(let i = 0; i < imgSrcs.length; i++){
+    if(xLargeSrcFromSrcset(srcsetTarget) === imgSrcs[i]){
+      imageIndex = i;
+      currentImgSrcIndex = i;
+      break;
+    }
+  }
+  openImageOverlayByIndex(imageIndex);
+}
+
+function openImageOverlayByIndex(imageIndex, omitHistoryEntry){
+  if(imageIndex < 0 || imageIndex >= imgSrcs.length){
+    return false;
+  }
+  const src = imgSrcs[imageIndex];
+  const el = document.querySelector('.image-viewer-overlay');
+  if(el.style.display === 'none'){
+    el.style.display = 'block';
+    // add history state so back button will take us out of the popup
+    if(!omitHistoryEntry){
+      history.pushState({imageViewerOpen: true, imageViewerIndex: imageIndex}, '');
+    }
+  }
+  document.querySelector('.image-viewer-img').src = src;
+  document.querySelector('.image-viewer-counter').textContent = (1 + imageIndex) + ' / ' + imgSrcs.length; 
+
+  return true;
+}
+
 function loadPannellumDivs(){
   const pannellums = document.getElementsByClassName('pannellum-div');
   for(const pan of pannellums){
@@ -198,9 +317,49 @@ function loadPannellumDivs(){
   }
 }
 
+function xLargeSrcFromSrcset(srcset) {
+  const srcs = srcset.split(' ');
+    if(srcset !== '' && srcs.length > 0){
+      const src = srcs[0];
+      // replace "_small", "_medium", "_large" with "_x-large"
+      return src.replace(/(_small|_medium|_large)(\\.[a-zA-Z0-9]+$)/, '_x-large$2');
+    }
+    return null;
+}
+
 window.onload = () => {
   loadPannellumDivs();
+
+  // initialize click events for image overlay
+  const overlay = document.querySelector('.image-viewer-overlay');
+  const box = document.querySelector('.image-viewer-box');
+  box.onclick = (e) => e.stopPropagation();
+  overlay.onclick = () => closeImageOverlay(); 
+
+  // populate imgSrcs with images in the blog
+  const images = document.getElementsByTagName('img');
+  for(let img of images){
+    const src = xLargeSrcFromSrcset(img.srcset);
+    if(!!src){
+      imgSrcs.push(src);
+      // add click event listener for image
+      img.onclick = (e) => openImageOverlay(e.target.srcset)
+    }
+  }
 }
+
+window.addEventListener('popstate', e => {
+  if(!e.state){
+    closeImageOverlay(true);
+  }
+  else if('imageViewerOpen' in e.state){
+    if(!e.state.imageViewerOpen){
+      closeImageOverlay(true);
+    } else {
+      openImageOverlayByIndex(e.state.imageViewerIndex, true);
+    }
+  }
+})
 `
 }
 
