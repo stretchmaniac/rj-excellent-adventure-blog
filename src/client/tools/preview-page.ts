@@ -62,6 +62,12 @@ ${getHeaderCssFragment('../')}
   font-family: 'Open Sans';
 }
 
+@media screen and (max-width: 600px) {
+  .image-viewer-controls-middle {
+    transform: translate(50px, 0px);
+  }
+}
+
 .image-viewer-controls-middle {
   display: flex;
   flex-direction: row;
