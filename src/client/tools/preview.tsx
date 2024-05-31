@@ -109,14 +109,14 @@ export function getPreviewImgSizes(imgSize: string): string{
     return `(max-width: ${maxWidth}px) 100vw, ${maxWidth}px`
 }
 
-function getFontCssFragment(){
+function getFontCssFragment(homeRootRelativePath: string){
     return `/* open-sans-300 - latin */
     @font-face {
       font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 300;
-      src: url('/fixed-assets/open-sans-v40-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-300.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-300italic - latin */
@@ -125,7 +125,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 300;
-      src: url('/fixed-assets/open-sans-v40-latin-300italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-300italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-regular - latin */
@@ -134,7 +134,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 400;
-      src: url('/fixed-assets/open-sans-v40-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-italic - latin */
@@ -143,7 +143,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 400;
-      src: url('/fixed-assets/open-sans-v40-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-500 - latin */
@@ -152,7 +152,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 500;
-      src: url('/fixed-assets/open-sans-v40-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-500italic - latin */
@@ -161,7 +161,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 500;
-      src: url('/fixed-assets/open-sans-v40-latin-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-600 - latin */
@@ -170,7 +170,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 600;
-      src: url('/fixed-assets/open-sans-v40-latin-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-600italic - latin */
@@ -179,7 +179,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 600;
-      src: url('/fixed-assets/open-sans-v40-latin-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-700 - latin */
@@ -188,7 +188,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 700;
-      src: url('/fixed-assets/open-sans-v40-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-700italic - latin */
@@ -197,7 +197,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 700;
-      src: url('/fixed-assets/open-sans-v40-latin-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-800 - latin */
@@ -206,7 +206,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: normal;
       font-weight: 800;
-      src: url('/fixed-assets/open-sans-v40-latin-800.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-800.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* open-sans-800italic - latin */
@@ -215,7 +215,7 @@ function getFontCssFragment(){
       font-family: 'Open Sans';
       font-style: italic;
       font-weight: 800;
-      src: url('/fixed-assets/open-sans-v40-latin-800italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+      src: url('${homeRootRelativePath}open-sans-v40-latin-800italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
     }
     
     /* lora-regular - latin */
@@ -224,7 +224,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: normal;
   font-weight: 400;
-  src: url('/fixed-assets/lora-v35-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-regular.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-italic - latin */
@@ -233,7 +233,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: italic;
   font-weight: 400;
-  src: url('/fixed-assets/lora-v35-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-500 - latin */
@@ -242,7 +242,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: normal;
   font-weight: 500;
-  src: url('/fixed-assets/lora-v35-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-500.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-500italic - latin */
@@ -251,7 +251,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: italic;
   font-weight: 500;
-  src: url('/fixed-assets/lora-v35-latin-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-500italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-600 - latin */
@@ -260,7 +260,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: normal;
   font-weight: 600;
-  src: url('/fixed-assets/lora-v35-latin-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-600.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-600italic - latin */
@@ -269,7 +269,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: italic;
   font-weight: 600;
-  src: url('/fixed-assets/lora-v35-latin-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-600italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-700 - latin */
@@ -278,7 +278,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: normal;
   font-weight: 700;
-  src: url('/fixed-assets/lora-v35-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-700.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
 /* lora-700italic - latin */
@@ -287,7 +287,7 @@ function getFontCssFragment(){
   font-family: 'Lora';
   font-style: italic;
   font-weight: 700;
-  src: url('/fixed-assets/lora-v35-latin-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+  src: url('${homeRootRelativePath}lora-v35-latin-700italic.woff2') format('woff2'); /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
       `
@@ -295,7 +295,7 @@ function getFontCssFragment(){
 
 export function getHeaderCssFragment(homeRootRelativePath: string){
     return `
-${getFontCssFragment()}
+${getFontCssFragment(homeRootRelativePath)}
 
 /* rock-salt-regular - latin */
 @font-face {
