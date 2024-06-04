@@ -39,10 +39,11 @@ export function pageHtml(pages: Page[], page: Page, idMap: Map<string, string>):
                   </div>
                   <div class="image-viewer-controls-box">
                     <div class="image-viewer-controls">
-                      <button class="image-view-back-to-blog-button" onClick="closeImageOverlay()">Back to Blog</button>
-                      <button class="image-viewer-previous-button" onClick="imageOverlayPreviousButton()">Previous</button>
+                      <button class="image-viewer-back-to-blog-button image-viewer-controls-button" onClick="closeImageOverlay()">Back to Blog</button>
+                      <button class="image-viewer-fullscreen image-viewer-controls-button" onClick="requestImageFullScreen()">Fullscreen</button>
+                      <button class="image-viewer-previous-button image-viewer-controls-button" onClick="imageOverlayPreviousButton()">Previous</button>
                       <div class="image-viewer-counter">1/10</div>
-                      <button class="image-viewer-next-button" onClick="imageOverlayNextButton()">Next</button>
+                      <button class="image-viewer-next-button image-viewer-controls-button" onClick="imageOverlayNextButton()">Next</button>
                     </div>
                   </div>
                 </div>
@@ -62,6 +63,7 @@ ${getHeaderCssFragment('../')}
   width: 70px;
   text-align: center;
   font-family: 'Open Sans';
+  color: white;
 }
 
 .image-viewer-non-controls {
@@ -76,22 +78,36 @@ ${getHeaderCssFragment('../')}
   justify-content: center;
 }
 
+.image-viewer-controls-button {
+  background-color: rgb(175, 175, 175);
+  border-radius: 4px;
+  border: 1px solid black;
+}
+
+.image-viewer-controls-button:hover {
+  background-color: rgb(150,150,150);
+}
+
 .image-viewer-controls {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  background-color: white;
+  background-color: #585858;
   border-radius: 5px;
   padding: 5px;
 }
 
-.image-view-back-to-blog-button {
+.image-viewer-fullscreen {
   margin-right: 20px;
 }
 
+.image-viewer-back-to-blog-button {
+  margin-right: 5px;
+}
+
 .image-viewer-img {
-  max-width: calc(100vw - 20px);
-  max-height: calc(100vh - 50px);
+  max-width: calc(100vw - 8px);
+  max-height: calc(100vh - 40px);
   display: block;
 }
 
@@ -102,14 +118,11 @@ ${getHeaderCssFragment('../')}
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 5px;
-  background-color: white;
-  padding: 5px;
 }
 
 .image-viewer-overlay {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   position: absolute;
   background-color: black;
   z-index: 1;
@@ -270,6 +283,11 @@ function openImageOverlay(srcsetTarget) {
   openImageOverlayByIndex(imageIndex);
 }
 
+function requestImageFullScreen() {
+  const el = document.querySelector('.image-viewer-overlay');
+  el.requestFullscreen();
+}
+
 function openImageOverlayByIndex(imageIndex, omitHistoryEntry){
   if(imageIndex < 0 || imageIndex >= imgSrcs.length){
     return false;
@@ -282,8 +300,6 @@ function openImageOverlayByIndex(imageIndex, omitHistoryEntry){
     if(!omitHistoryEntry){
       history.pushState({imageViewerOpen: true, imageViewerIndex: imageIndex}, '');
     }
-    // request full screen for image-viewer-overlay
-    el.requestFullscreen();
   }
   document.querySelector('.image-viewer-img').src = src;
   document.querySelector('.image-viewer-counter').textContent = (1 + imageIndex) + ' / ' + imgSrcs.length; 
@@ -353,7 +369,7 @@ window.onload = () => {
   box.onclick = (e) => e.stopPropagation();
   const controls = document.querySelector('.image-viewer-controls');
   controls.onclick = (e) => e.stopPropagation();
-  overlay.onclick = () => closeImageOverlay(); 
+  // overlay.onclick = () => closeImageOverlay(); 
 
   // populate imgSrcs with images in the blog
   const images = document.getElementsByTagName('img');
