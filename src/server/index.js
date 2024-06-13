@@ -166,14 +166,22 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     const orderedPageHtml = data.pagesHtml
     const orderedPageCss = data.pagesCss
     const orderedPageJs = data.pagesJs
+    let postPageWrites = 0
     for(let i = 0; i < orderedIds.length; i++){
         const id = orderedIds[i]
         const folderName = pageIdToFolderName.get(id)
         expectedFiles[folderName].push('page.html', 'styles.css', 'page.js')
-        fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.html', orderedPageHtml[i])
-        fs.writeFileSync(rootDir + '/preview/' + folderName + '/styles.css', orderedPageCss[i])
-        fs.writeFileSync(rootDir + '/preview/' + folderName + '/page.js', orderedPageJs[i])
+        const srcStrings = [orderedPageHtml[i], orderedPageCss[i], orderedPageJs[i]]
+        const destFiles = ['page.html', 'styles.css', 'page.js'].map(s => rootDir + '/preview/' + folderName + '/' + s)
+        for(let j = 0; j < srcStrings.length; j++){
+            // check if file content matches first
+            if(fs.readFileSync(destFiles[j], {encoding: 'utf-8'}) !== srcStrings[j]){
+                postPageWrites++
+                fs.writeFileSync(destFiles[j], srcStrings[j])
+            }
+        }
     }
+    console.log('preview generation page writes:', postPageWrites)
 
     // delete any file/folder that is not explicitly accounted for here
     let previewImgDeleteCount = 0
@@ -231,6 +239,8 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             }
         }
     }
+
+    console.log('----- preview generation complete -----')
 
     res.send(JSON.stringify({success: !checkFailed}))
 })
