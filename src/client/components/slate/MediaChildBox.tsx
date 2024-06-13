@@ -430,7 +430,7 @@ function toggleParentCaption(editor: Editor, props: MediaChildProps, enabled: bo
             children: [{
                 type: 'paragraph',
                 textAlign: 'center',
-                children: [{text: 'parent caption text', fontSize: 'small', italic: true}]
+                children: [{text: 'Caption', fontSize: 'small', italic: true}]
             }]
         })
     }
@@ -456,7 +456,7 @@ function toggleCaption(editor: Editor, props: MediaChildProps, enabled: boolean)
             children: [{
                 type: 'paragraph',
                 textAlign: 'center',
-                children: [{text: 'caption text', fontSize: 'small', italic: true}]
+                children: [{text: 'caption', fontSize: 'small', italic: true}]
             }]
         })
     }
