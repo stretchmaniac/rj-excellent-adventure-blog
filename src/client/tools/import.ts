@@ -1,4 +1,3 @@
-import { MediaChild } from "../components/PageDesign"
 import { Page } from "../types/PageType"
 import { ExternalLink } from "../types/link"
 import { emptyBlogPostWithTitleDate } from "./empty-page"
@@ -85,7 +84,7 @@ function parseNode(node: Element | ChildNode, context: ParseContext): (Object | 
         return parseDiv(node as Element, context)
     } else if(tag === 'TABLE'){
         return [parseTable(node as Element, context)]  
-    } else if(['B', 'I', 'S', 'U'].includes(tag)){
+    } else if(['B', 'I', 'S', 'STRIKE', 'U'].includes(tag)){
        return [parseMarkTagNaked(tag, node as Element, context)]  
     } else if(tag === 'BLOCKQUOTE'){
         return [parseBlockQuote(node as Element, context)]
@@ -161,7 +160,7 @@ function parseDiv(node: Element, context: ParseContext) : (Object | undefined)[]
             return parsed && (parsed as any).type === 'a'
         }
         return n.nodeName === '#text' || ('tagName' in n && 
-            ['U','S','I','B'].includes(n.tagName))
+            ['U','S','STRIKE','I','B'].includes(n.tagName))
     }
     function renderTextLike(){
         // create <p> node around textLikeBlock and render via parseP
@@ -232,7 +231,7 @@ function parseMarkTagInPar(tagName: string, node: Element, context: ParseContext
         name = 'bold'
     } else if(tagName === 'I'){
         name = 'italic'
-    } else if(tagName === 'S'){
+    } else if(tagName === 'S' || tagName === 'STRIKE'){
         name = 'strikethrough'
     } else if(tagName === 'U'){
         name = 'underline'
@@ -245,7 +244,7 @@ function parseMarkTagInPar(tagName: string, node: Element, context: ParseContext
         if(n.nodeName === '#text' || n.nodeName === 'SPAN'){
             res.push(parseTextNode(n, newContext))
         }
-        else if(['B', 'I', 'U', 'S'].includes(n.nodeName)){
+        else if(['B', 'I', 'U', 'S', 'STRIKE'].includes(n.nodeName)){
             res.push(...parseMarkTagInPar(n.nodeName, n as Element, newContext))
         } else if(n.nodeName === 'BR'){
             res.push({text: '\n'})
@@ -302,7 +301,7 @@ function parseP(node: Element, context: ParseContext): Object {
             if(a && (a as any).type === 'a'){
                 parsedEl.children.push(a)
             }
-        } else if(['B', 'I', 'U', 'S'].includes(n.nodeName)){
+        } else if(['B', 'I', 'U', 'S', 'STRIKE'].includes(n.nodeName)){
             parsedEl.children.push(...parseMarkTagInPar(n.nodeName, n as Element, {...context, inParagraph: true}))
         } else if(n.nodeName === 'BR'){
             parsedEl.children.push({text: '\n'})
