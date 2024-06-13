@@ -378,7 +378,7 @@ function maintainFixedHeaderContentStructure(editor: Editor){
 function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: Date, footer: any[], setFooter: (newFooter: any[]) => void){
   const exp = fixedBlogHeader(title, date, footer)
   // exp consists of two children
-  //  - child #1 of type header-container
+  //  - child #1 of type header-container (hidden == false)
   //  - child #2 of type content-container
   // child #2 has 2 read-only children at the top (date, empty paragraph), then footer.length read-only
   // children at the bottom
@@ -395,11 +395,11 @@ function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: Date,
 
   if(!matches){
     editor.withoutNormalizing(() => {
-      // delete all existing readOnly elements and insert required children
-      while([...Editor.nodes(editor, {at: [], match: (n, p) => (n as any).readOnly})].length > 0){
+      // delete all existing readOnly or header-container elements and insert required children
+      while([...Editor.nodes(editor, {at: [], match: (n, p) => (n as any).readOnly || (n as any).type === 'header-container'})].length > 0){
         Transforms.removeNodes(editor, {
           at: [],
-          match: (n, p) => (n as any).readOnly
+          match: (n, p) => (n as any).readOnly || (n as any).type === 'header-container'
         })
       }
       if(editor.children.length === 0){
@@ -460,8 +460,16 @@ function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: Date,
 }
 
 function compareElRecursive(el1: any, el2: any): boolean {
+  if(el1 === undefined || el1 === null || el2 === undefined || el2 === null){
+    return el1 === el2
+  }
   for(const key in el1){
     if(key !== 'children' && el1[key] !== el2[key]){
+      return false
+    }
+  }
+  for(const key in el2){
+    if(key !== 'children' && el2[key] !== el1[key]){
       return false
     }
   }

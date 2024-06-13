@@ -206,7 +206,7 @@ export function fixedBlogHeader(title: string, date: Date, footer: any[]) {
                 }, {
                     type: 'paragraph',
                     readOnly: true,
-                    children: [{text: ''}]  
+                    children: [{text: '', fontSize: 'medium'}]  
                 }
             , ...footer]
         }

@@ -175,7 +175,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         const destFiles = ['page.html', 'styles.css', 'page.js'].map(s => rootDir + '/preview/' + folderName + '/' + s)
         for(let j = 0; j < srcStrings.length; j++){
             // check if file content matches first
-            if(fs.readFileSync(destFiles[j], {encoding: 'utf-8'}) !== srcStrings[j]){
+            if(!fs.existsSync(destFiles[j]) || fs.readFileSync(destFiles[j], {encoding: 'utf-8'}) !== srcStrings[j]){
                 postPageWrites++
                 fs.writeFileSync(destFiles[j], srcStrings[j])
             }
