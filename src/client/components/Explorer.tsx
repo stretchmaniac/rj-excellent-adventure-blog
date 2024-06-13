@@ -5,6 +5,7 @@ import React from 'react'
 import PageList from './PageList'
 import { pageContains } from '../tools/page-search'
 import ToggleButtonGroup from './ToggleButtonGroup'
+import { TbLayoutSidebarLeftCollapseFilled, TbLayoutSidebarLeftExpandFilled } from 'react-icons/tb'
 
 const EXPLORER_MODE = {
     SEARCH_RESULTS: 0,
@@ -19,6 +20,7 @@ export default function Explorer(props: ExplorerProps) {
         selectedPageID: null,
         postTabSelected: true
     })
+    const [explorerExpanded, setExplorerExpanded] = React.useState(true)
 
     const blogPages = props.pages.filter(p => p.isBlogPost)
     const nonBlogPages = props.pages.filter(p => !p.isBlogPost)
@@ -30,64 +32,85 @@ export default function Explorer(props: ExplorerProps) {
         (explorerState.postTabSelected ? blogPages : nonBlogPages)
     const selectedPage = applicablePages.map(p => p.id === explorerState.selectedPageID).indexOf(true)
 
-    return <div className="explorer-root">
-        <div style={{height: '10px', flexShrink: 0}} />
-        <SearchBar 
-            onChange={searchText => {
-                const trimmed = searchText.trim()
-                if(trimmed.length === 0){
+    return <div className={"explorer-root" + (explorerExpanded ? '' : ' explorer-root-collapsed')}>
+        <div style={{flexShrink: 0, display:'flex', flexDirection:'row', justifyContent: 'end', marginBottom: '5px'}}>
+            {explorerExpanded ? 
+                <button className='icon-button' title='Collapse Post Explorer' onClick={() => setExplorerExpanded(false)}>
+                    <TbLayoutSidebarLeftCollapseFilled className='icon'/>
+                </button>
+            :
+                <button className='icon-button' title='Expand Post Explorer' onClick={() => {
+                    setExplorerExpanded(true)
                     setExplorerState({
                         ...explorerState,
                         mode: EXPLORER_MODE.PAGE_LIST
                     })
-                } else {
-                    setExplorerState({
-                        ...explorerState,
-                        mode: EXPLORER_MODE.SEARCH_RESULTS,
-                        searchQuery: trimmed
-                    })
-                }
-            }}/>
-        <div style={{height: '15px', flexShrink: 0}} />
-        { explorerState.mode == EXPLORER_MODE.PAGE_LIST ? 
-            // show tab view when no search result
-            <ToggleButtonGroup 
-                options={['Blog Posts', 'Static Pages']}
-                selected={explorerState.postTabSelected ? 0 : 1}
-                onChange={optionIndex => setExplorerState({
-                    ...explorerState,
-                    postTabSelected: optionIndex == 0
-                })}
-                />
-        : ''}
-        <div style={{height: '10px'}}></div>
-        <PageList pages={applicablePages}
-            selected={selectedPage}
-            selectPage={(index) => {
-                    setExplorerState({
-                    ...explorerState,
-                    selectedPageID: applicablePages[index].id
-                })
-                props.selectPage(applicablePages[index].id)
-            }}
-            />
-        { explorerState.mode == EXPLORER_MODE.SEARCH_RESULTS ? '' :
-            <div style={{display:'flex', justifyContent: 'center'}}>
-                <button
-                    className="add-post-button"
-                    onClick={() => {
-                        props.showNewPageDialog(explorerState.postTabSelected, p => {
-                            if(p == null){ return; }
-                            props.addPage(p)
-                            props.selectPage(p.id)
+                }}>
+                    <TbLayoutSidebarLeftExpandFilled className='icon'/>
+                </button>
+            }
+        </div>
+        {explorerExpanded && 
+            <React.Fragment>
+                <SearchBar 
+                    onChange={searchText => {
+                        const trimmed = searchText.trim()
+                        if(trimmed.length === 0){
                             setExplorerState({
                                 ...explorerState,
-                                selectedPageID: p.id
+                                mode: EXPLORER_MODE.PAGE_LIST
                             })
+                        } else {
+                            setExplorerState({
+                                ...explorerState,
+                                mode: EXPLORER_MODE.SEARCH_RESULTS,
+                                searchQuery: trimmed
+                            })
+                        }
+                    }}/>
+        
+                <div style={{height: '15px', flexShrink: 0}} />
+                {explorerState.mode == EXPLORER_MODE.PAGE_LIST ? 
+                    // show tab view when no search result
+                    <ToggleButtonGroup 
+                        options={['Blog Posts', 'Static Pages']}
+                        selected={explorerState.postTabSelected ? 0 : 1}
+                        onChange={optionIndex => setExplorerState({
+                            ...explorerState,
+                            postTabSelected: optionIndex == 0
+                        })}
+                        />
+                : ''}
+                <div style={{height: '10px'}}></div>
+                <PageList pages={applicablePages}
+                    selected={selectedPage}
+                    selectPage={(index) => {
+                            setExplorerState({
+                            ...explorerState,
+                            selectedPageID: applicablePages[index].id
                         })
+                        props.selectPage(applicablePages[index].id)
                     }}
-                    >Add {explorerState.postTabSelected ? 'Post' : 'Static Page'}</button>
-            </div>
+                    />
+                { explorerState.mode == EXPLORER_MODE.SEARCH_RESULTS ? '' :
+                    <div style={{display:'flex', justifyContent: 'center'}}>
+                        <button
+                            className="add-post-button"
+                            onClick={() => {
+                                props.showNewPageDialog(explorerState.postTabSelected, p => {
+                                    if(p == null){ return; }
+                                    props.addPage(p)
+                                    props.selectPage(p.id)
+                                    setExplorerState({
+                                        ...explorerState,
+                                        selectedPageID: p.id
+                                    })
+                                })
+                            }}
+                            >Add {explorerState.postTabSelected ? 'Post' : 'Static Page'}</button>
+                    </div>
+                }
+            </React.Fragment>
         }
     </div>
 }

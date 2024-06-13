@@ -4,11 +4,28 @@
     border-right: 1px solid rgba(0,0,0,.1);
     display: flex;
     padding: 10px;
+    padding-top: 3px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
 }
 
+.explorer-root-collapsed {
+    width: 23px !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+}
+
 .add-post-button {
     margin-top: 10px;
+}
+
+.icon-button {
+    padding: 2px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
