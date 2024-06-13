@@ -12,13 +12,11 @@ import { BlogConfig } from '../types/blog-config'
 export function MoreToolsPopup(props: MoreToolsPopupProps) {
     const [tidyMediaFinished, setTidyMediaFinished] = React.useState(false)
     const [imgUpdate, setImgUpdate] = React.useState(0)
+    const [resourceTestTriggered, setResourceTestTriggered] = React.useState(false)
     const [resourceTestRes, setResourceTestRes] = React.useState<ResourceTestResult | null>(null)
     const [footerParseFailed, setFooterParseFailed] = React.useState(false)
     const [footerParsed, setFooterParsed] = React.useState<any[]>(props.config.fixedBlogPostFooterDesign)
 
-    React.useEffect(() => {
-        testResources().then(v => setResourceTestRes(v))
-    }, [])
     const testResourceNameMap = {
         'powershell': 'Powershell 7',
         'image magick': 'Image Magick',
@@ -150,31 +148,18 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                             <img src={"http://localhost:3000/fixed-assets/header.jpg?t=" + imgUpdate}/>
                         </div>
                     </div>
-                    <div className='input-row'>
-                        <span className='input-label'>Blog post footer</span>
-                        <div className='sub-input-row'>
-                            <textarea
-                                rows={15}
-                                defaultValue={JSON.stringify(props.config.fixedBlogPostFooterDesign, null, 2)}
-                                onChange={e => {
-                                    try {
-                                        const v = JSON.parse(e.target.value)
-                                        for(const el of v){
-                                            if(!el.readOnly){
-                                                el.readOnly = true
-                                            }
-                                        }
-                                        setFooterParsed(v)
-                                        setFooterParseFailed(false)
-                                    } catch(e) {
-                                        setFooterParseFailed(true)
-                                    }
-                                }} />
+                    {!resourceTestRes && resourceTestTriggered && 
+                        <div className='input-row'>Loading...</div>
+                    }
+                    {!resourceTestTriggered && 
+                        <div className='input-row'>
+                            <button onClick={() => {
+                                setResourceTestTriggered(true)
+                                testResources().then(v => setResourceTestRes(v))
+                            }}>
+                                Search for Missing Resources
+                            </button>
                         </div>
-                        {footerParseFailed && <span className='input-label' style={{color: 'red'}}>JSON parse failed</span>}
-                    </div>
-                    {!resourceTestRes && 
-                        <div>Loading...</div>
                     }
                     {resourceTestRes && 
                         <React.Fragment>
@@ -220,6 +205,29 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
                             </button>
                             {tidyMediaFinished && <FaRegCircleCheck style={{color: 'green', marginLeft: '5px'}}/>}
                         </div>
+                    </div>
+                    <div className='input-row'>
+                        <span className='input-label'>Blog post footer</span>
+                        <div className='sub-input-row'>
+                            <textarea
+                                rows={15}
+                                defaultValue={JSON.stringify(props.config.fixedBlogPostFooterDesign, null, 2)}
+                                onChange={e => {
+                                    try {
+                                        const v = JSON.parse(e.target.value)
+                                        for(const el of v){
+                                            if(!el.readOnly){
+                                                el.readOnly = true
+                                            }
+                                        }
+                                        setFooterParsed(v)
+                                        setFooterParseFailed(false)
+                                    } catch(e) {
+                                        setFooterParseFailed(true)
+                                    }
+                                }} />
+                        </div>
+                        {footerParseFailed && <span className='input-label' style={{color: 'red'}}>JSON parse failed</span>}
                     </div>
                 </div>
                 <div className='popup-buttons'>
