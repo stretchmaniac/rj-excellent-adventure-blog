@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { Editor, createEditor, Node, Transforms, Path, Range, Point, Ancestor } from 'slate'
+import { Editor, createEditor, Node, Transforms, Path, Range, Point, Ancestor, NodeEntry } from 'slate'
 import { Slate, Editable, withReact, RenderLeafProps, useSlate, RenderElementProps } from 'slate-react'
 import { BaseEditor } from 'slate'
 import { ReactEditor } from 'slate-react'
@@ -82,11 +82,20 @@ const withDefaultFontSize = (editor: Editor) => {
 const withNoHangingMedia = (editor: Editor) => {
   // delete any media-parent with no media-child
   // delete any media-child/media-child-caption/media-parent-caption whose direct parent is not media-parent
+  // delete any media-child-caption that does not immediately follow a media-child
   const normalizeOriginal = editor.normalizeNode
-  editor.normalizeNode = ([node, path]) => {
+  const newNormalization = ([node, path]: NodeEntry) => {
     if((node as any).type === 'media-parent' && (node as any).children.filter((c:any) => c.type === 'media-child').length === 0){
       Transforms.removeNodes(editor, {at: path})
       return
+    }
+    if((node as any).type === 'media-parent'){
+      // run normalization scheme on all children. Normally slate only runs normalization routines 
+      // on the edited element and its parents, see https://github.com/ianstormtaylor/slate/issues/3465
+      const cn = (node as any).children
+      for(let i = cn.length - 1; i >= 0; i--){ // backwards so we can remove nodes
+        newNormalization([cn[i], [...path, i]])
+      }
     }
     if(['media-child', 'media-child-caption', 'media-parent-caption'].includes((node as any).type)){
       const [p, pPath] = Editor.parent(editor, path)
@@ -95,8 +104,22 @@ const withNoHangingMedia = (editor: Editor) => {
         return
       }
     }
+    if((node as any).type === 'media-child-caption'){
+      let invalid = path.length === 0 || path[path.length - 1] === 0
+      if(!invalid){
+        const prevNode = getNodeAtPath(editor, [...path.slice(0, path.length - 1), path[path.length - 1] - 1])
+        invalid = prevNode.type !== 'media-child'
+      }
+      if(invalid){
+        Transforms.removeNodes(editor, {at: path})
+        return
+      }
+    }
     normalizeOriginal([node, path])
   }
+
+  editor.normalizeNode = newNormalization
+
   return editor
 }
 
