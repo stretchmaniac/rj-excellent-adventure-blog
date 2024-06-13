@@ -251,6 +251,7 @@ function closeImageOverlay(omitHistoryEntry){
   const el = document.querySelector('.image-viewer-overlay');
   if(document.fullscreenElement){
     document.exitFullscreen();
+    document.querySelector('.image-viewer-fullscreen').innerText = 'Fullscreen';
   }
   if(el.style.display !== 'none'){
     el.style.display = 'none';
@@ -285,7 +286,18 @@ function openImageOverlay(srcsetTarget) {
 
 function requestImageFullScreen() {
   const el = document.querySelector('.image-viewer-overlay');
-  el.requestFullscreen();
+  if(document.fullscreenElement){
+    // exit out of fullscreen
+    document.exitFullscreen();
+    document.querySelector('.image-viewer-fullscreen').innerText = 'Fullscreen';
+  } else {
+    el.requestFullscreen().then(() => {
+      if(document.fullscreenElement){
+        // change button text to "exit full screen"
+        document.querySelector('.image-viewer-fullscreen').innerText = 'Exit Fullscreen';
+      }
+    });
+  }
 }
 
 function openImageOverlayByIndex(imageIndex, omitHistoryEntry){
