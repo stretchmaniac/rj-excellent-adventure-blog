@@ -99,12 +99,12 @@ export default function MediaChildBox(props: MediaChildProps) {
                 }}>
         {props.children}
         {props.media.content === null && <BiImageAdd className="missing-media-icon"/>}
-        {props.media.content !== null && props.media.content.type === MediaType.IMAGE && <img
+        {props.media.content && props.media.content.type === MediaType.IMAGE && <img
             className={props.media.size + '-box'}
             crossOrigin="anonymous"
             src={props.media.content.stableRelativePath}
             />}
-        {props.media.content !== null && props.media.content.type === MediaType.PHOTOSPHERE && 
+        {props.media.content && props.media.content.type === MediaType.PHOTOSPHERE && 
             <div style={{backgroundImage: `url('${pannellumPreviewDataUrl}')`, backgroundSize: 'cover'}}>
                 <div className={props.media.size + '-pannellum'} ref={pannellumContainerRef}
                     onMouseDown={() => {
@@ -152,7 +152,7 @@ export default function MediaChildBox(props: MediaChildProps) {
                 </div>
             </div>
             }
-        {props.media.content !== null && props.media.content.type === MediaType.VIDEO && <video
+        {props.media.content && props.media.content.type === MediaType.VIDEO && <video
             controls
             className={props.media.size + '-box'}>
             <source src={props.media.content.stableRelativePath}/>
@@ -229,7 +229,7 @@ export default function MediaChildBox(props: MediaChildProps) {
                 <span className='media-tool-button-text'>XL</span>
             </button>
         </div>}
-        {showToolbar && props.media.content !== null && 
+        {showToolbar && props.media.content && 
             props.media.content.type !== MediaType.VIDEO && 
             <div className='media-toolbar-3rd-row'>
             <button title='image' 
