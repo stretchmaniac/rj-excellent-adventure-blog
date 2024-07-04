@@ -602,22 +602,27 @@ app.post('/set-data', cors(corsOptions), function(req, res){
         fs.writeFileSync(configFName, toWrite)
     }
 
-    // delete all page-like folders in rootDir 
+    // create pages directory if necessary
+    if(!fs.existsSync(rootDir + '/pages')){
+        fs.mkdirSync(rootDir + '/pages')
+    }
+
+    // delete all page-like folders in rootDir/pages 
     // that don't correspond to existing pages
-    const childFolderNames = fs.readdirSync(rootDir, { withFileTypes: true })
+    const childFolderNames = fs.readdirSync(rootDir + '/pages', { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
     const pageMap = {}
     const pageIdHashSet = new Set(pages.map(p => p.id))
     for(const childFolder of childFolderNames){
-        if(folderNamePageLike(childFolder) && fs.existsSync(rootDir+'/'+childFolder+'/'+pageFileName())){
+        if(folderNamePageLike(childFolder) && fs.existsSync(rootDir+'/pages/'+childFolder+'/'+pageFileName())){
             // check for page id
-            const pageId = JSON.parse(fs.readFileSync(rootDir+'/'+childFolder+'/'+pageFileName(), {encoding: 'utf-8'})).id
+            const pageId = JSON.parse(fs.readFileSync(rootDir+'/pages/'+childFolder+'/'+pageFileName(), {encoding: 'utf-8'})).id
             const exists = pageIdHashSet.has(pageId)
             if(pageId && !exists){
-                fs.rmSync(rootDir + '/' + childFolder, {recursive: true, force: true})
+                fs.rmSync(rootDir + '/pages/' + childFolder, {recursive: true, force: true})
             } else if(exists){
-                pageMap[pageId] = rootDir + '/' + childFolder
+                pageMap[pageId] = rootDir + '/pages/' + childFolder
             }
         }
     }
@@ -625,7 +630,7 @@ app.post('/set-data', cors(corsOptions), function(req, res){
     const pageFolders = pageFolderNames(pages)
     for(let i = 0; i < pages.length; i++){
         const page = pages[i]
-        const folderName = page.id in pageMap ? pageMap[page.id] : rootDir + '/' + pageFolders[i]
+        const folderName = page.id in pageMap ? pageMap[page.id] : rootDir + '/pages/' + pageFolders[i]
         if(!fs.existsSync(folderName)){
             // create the folder
             fs.mkdirSync(folderName)
@@ -640,7 +645,7 @@ app.post('/set-data', cors(corsOptions), function(req, res){
             fs.writeFileSync(pageFile, pageContents)
         }
         // rename directory to current
-        fs.renameSync(folderName, rootDir + '/' + pageFolderName(page))
+        fs.renameSync(folderName, rootDir + '/pages/' + pageFolderName(page))
     }
 
     console.log("set-data write count: ", writeCount)
@@ -662,12 +667,12 @@ app.get('/load-data', cors(corsOptions), function(req, res){
 
     const pages = []
     // looks for any folder representing a page
-    const childFolderNames = fs.readdirSync(rootDir + '/', { withFileTypes: true })
+    const childFolderNames = fs.readdirSync(rootDir + '/pages', { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
     for(let f of childFolderNames){
-        if(folderNamePageLike(f) && fs.existsSync(rootDir + '/' + f + '/' + pageFileName())){
-            pages.push(JSON.parse(fs.readFileSync(rootDir + '/' + f + '/' + pageFileName(), {encoding: 'utf-8'})))
+        if(folderNamePageLike(f) && fs.existsSync(rootDir + '/pages/' + f + '/' + pageFileName())){
+            pages.push(JSON.parse(fs.readFileSync(rootDir + '/pages/' + f + '/' + pageFileName(), {encoding: 'utf-8'})))
         }
     }
 
