@@ -584,9 +584,23 @@ app.post('/set-data', cors(corsOptions), function(req, res){
     const config = blogState.config 
     const pages = blogState.pages
 
+    if(!config || !pages || pages.filter(p => !p).length > 0){
+        console.log("set-data write count: 0")
+        console.log("ERROR pages: ", pages)
+        res.send({success: false, reason: 'Data send to set-data does not include "config" or "pages" property, or contains a bad page.'})
+        return
+    }
+
+    let writeCount = 0
+
     // first write to config file
     const configFName = rootDir + '/' + configFileName()
-    fs.writeFileSync(configFName, JSON.stringify(config, null, 2))
+    const toWrite = JSON.stringify(config, null, 2)
+    // read config, see if it is different than toWrite, with sanity check if toWrite is empty
+    if(fs.readFileSync(configFName, {encoding: 'utf-8'}) !== toWrite && toWrite.trim().length > 0){
+        writeCount++
+        fs.writeFileSync(configFName, toWrite)
+    }
 
     // delete all page-like folders in rootDir 
     // that don't correspond to existing pages
@@ -594,14 +608,15 @@ app.post('/set-data', cors(corsOptions), function(req, res){
         .filter(dirent => dirent.isDirectory())
         .map(dirent => dirent.name)
     const pageMap = {}
+    const pageIdHashSet = new Set(pages.map(p => p.id))
     for(const childFolder of childFolderNames){
         if(folderNamePageLike(childFolder) && fs.existsSync(rootDir+'/'+childFolder+'/'+pageFileName())){
             // check for page id
-            const pageId = JSON.parse(fs.readFileSync(rootDir+'/'+childFolder+'/'+pageFileName())).id
-            const filtered = pages.filter(p => p.id === pageId)
-            if(pageId && filtered.length === 0){
+            const pageId = JSON.parse(fs.readFileSync(rootDir+'/'+childFolder+'/'+pageFileName(), {encoding: 'utf-8'})).id
+            const exists = pageIdHashSet.has(pageId)
+            if(pageId && !exists){
                 fs.rmSync(rootDir + '/' + childFolder, {recursive: true, force: true})
-            } else if(filtered.length > 0){
+            } else if(exists){
                 pageMap[pageId] = rootDir + '/' + childFolder
             }
         }
@@ -617,10 +632,18 @@ app.post('/set-data', cors(corsOptions), function(req, res){
         }
         // overwrite page file
         const pageFile = folderName + '/' + pageFileName()
-        fs.writeFileSync(pageFile, JSON.stringify(page, null, 2))
+        const pageContents = JSON.stringify(page, null, 2)
+        // check if different than existing, do sanity check for empty page
+        const existingPage = !fs.existsSync(pageFile) ? '' : fs.readFileSync(pageFile, {encoding: 'utf-8'}).valueOf()
+        if(!fs.existsSync(pageFile) || existingPage !== pageContents && pageContents.trim().length > 0 && page.id){
+            writeCount++
+            fs.writeFileSync(pageFile, pageContents)
+        }
         // rename directory to current
         fs.renameSync(folderName, rootDir + '/' + pageFolderName(page))
     }
+
+    console.log("set-data write count: ", writeCount)
     res.send(JSON.stringify({success: true}))
 })
 
@@ -634,7 +657,7 @@ app.get('/load-data', cors(corsOptions), function(req, res){
         localSaveFolder: rootDir
     }
     if(fs.existsSync(configFName)){
-        config = JSON.parse(fs.readFileSync(configFName))
+        config = JSON.parse(fs.readFileSync(configFName, {encoding: 'utf-8'}))
     }
 
     const pages = []
@@ -644,7 +667,7 @@ app.get('/load-data', cors(corsOptions), function(req, res){
         .map(dirent => dirent.name)
     for(let f of childFolderNames){
         if(folderNamePageLike(f) && fs.existsSync(rootDir + '/' + f + '/' + pageFileName())){
-            pages.push(JSON.parse(fs.readFileSync(rootDir + '/' + f + '/' + pageFileName())))
+            pages.push(JSON.parse(fs.readFileSync(rootDir + '/' + f + '/' + pageFileName(), {encoding: 'utf-8'})))
         }
     }
 
