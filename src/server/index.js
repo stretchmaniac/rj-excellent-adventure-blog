@@ -203,10 +203,12 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     // root dir
     const copiedRootDirFiles = fs.readdirSync(`${rootDir}/preview`)
         .filter(f => !(f in expectedFiles))
-    const f1 = copiedRootDirFiles.filter(name => !rootDirExpectedFiles.includes(name))
-    const f2 = rootDirExpectedFiles.filter(name => !copiedRootDirFiles.includes(name))
-    checkFailed = f1.length > 0 || f2.length > 0
-    if(checkFailed){
+    const copiedSet = new Set(copiedRootDirFiles)
+    const expectedSet = new Set(rootDirExpectedFiles)
+    // curiously, NodeJS appears to be lacking basic Set functions (difference, symmetricDifference, etc.)
+    const f1 = [...copiedRootDirFiles.filter(s => !expectedSet.has(s))]
+    const f2 = [...rootDirExpectedFiles.filter(s => !copiedSet.has(s))]
+    if(f1.length > 0 || f2.length > 0){
         if(f1.length > 0){
             console.log(`Preview copy error: unexpected files ${f1} found in preview root directory`)
         } else {
@@ -226,10 +228,13 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
                     expNames.push(...fs.readdirSync(fullDir, {recursive: true}).map(s => `${expName}\\${s}`))
                 }
             }
-            const filtered1 = copiedNames.filter(name => !expNames.includes(name))
-            const filtered2 = expNames.filter(name => !copiedNames.includes(name))
-            checkFailed = filtered1.length > 0 || filtered2.length > 0
-            if(checkFailed){
+
+            const copiedSet = new Set(copiedNames)
+            const expSet = new Set(expNames)
+            // curiously, NodeJS appears to be lacking basic Set functions (difference, symmetricDifference, etc.)
+            const filtered1 = [...copiedNames.filter(s => !expSet.has(s))]
+            const filtered2 = [...expNames.filter(s => !copiedSet.has(s))]
+            if(filtered1.length > 0 || filtered2.length > 0){
                 if(filtered1.length > 0){
                     console.log(`Preview copy error: unexpected files ${filtered1} found in preview folder ${folder}`)
                 } else {

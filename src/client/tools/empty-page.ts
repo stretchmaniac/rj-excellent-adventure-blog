@@ -267,7 +267,14 @@ function sampleFirstParagraph(){
             "Otherwise there are exactly two representations for every rational. To understand why, one must wrap their head around the fact that numbers aren't actually " +
             "strings of digits. They are non-unique limits of (infinite) sequences of rational numbers. Equivalent digit representations are sequences in disguise " +
             "so that (sum_n^N a_n 10^n) - (sum_n^N b_n 10^n) = sum_n^N (a_n - b_n) 10^n tends to 0 as N tends to infinity. And this bit of seeming word salad is as pristine a representation " +
-            "of math that you'll ever get -- a completely satisfying and utterly incomprehensible (to the uninitiated) solution to a problem that no normal person would bother to ask."
+            "of math that you'll ever get -- a completely satisfying and utterly incomprehensible (to the uninitiated) solution to a problem that no normal person would bother to ask.",
+        "We are now Canadian wanderers above the sea of fog. We don't really have the reddish hair to show for it, nor fancy wooden stick, " +
+            "but hey, our scenery has been just as good!",
+        "Rick installed a new gadget in our plumbing this week. Now all our intake water goes through electrolysis and the resulting " +
+            "hydrogen is burned off, recombining into 100% pure water. Reverse-osmosis is nice and all, but does it really have the " +
+            "bang of combustion? We didn't think so.",
+        "We didn't pump the tire / We are always learning / Since the wheel's been turning / We didn't pump the tire / No, we " +
+            "didn't check it / (yikes) and now we blew it..."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }
