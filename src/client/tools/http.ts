@@ -63,7 +63,7 @@ export function searchCachedImageFolders(fileName: string): Promise<ImageCacheRe
     })
 }
 
-export function setPreview(preview: GeneratedPreview): Promise<boolean> {
+export function setPreview(preview: GeneratedPreview, verify: boolean): Promise<boolean> {
     const mapToArr = (map: Map<string, string>) => {
         const res: string[] = []
         for(const key of map.keys()){
@@ -81,9 +81,12 @@ export function setPreview(preview: GeneratedPreview): Promise<boolean> {
         return res
     }
     const jsonPreview = {
-        ...preview,
-        pageIdToFolderName: mapToArr(preview.pageIdToFolderName),
-        imageCopyMap: refMediaMapToArr(preview.imageCopyMap)
+        previewData: {
+            ...preview,
+            pageIdToFolderName: mapToArr(preview.pageIdToFolderName),
+            imageCopyMap: refMediaMapToArr(preview.imageCopyMap)
+        },
+        verify: verify
     }
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/serve-preview', {

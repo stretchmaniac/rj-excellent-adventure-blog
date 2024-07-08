@@ -36,6 +36,7 @@ export default function Toolbar(props: ToolbarProps) {
     const formatState = props.getFormatState()
     const [previewLoading, setPreviewLoading] = React.useState(false)
     const [previewFileCheckFailed, setPreviewFileCheckFailed] = React.useState(false)
+    const [verifyPreview, setVerifyPreview] = React.useState(false)
 
     return <div className="toolbar-root">
         <ToggleButton title="bold" 
@@ -258,11 +259,14 @@ export default function Toolbar(props: ToolbarProps) {
         <div className='toolbar-right-side'>
             <button onClick={() => {
                 setPreviewLoading(true)
-                props.previewHook().then(success => {
+                props.previewHook(verifyPreview).then(success => {
                     setPreviewLoading(false)
                     setPreviewFileCheckFailed(!success)
                 })
             }} disabled={previewLoading}>{previewLoading ? 'Loading...' : 'Preview'}</button>
+            <input style={{marginLeft: '8px'}} id="verify_check" type="checkbox" checked={verifyPreview} onChange={(e) => setVerifyPreview((e.target as any).checked)}/>
+            <label style={{fontSize: '10px'}} htmlFor="verify_check"
+                title="Check integrity of generated preview. Suitable for catching hardware write issues.">verify</label>
             {previewFileCheckFailed && <MdErrorOutline className='error-icon' title='File check failed for preview folder. Try Again.'/>}
         </div>
     </div>
@@ -282,7 +286,7 @@ export type ToolbarProps = {
     onFormatChange: (changedItem: string, newState: FormatState) => void
     closeClickToExitPopup: () => void
     clickToExitPopupHook: (menuOpts: {position: Array<number>, contents: React.ReactNode, onCancel: () => void, disableClickToClose?: boolean}) => void
-    previewHook: () => Promise<boolean>
+    previewHook: (verify: boolean) => Promise<boolean>
 }
 
 export type FormatState = {

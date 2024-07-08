@@ -183,10 +183,10 @@ export function Main() {
     const selectedPageIndex = pages.map(p => p.id == selectedPageID).indexOf(true)
     const selectedPage = selectedPageIndex == -1 ? null : pages[selectedPageIndex]
 
-    function showPreview(pageSource: Page | null): Promise<boolean> {
+    function showPreview(pageSource: Page | null, verify: boolean): Promise<boolean> {
         return new Promise((res, rej) => {
             const preview = makePreview(pages)
-            setPreview(preview).then(success => {
+            setPreview(preview, verify).then(success => {
                 if(pageSource){
                     window.open(`http://localhost:3000/preview/${preview.pageIdToFolderName.get(pageSource.id)}/page.html`, '_blank')
                 } else {
@@ -241,7 +241,7 @@ export function Main() {
                 footer={config.fixedBlogPostFooterDesign}
                 setFooter={(newFooter) => setConfigWithSideEffects({...config, fixedBlogPostFooterDesign: newFooter})}
                 setWaitingPopup={setWaitingPopup}
-                previewHook={() => showPreview(selectedPage)}
+                previewHook={(verify) => showPreview(selectedPage, verify)}
                 onPageEdit={p => {
                     const newPages = []
                     for(let i = 0; i < selectedPageIndex; i++){

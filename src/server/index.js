@@ -74,19 +74,21 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         fs.mkdirSync(rootDir + '/preview')
     }
     const data = JSON.parse(req.body)
+    const previewData = data.previewData
+    const verify = data.verify
     const rootDirExpectedFiles = ['home.html', 'home.js', 'home.css', 'older-posts.html', 'older-posts.css', 'older-posts.js']
     // write html files, css files, and js files to preview directory
     for(const exp of rootDirExpectedFiles){
         // remove the files first, so that if the copy step fails we notice
         fs.rmSync(rootDir + '/preview/' + exp)
     }
-    fs.writeFileSync(rootDir + '/preview/home.html', data.homeHtml)
-    fs.writeFileSync(rootDir + '/preview/home.css', data.homeCss)
-    fs.writeFileSync(rootDir + '/preview/home.js', data.homeJs)
+    fs.writeFileSync(rootDir + '/preview/home.html', previewData.homeHtml)
+    fs.writeFileSync(rootDir + '/preview/home.css', previewData.homeCss)
+    fs.writeFileSync(rootDir + '/preview/home.js', previewData.homeJs)
 
-    fs.writeFileSync(rootDir + '/preview/older-posts.html', data.olderPostsHtml)
-    fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
-    fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
+    fs.writeFileSync(rootDir + '/preview/older-posts.html', previewData.olderPostsHtml)
+    fs.writeFileSync(rootDir + '/preview/older-posts.css', previewData.olderPostsCss)
+    fs.writeFileSync(rootDir + '/preview/older-posts.js', previewData.olderPostsJs)
 
     // these are folder-level files,
     // so if a folder myFolder existed, we'd expect to see 
@@ -98,7 +100,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     const expectedFolders = {} // shares keyset with expectedFiles
 
     // re-create page folders
-    const pageIdToFolderName = arrToMap(data.pageIdToFolderName)
+    const pageIdToFolderName = arrToMap(previewData.pageIdToFolderName)
     for(const folder of pageIdToFolderName.values()){
         expectedFiles[folder] = []
         expectedFolders[folder] = []
@@ -119,7 +121,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
 
     let previewImgCopyCount = 0
     // copy images to page folders, if not already present
-    const imgCopyMap = arrToMap(data.imageCopyMap)
+    const imgCopyMap = arrToMap(previewData.imageCopyMap)
     for(const media of imgCopyMap.keys()){
         const mediaSrc = media.fileName
         const mediaType = media.type
@@ -176,10 +178,10 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
 
     // copy page html, css and js files to page folder
-    const orderedIds = data.pagesHtmlIds
-    const orderedPageHtml = data.pagesHtml
-    const orderedPageCss = data.pagesCss
-    const orderedPageJs = data.pagesJs
+    const orderedIds = previewData.pagesHtmlIds
+    const orderedPageHtml = previewData.pagesHtml
+    const orderedPageCss = previewData.pagesCss
+    const orderedPageJs = previewData.pagesJs
     let postPageWrites = 0
     for(let i = 0; i < orderedIds.length; i++){
         const id = orderedIds[i]
@@ -229,7 +231,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             console.log(`Preview copy error: expected files ${f2} not found in preview root directory`)
         }
     }
-    if(!checkFailed){
+    if(!checkFailed && verify){
         // check page folders
         for(const folder in expectedFiles){
             // recursive: true specifically for photospheres
@@ -253,6 +255,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
 					} else {
 						console.log(`Preview copy error: expected files ${filtered2} not found in preview folder ${folder}`)
 					}
+                    checkFailed = true
 					break
 				}
 			}
