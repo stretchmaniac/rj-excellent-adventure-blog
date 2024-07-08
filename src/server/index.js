@@ -672,7 +672,11 @@ app.post('/set-data', cors(corsOptions), function(req, res){
     const amPm = hours >= 12 ? 'pm' : 'am'
     hours %= 12
     const minutes = date.getMinutes()
-	var timestamp = `${hours}:${minutes}${amPm}`
+    let seconds = date.getSeconds() + ''
+    while(seconds.length < 2){
+        seconds = '0' + seconds
+    }
+	var timestamp = `${hours}:${minutes}:${seconds}${amPm}`
   
     console.log(`set-data write count (${timestamp}): ${writeCount}`)
     res.send(JSON.stringify({success: true}))
