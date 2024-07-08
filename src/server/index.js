@@ -4,6 +4,7 @@ const spawn = require('child_process').spawn;
 const fs = require('fs');
 const { randomUUID } = require('crypto');
 const { spawnSync } = require('child_process');
+const { performance } = require('perf_hooks');
 
 const app = express()
 app.use(express.json())
@@ -63,7 +64,8 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
 })
 
 app.post('/serve-preview', cors(corsOptions), async function(req, res){
-    if(rootDir === null){
+    var startTime = performance.now()
+	if(rootDir === null){
         res.send(JSON.stringify({success: false, reason: 'Mirror directory has not been set'}))
         return
     }
@@ -86,12 +88,20 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     fs.writeFileSync(rootDir + '/preview/older-posts.css', data.olderPostsCss)
     fs.writeFileSync(rootDir + '/preview/older-posts.js', data.olderPostsJs)
 
+    // these are folder-level files,
+    // so if a folder myFolder existed, we'd expect to see 
+    //   fs.readdirSync(myFolder)
+    // return 
+    //   [...expectedFiles['myFolder'], ...expectedFolders['myFolder']]
+    // Order is not important here
     const expectedFiles = {} // map string => string[]
+    const expectedFolders = {} // shares keyset with expectedFiles
 
     // re-create page folders
     const pageIdToFolderName = arrToMap(data.pageIdToFolderName)
     for(const folder of pageIdToFolderName.values()){
         expectedFiles[folder] = []
+        expectedFolders[folder] = []
         if(!fs.existsSync(rootDir + '/preview/' + folder)){
             fs.mkdirSync(rootDir + '/preview/' + folder)
         }
@@ -133,7 +143,8 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         } else if(mediaType === 'PHOTOSPHERE'){
             // copy _ps folder, if not already present
             if(fs.existsSync(rootDir + '/media/' + base + '_ps')){
-                expectedFiles[dest].push(base + '_ps')
+                // the _ps folder includes all photosphere auxiliary image files
+                expectedFolders[dest].push(base + '_ps')
                 if(!fs.existsSync(rootDir + '/preview/' + dest + '/' + base + '_ps')){
                     previewImgCopyCount++
                     fs.cpSync(rootDir + '/media/' + base + '_ps', rootDir + '/preview/' + dest + '/' + base + '_ps', {recursive: true})
@@ -157,7 +168,10 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
         }
         
     }
-    // copy fixed-assets folder
+	
+    console.log('preview generation copy count:', previewImgCopyCount)
+
+	 // copy fixed-assets folder
     rootDirExpectedFiles.push(...fs.readdirSync(rootDir + '/fixed-assets'))
     fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
 
@@ -181,6 +195,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             }
         }
     }
+	
     console.log('preview generation page writes:', postPageWrites)
 
     // delete any file/folder that is not explicitly accounted for here
@@ -188,14 +203,13 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
     for(let folder in expectedFiles){
         fs.readdirSync(rootDir + '/preview/' + folder)
             .forEach(f => {
-                if(!expectedFiles[folder].includes(f)){
+                if(!expectedFiles[folder].includes(f) && !expectedFolders[folder].includes(f)){
                     previewImgDeleteCount++
                     fs.rmSync(rootDir + '/preview/' + folder + '/' + f, {recursive: true, force: true})
                 }
             })
     }
 
-    console.log('preview generation copy count:', previewImgCopyCount)
     console.log('preview generation delete count (not counting page folders):', previewImgDeleteCount)
 
     // do file name check on all copied files (apparently Dad has bad hardware)
@@ -222,30 +236,30 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
             const copiedNames = fs.readdirSync(`${rootDir}/preview/${folder}`, {recursive: true})
             const expNamesRaw = expectedFiles[folder]
             const expNames = [...expNamesRaw]
-            for(const expName of expNamesRaw){
+            for(const expName of expectedFolders[folder]){
                 const fullDir = `${rootDir}/media/${expName}`
-                if(fs.existsSync(fullDir) && fs.lstatSync(fullDir).isDirectory()){
-                    expNames.push(...fs.readdirSync(fullDir, {recursive: true}).map(s => `${expName}\\${s}`))
-                }
+                expNames.push(expName)
+                expNames.push(...fs.readdirSync(fullDir, {recursive: true}).map(s => `${expName}\\${s}`))
             }
-
-            const copiedSet = new Set(copiedNames)
             const expSet = new Set(expNames)
             // curiously, NodeJS appears to be lacking basic Set functions (difference, symmetricDifference, etc.)
             const filtered1 = [...copiedNames.filter(s => !expSet.has(s))]
-            const filtered2 = [...expNames.filter(s => !copiedSet.has(s))]
-            if(filtered1.length > 0 || filtered2.length > 0){
-                if(filtered1.length > 0){
-                    console.log(`Preview copy error: unexpected files ${filtered1} found in preview folder ${folder}`)
-                } else {
-                    console.log(`Preview copy error: expected files ${filtered2} not found in preview folder ${folder}`)
-                }
-                break
-            }
+			if (filtered1.length > 0 || copiedNames.length != expNames.length){
+	            const copiedSet = new Set(copiedNames)
+				const filtered2 = [...expNames.filter(s => !copiedSet.has(s))]
+				if(filtered1.length > 0 || filtered2.length > 0){
+					if(filtered1.length > 0){
+						console.log(`Preview copy error: unexpected files ${filtered1} found in preview folder ${folder}`)
+					} else {
+						console.log(`Preview copy error: expected files ${filtered2} not found in preview folder ${folder}`)
+					}
+					break
+				}
+			}
         }
     }
-
-    console.log('----- preview generation complete -----')
+	var endTime = performance.now()
+    console.log(`----- preview generation complete in ${((endTime - startTime)/1000).toFixed(3)} seconds -----`)
 
     res.send(JSON.stringify({success: !checkFailed}))
 })
@@ -652,8 +666,15 @@ app.post('/set-data', cors(corsOptions), function(req, res){
         // rename directory to current
         fs.renameSync(folderName, rootDir + '/pages/' + pageFolderName(page))
     }
-
-    console.log("set-data write count: ", writeCount)
+	
+    const date = new Date()
+    let hours = date.getHours()
+    const amPm = hours >= 12 ? 'pm' : 'am'
+    hours %= 12
+    const minutes = date.getMinutes()
+	var timestamp = `${hours}:${minutes}${amPm}`
+  
+    console.log(`set-data write count (${timestamp}): ${writeCount}`)
     res.send(JSON.stringify({success: true}))
 })
 

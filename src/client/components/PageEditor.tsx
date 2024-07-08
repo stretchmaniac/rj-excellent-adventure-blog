@@ -5,6 +5,7 @@ import ToggleButtonGroup from './ToggleButtonGroup';
 import PageSettings from './PageSettings';
 import PageDesign from './PageDesign';
 import { ImportPopup, WaitingPopup } from '../Main';
+import { LuSquirrel } from 'react-icons/lu'
 
 type PannellumScreenshotQueueItem = {
     id: string
@@ -78,7 +79,10 @@ export default function PageEditor(props: PageEditorProps){
 
     return <div className={"page-editor-root" + (page == null ? " empty" : "")}>
         {page == null ? 
-            <span className='page-editor-empty'>Select a page to the left!</span>
+            <React.Fragment>
+                <LuSquirrel className="page-editor-squirrel"/>
+                <span className='page-editor-empty'>Select a page on your left</span>
+            </React.Fragment>
         : 
             <div className="page-editor-nonempty">
                 <div className="page-editor-tabs">

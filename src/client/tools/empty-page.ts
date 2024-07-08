@@ -91,7 +91,7 @@ function getAllRefMedia(workingList: ReferencedMedia[], obj: any){
             }
         } else if(typeof obj[key] === 'string' && obj[key].match(r)){
             // don't include localhost part
-            const spl: string = obj[key].split(r) // splits on all capturing groups
+            const spl: string[] = obj[key].split(r) // splits on all capturing groups
             const type = 'type' in obj ? obj.type as MediaType : MediaType.IMAGE
             workingList.push({
                 fileName: spl[spl.length - 1],
@@ -274,7 +274,7 @@ function sampleFirstParagraph(){
             "hydrogen is burned off, recombining into 100% pure water. Reverse-osmosis is nice and all, but does it really have the " +
             "bang of combustion? We didn't think so.",
         "We didn't pump the tire / We are always learning / Since the wheel's been turning / We didn't pump the tire / No, we " +
-            "didn't check it / (yikes) and now we blew it..."
+            "didn't check it / and now (yikes) we blew it..."
     ]
     return options[Math.floor(Math.random() * options.length)]
 }
