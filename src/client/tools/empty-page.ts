@@ -1,5 +1,5 @@
 import { Page } from '../types/PageType'
-import { getReadableDateString } from './date';
+import { currentSimpleDate, getReadableDateString, SimpleDate } from './date';
 import { Media, MediaType, hasImageExt } from './media';
 
 export function nextID(): string {
@@ -15,7 +15,7 @@ function emptyPage(): Page {
         summaryText: '',
         autoSummaryImg: true,
         summaryImg: null, 
-        date: new Date(),
+        date: currentSimpleDate(),
         isBlogPost: true,
         linkedFromHeader: false,
         headerSortOrder: '0',
@@ -28,7 +28,7 @@ export function homePageAlias(): Page {
     return {
         id: '-1:home',
         title: 'Home Page',
-        date: new Date(),
+        date: currentSimpleDate(),
         isBlogPost: false,
         linkedFromHeader: false,
         headerSortOrder: '0',
@@ -182,7 +182,7 @@ export function getSummaryImg(page: Page): Media | null {
     return null
 }
 
-export function fixedBlogHeader(title: string, date: Date, footer: any[]) {
+export function fixedBlogHeader(title: string, date: SimpleDate, footer: any[]) {
     return [
         {
             type: 'header-container',
@@ -213,7 +213,7 @@ export function fixedBlogHeader(title: string, date: Date, footer: any[]) {
     ]
 }
 
-export function emptyBlogPostWithTitleDate(title: string, date: Date, footer: any[]) : Page {
+export function emptyBlogPostWithTitleDate(title: string, date: SimpleDate, footer: any[]) : Page {
     const p = emptyBlogPost()
     p.title = title
     p.date = date
@@ -286,7 +286,7 @@ export function emptyStaticPage(): Page {
     }
 }
 
-export function emptyStaticPageWithTitleDate(title: string, date: Date): Page {
+export function emptyStaticPageWithTitleDate(title: string, date: SimpleDate): Page {
     const p = emptyStaticPage()
     p.title = title 
     p.date = date 

@@ -13,10 +13,8 @@ import { ImportPopup } from '../Main'
 export default function PageSettings(props: PageSettingsProps) {
     let dateStr = ''
     const date = props.page.date
-    // check if date is valid
-    if(!isNaN(date.getTime())){
-        dateStr = getDateInputStr(date)
-    }
+    dateStr = getDateInputStr(date)
+
     return <div className='page-settings-root'>
         <div className='input-row-checkbox'>
             <input type="checkbox" checked={!props.page.isBlogPost}
@@ -61,7 +59,7 @@ export default function PageSettings(props: PageSettingsProps) {
                     const [yyyy, mm, dd] = e.target.value.split('-')
                     props.editPage({
                         ...props.page,
-                        date: new Date(Number.parseInt(yyyy), Number.parseInt(mm) - 1, Number.parseInt(dd))
+                        date: {year: Number.parseInt(yyyy), month: Number.parseInt(mm) - 1, day: Number.parseInt(dd)}
                     })
                 }}/> 
         </div>

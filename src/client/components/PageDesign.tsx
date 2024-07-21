@@ -20,6 +20,7 @@ import { LinkViewer } from './slate/LinkViewer'
 import { numberArrEq } from '../tools/misc'
 import { HyperlinkOpenTrigger } from './slate/HyperlinkSelect'
 import { withCopyPaste } from '../tools/slate-copy-paste'
+import { SimpleDate } from '../tools/date'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -398,7 +399,7 @@ function maintainFixedHeaderContentStructure(editor: Editor){
   }
 }
 
-function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: Date, footer: any[], setFooter: (newFooter: any[]) => void){
+function maintainFixedHeaderAndFooter(editor: Editor, title: string, date: SimpleDate, footer: any[], setFooter: (newFooter: any[]) => void){
   const exp = fixedBlogHeader(title, date, footer)
   // exp consists of two children
   //  - child #1 of type header-container (hidden == false)
@@ -1269,7 +1270,7 @@ export type PageDesignProps = {
   allPages: Array<Page>
   pageID: string
   pageTitle: string 
-  pageDate: Date
+  pageDate: SimpleDate
   isBlogPost: boolean
   designStruct: any[]
   footer: any[]

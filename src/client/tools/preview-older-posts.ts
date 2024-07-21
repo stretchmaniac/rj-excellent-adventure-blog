@@ -243,8 +243,8 @@ function binToMonths(pages: Page[]){
     const result: MonthBin[] = []
     for(let i = 0; i < newToOld.length; i++){
         const p = newToOld[i]
-        const month = p.date.getMonth() + 1
-        const year = p.date.getFullYear()
+        const month = p.date.month + 1
+        const year = p.date.year
         if(result.length === 0 || !matchesMonthAndYear(result[result.length - 1], month, year)){
             // make new entry 
             result.push({

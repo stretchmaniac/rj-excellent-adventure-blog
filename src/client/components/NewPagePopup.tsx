@@ -2,11 +2,11 @@ import React from 'react'
 import './../assets/stylesheets/new-page-popup.scss'
 import './../assets/stylesheets/popup-common.scss'
 import './../assets/stylesheets/form-common.scss'
-import { getDateInputStr } from '../tools/date'
+import { currentSimpleDate, getDateInputStr, SimpleDate } from '../tools/date'
 
 export function NewPagePopup(props: NewPagePopupProps) {
     const [title, setTitle] = React.useState('')
-    const [date, setDate] = React.useState(getDateInputStr(new Date()))
+    const [date, setDate] = React.useState(getDateInputStr(currentSimpleDate()))
     return <div className='popup-fullscreen'>
             <div className='popup-root'>
                 <div className='popup-header'>
@@ -29,14 +29,14 @@ export function NewPagePopup(props: NewPagePopupProps) {
                 </div>
                 <div className='popup-buttons'>
                     <button 
-                        onClick={() => props.onComplete(title, new Date(), true)}
+                        onClick={() => props.onComplete(title, currentSimpleDate(), true)}
                         className='popup-button popup-cancel'>Cancel</button>
                     <button 
                         onClick={() => {
                             const [yyyy, mm, dd] = date.split('-')
                             props.onComplete(
                                 title,
-                                new Date(Number.parseInt(yyyy), Number.parseInt(mm) - 1, Number.parseInt(dd)),
+                                {year: Number.parseInt(yyyy), month: Number.parseInt(mm) - 1, day: Number.parseInt(dd)},
                                 false
                             )
                         }}
@@ -48,5 +48,5 @@ export function NewPagePopup(props: NewPagePopupProps) {
 
 export type NewPagePopupProps = {
     headerText: string,
-    onComplete: (title: string, date: Date, cancelled: boolean) => void
+    onComplete: (title: string, date: SimpleDate, cancelled: boolean) => void
 }

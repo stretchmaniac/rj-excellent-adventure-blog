@@ -1,4 +1,5 @@
 import { BlogState } from "../types/blog-state"
+import { SimpleDate } from "./date"
 import { ReferencedMedia, sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
@@ -268,7 +269,7 @@ export function loadData(): Promise<BlogState> {
             const res = JSON.parse(data)
             if(res.success){
                 // convert any "date" field to actual date object
-                convertDateRecursive(res.blogState)
+                convertLegacyDateRecursive(res.blogState)
                 sortPages(res.blogState.pages)
                 const legacyPromises: Promise<boolean>[] = []
                 convertLegacyMediaRecursive(res.blogState, legacyPromises)
@@ -312,13 +313,19 @@ function convertLegacyMediaRecursive(obj: any, donePromises: Promise<boolean>[])
     }
 }
 
-function convertDateRecursive(obj: any){
+function convertLegacyDateRecursive(obj: any){
     for(const prop in obj){
-        if(prop === 'date'){
-            obj[prop] = new Date(Date.parse(obj[prop]))
+        if(prop === 'date' && (typeof obj[prop]) === 'string'){
+            const parsedDate = new Date(Date.parse(obj[prop]))
+            const nonLegacyDate: SimpleDate = {
+                day: parsedDate.getDate(),
+                month: parsedDate.getMonth(),
+                year: parsedDate.getFullYear()
+            }
+            obj[prop] = nonLegacyDate
         }
         if((typeof obj[prop]) === 'object'){
-            convertDateRecursive(obj[prop])
+            convertLegacyDateRecursive(obj[prop])
         }
     }
 }

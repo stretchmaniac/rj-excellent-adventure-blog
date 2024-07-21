@@ -1,9 +1,10 @@
+import { SimpleDate } from "../tools/date"
 import { Media } from "../tools/media"
 
 export type Page = {
     id: string
     title: string
-    date: Date
+    date: SimpleDate
     isBlogPost: boolean
     linkedFromHeader: boolean
     headerSortOrder: string

@@ -800,10 +800,9 @@ function pageFolderNames(pages) {
 }
 
 function getDateInputStr(date){
-    const d = new Date(Date.parse(date))
-    const month = d.getMonth() + 1
-    const day = d.getDate()
-    return d.getFullYear() + '-' + 
+    const month = date.month
+    const day = date.day
+    return date.year + '-' + 
         (month < 10 ? '0' + month : month) + '-' +
         (day < 10 ? '0' + day : day)
 }
