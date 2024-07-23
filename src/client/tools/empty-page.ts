@@ -48,13 +48,35 @@ export function emptyBlogPost(): Page {
     }
 }
 
+function compareDates(a: SimpleDate, b: SimpleDate){
+    // Sorted by year, then month, then day.
+    // Using an alias A = a.year * 32 * 12 + a.month * 32 + day would also work
+    if(a.year < b.year){
+        return -1
+    } else if(a.year > b.year){
+        return 1
+    }
+
+    if(a.month < b.month){
+        return -1
+    } else if(a.month > b.month){
+        return 1
+    }
+
+    if(a.day < b.day){
+        return -1
+    } else if(a.day > b.day){
+        return 1
+    }
+
+    return 0
+}
+
 export function sortPages(newPages: Page[]){
     newPages.sort((a, b) => {
-        if(a.date < b.date){
-            return 1
-        }
-        if(b.date < a.date) {
-            return -1
+        const cmp = compareDates(a.date, b.date)
+        if(cmp !== 0){
+            return -cmp
         }
         // sort alphabetically according to title next
         if(a.title !== b.title){
