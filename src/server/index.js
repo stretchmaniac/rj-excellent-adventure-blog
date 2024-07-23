@@ -672,13 +672,24 @@ app.post('/set-data', cors(corsOptions), function(req, res){
 	
     const date = new Date()
     let hours = date.getHours()
+    // hours returns 0, 1, 2, ..., 23
+    // the 0th hour THROUGH the 11th hour makes up the first 12 hours (AM), the 12hr hour through the 23rd makes up the second (PM)
     const amPm = hours >= 12 ? 'pm' : 'am'
+    // clocks are weird, the map we're looking for is
+    //  0  1  2  3  4  ... 11 12 13 14 ... 22 23
+    //  12 1  2  3  4      11 12 1  2      10 11
+    // so basically take hours modulo 12 and replace 0 with 12
     hours %= 12
-    const minutes = date.getMinutes()
-    let seconds = date.getSeconds() + ''
-    while(seconds.length < 2){
-        seconds = '0' + seconds
+    if(hours === 0){
+        hours = 12
     }
+    const pad2 = a => {
+        while(a.length < 2){a = '0' + a}
+        return a
+    }
+    const minutes = pad2(date.getMinutes() + '')
+    const seconds = pad2(date.getSeconds() + '')
+
 	var timestamp = `${hours}:${minutes}:${seconds}${amPm}`
   
     console.log(`set-data write count (${timestamp}): ${writeCount}`)
