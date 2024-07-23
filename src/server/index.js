@@ -811,7 +811,7 @@ function pageFolderNames(pages) {
 }
 
 function getDateInputStr(date){
-    const month = date.month
+    const month = date.month + 1
     const day = date.day
     return date.year + '-' + 
         (month < 10 ? '0' + month : month) + '-' +
