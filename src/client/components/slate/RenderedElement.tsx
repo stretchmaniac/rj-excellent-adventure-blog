@@ -3,13 +3,14 @@ import { Link } from "../../types/link";
 import { MediaChild, PannellumPackage, getNodeAtPath } from "../PageDesign";
 import MediaChildBox from "./MediaChildBox";
 import './../../assets/stylesheets/slate/media-child-box.scss'
-import { Editor, Node } from "slate";
+import { Editor, Node, Transforms } from "slate";
 import { MediaParent } from "./MediaParent";
 import { fontMap } from "../../tools/font-size";
 import { WaitingPopup } from "../../Main";
 import { getParElSpacing, getParNonParSpacing } from "../../tools/paragraph-spacing";
 import '../../assets/stylesheets/slate/misc-post.scss'
 import { numberArrEq } from "../../tools/misc";
+import RenderedLeaf from "./RenderedLeaf";
 
 export type CustomRenderedElementProps = {
     usualProps: RenderElementProps,
@@ -45,6 +46,16 @@ export default function RenderedElement(bigProps: CustomRenderedElementProps) {
         return <div {...props.attributes}>
             {props.children}
         </div>
+    }
+    if(t === 'shift-newline'){
+        const text = '↴\n'
+        return <span contentEditable={false}
+            style={{color: 'red'}} {...props.attributes}>
+                <RenderedLeaf text={{text: text}} attributes={{"data-slate-leaf": true}} leaf={{...el, text: text}}>
+                    &#8628;&#10;
+                </RenderedLeaf>
+                {props.children}
+            </span>
     }
 
     const textAlign = ('textAlign' in el ? el.textAlign : 'left') as string

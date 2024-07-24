@@ -65,6 +65,8 @@ function serializeInternal(child: any, state: SerializeState): React.ReactNode {
         return serializeBlockQuote(child, state)
     } else if(type === 'a'){
         return serializeLink(child, state)
+    } else if(type === 'shift-newline'){
+        return serializeShiftNewline(child, state)
     } else if(type === 'list'){
         return serializeList(child, state)
     } else if(type === 'li'){
@@ -218,6 +220,10 @@ function serializeLink(child: any, state: SerializeState): React.ReactNode {
     </a>
 }
 
+function serializeShiftNewline(child: any, state: SerializeState): React.ReactNode {
+    return serializeLeaf({...child, text: '\n'}, state)
+}
+
 function serializeBlockQuote(child: any, state: SerializeState): React.ReactNode {
     return <blockquote>
         {child.children && 
@@ -344,11 +350,12 @@ function serializeLeaf(child: any, state: SerializeState): React.ReactNode {
 
     const fontSize = child.fontSize ? fontMap(child.fontSize) + 'px' : ''
     const font = child.font ? child.font : ''
-    let text = child.text 
-    if(text.startsWith('\n')){
+    let text = child.text
+    const textIsNewline = text === '\n'
+    if(!textIsNewline && text.startsWith('\n')){
         text = ' ' + text
     }
-    if(text.endsWith('\n')){
+    if(!textIsNewline && text.endsWith('\n')){
         text = text + ' '
     }
     return <span style={{

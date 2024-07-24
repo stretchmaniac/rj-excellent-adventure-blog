@@ -36,8 +36,9 @@ declare module 'slate' {
 const withInlinesAndVoids = (editor: Editor) => {
   // we need to manually specify inline elements so that slate doesn't silently 
   // delete them :(
-  editor.isInline = el => ['a'].includes(el.type)
-  editor.isVoid = el => ['media-child'].includes(el.type)
+  editor.isInline = el => ['a','shift-newline'].includes(el.type)
+  editor.isVoid = el => ['media-child','shift-newline'].includes(el.type)
+  editor.markableVoid = el => ['shift-newline'].includes(el.type)
   return editor
 }
 
@@ -518,7 +519,12 @@ function compareElRecursive(el1: any, el2: any): boolean {
 function handleKeyDown(editor: Editor, e: React.KeyboardEvent<HTMLDivElement>){
   // shift-enter to insert newline character
   if(e.shiftKey && e.code === 'Enter'){
-    Transforms.insertText(editor, '\n')
+    const currentMarks = {...Editor.marks(editor)} as any
+    Transforms.insertNodes(editor, [{type: 'shift-newline', ...currentMarks, children:[{text: ''}]} as any, {text: ''}])
+    Transforms.insertNodes(editor, [{text: '', ...currentMarks}])
+    for(let key in currentMarks){
+      Editor.addMark(editor, key, currentMarks[key])
+    }
     e.preventDefault()
   }
   // when in a caption and the caption is empty, prevent default backspace and delete behavior
