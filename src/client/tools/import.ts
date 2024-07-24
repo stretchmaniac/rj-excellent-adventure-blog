@@ -70,7 +70,7 @@ function parseNode(node: Element | ChildNode, context: ParseContext): (Object | 
     if(tag === 'P'){
         return [parseP(node as Element, context)]
     } else if(tag === 'A'){
-        return [parseA(node as Element, context)]
+        return [parseA(node as Element, context, false)]
     } else if(tag === 'IMG'){
         return [parseImg(node as Element, context)]  
     } else if(tag === 'UL'){
@@ -156,7 +156,7 @@ function parseDiv(node: Element, context: ParseContext) : (Object | undefined)[]
     let elLikeBlocks: (ChildNode | Element)[] = []
     function textLike(n: ChildNode | Element){
         if('tagName' in n && n.tagName === 'A'){
-            const parsed = parseA(n as Element, context)
+            const parsed = parseA(n as Element, context, true)
             return parsed && (parsed as any).type === 'a'
         }
         return n.nodeName === '#text' || ('tagName' in n && 
@@ -209,7 +209,7 @@ function parseTable(node: Element, context: ParseContext): Object | undefined {
     // currently only recognize pattern is cells.length == 2 for image + caption
     if(cells.length === 2 && cells[0].children.length === 1 && 
         (cells[0].children[0].tagName === 'A' || cells[0].children[0].tagName === 'IMG')){
-        const parsedA = cells[0].children[0].tagName === 'A' ? parseA(cells[0].children[0], context) : 
+        const parsedA = cells[0].children[0].tagName === 'A' ? parseA(cells[0].children[0], context, false) : 
             parseImg(cells[0].children[0], context)
         if(parsedA && (parsedA as any).type === 'media-parent'){
             // add a caption
@@ -297,7 +297,7 @@ function parseP(node: Element, context: ParseContext): Object {
                 parsedEl.children.push(parseTextNode(n, {...context, inParagraph: true}))
             }
         } else if(n.nodeName === 'A'){
-            const a = parseA(n as Element, {...context, inParagraph: true})
+            const a = parseA(n as Element, {...context, inParagraph: true}, false)
             if(a && (a as any).type === 'a'){
                 parsedEl.children.push(a)
             }
@@ -338,7 +338,8 @@ function sizeFromWidth(imageSizingModeNew: boolean, width: number): string {
     return sizeNames[nearestWidthIndex]
 }
 
-function parseA(node: Element, context: ParseContext): Object | undefined {
+// if dryRun === true, then no media register will occur
+function parseA(node: Element, context: ParseContext, dryRun: boolean): Object | undefined {
     const aEl = node as HTMLLinkElement
     if(['jpg', 'JPG', 'jpeg', 'JPEG', 'bmp', 'BMP', 'png', 'PNG'].filter(ext => aEl.href.endsWith(ext)).length > 0 &&
             aEl.children.length === 1 && aEl.children[0].tagName === 'IMG'){
@@ -346,7 +347,7 @@ function parseA(node: Element, context: ParseContext): Object | undefined {
         const ref = aEl.href 
         const lastSlash = ref.lastIndexOf('/')
         const name = lastSlash === -1 ? ref : ref.substring(lastSlash + 1)
-        const media = findAndRegisterImg(decodeURI(name), context)
+        const media = dryRun ? undefined : findAndRegisterImg(decodeURI(name), context)
         let size = 'medium'
         if(aEl.children.length > 0 && aEl.children[0].tagName === 'IMG'){
             // strip size from child element
