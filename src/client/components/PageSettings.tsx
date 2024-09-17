@@ -4,7 +4,7 @@ import './../assets/stylesheets/page-settings.scss'
 import './../assets/stylesheets/form-common.scss'
 import React from 'react'
 import { chooseFiles } from '../tools/http'
-import { registerMedia } from '../tools/media'
+import { Media, registerMedia } from '../tools/media'
 import { IoIosWarning } from "react-icons/io";
 import { getSummaryImg, getSummaryText } from '../tools/empty-page'
 import { BiImport } from 'react-icons/bi'
@@ -96,7 +96,8 @@ export default function PageSettings(props: PageSettingsProps) {
                 <div className='input-row-checkbox'>
                     <input type="checkbox" checked={props.page.autoSummaryImg}
                         onChange={e => {
-                                props.editPage({...props.page, autoSummaryImg: e.target.checked, summaryImg: null})
+                                const targetSummaryImg : Media | null = e.target.checked ? null : getSummaryImg(props.page);
+                                props.editPage({...props.page, autoSummaryImg: e.target.checked, summaryImg: targetSummaryImg})
                             }
                         }
                         />
