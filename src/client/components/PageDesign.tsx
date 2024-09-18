@@ -21,6 +21,7 @@ import { numberArrEq } from '../tools/misc'
 import { HyperlinkOpenTrigger } from './slate/HyperlinkSelect'
 import { withCopyPaste } from '../tools/slate-copy-paste'
 import { SimpleDate } from '../tools/date'
+import { enumerateMediaChildren } from './ImportPopup'
 
 type CustomElement = { type: 'paragraph'; children: CustomText[] }
 type CustomText = { text: string }
@@ -162,7 +163,7 @@ export default function PageDesign(props: PageDesignProps) {
     } else {
       maintainFixedHeaderContentStructure(editor)
     }
-    maintainImageParagraphs(editor)
+    const mediaCounts = maintainImageParagraphs(editor)
 
     const [linkState, setLinkState] = React.useState<LinkState>({
       target: null,
@@ -195,6 +196,7 @@ export default function PageDesign(props: PageDesignProps) {
         }}/>}
       <Slate editor={editor} initialValue={props.designStruct} key={''+props.pageID}>
           <Toolbar getFormatState={getFormatState} 
+            getPhotosphereCount={() => mediaCounts.photosphereCount}
             setWaitingPopup={props.setWaitingPopup}
             insertLinkTrigger={openLinkTrigger}
             insertLinkClearTrigger={() => setOpenLinkTrigger(null)}
@@ -277,7 +279,7 @@ export function getNodeAtPath(editor: Editor, absPath: number[]){
   return root
 }
 
-function maintainImageParagraphs(editor: Editor){
+function maintainImageParagraphs(editor: Editor): MediaPageCounts {
   const images = [...Editor.nodes(editor, {
     at: [],
     match: (n, p) => (n as any).type === 'media-parent',
@@ -295,7 +297,19 @@ function maintainImageParagraphs(editor: Editor){
     return p2.length - p1.length
   })
 
+  let mediaCounts = {
+    'IMAGE': 0,
+    'PHOTOSPHERE': 0,
+    'VIDEO': 0
+  } as any
   for(const [node, path] of images){
+    if((node as any).children){
+      for(const c of (node as any).children){
+        if(c?.content?.type){
+          mediaCounts[c.content.type]++
+        }
+      }
+    }
     let insert = path[path.length - 1] === 0
     if(!insert){
       const queryPath = [...path.slice(0, path.length - 1), path[path.length-1] - 1]
@@ -314,6 +328,17 @@ function maintainImageParagraphs(editor: Editor){
       })
     }
   }
+  return {
+    imageCount: mediaCounts['IMAGE'], 
+    photosphereCount: mediaCounts['PHOTOSPHERE'],
+    videoCount: mediaCounts['VIDEO']
+  }
+}
+
+type MediaPageCounts = {
+  imageCount: number,
+  photosphereCount: number,
+  videoCount: number
 }
 
 function maintainFixedHeaderContentStructure(editor: Editor){

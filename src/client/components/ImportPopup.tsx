@@ -135,7 +135,7 @@ function countMedia(result: BloggerImportResult): number {
     return count
 }
 
-function enumerateMediaChildren(design: any[], processor: (mediaChild: any) => void){
+export function enumerateMediaChildren(design: any[], processor: (mediaChild: any) => void){
     for(let node of design){
         if(node?.type === 'media-child'){
             processor(node)

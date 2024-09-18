@@ -19,6 +19,7 @@ import { Media, registerMedia } from '../../tools/media';
 import { chooseFiles } from '../../tools/http';
 import { WaitingPopup } from '../../Main';
 import React from 'react';
+import { PiSphere } from 'react-icons/pi';
 
 export default function Toolbar(props: ToolbarProps) {
     const editor = useSlate()
@@ -37,6 +38,8 @@ export default function Toolbar(props: ToolbarProps) {
     const [previewLoading, setPreviewLoading] = React.useState(false)
     const [previewFileCheckFailed, setPreviewFileCheckFailed] = React.useState(false)
     const [verifyPreview, setVerifyPreview] = React.useState(false)
+
+    const photosphereCount = props.getPhotosphereCount()
 
     return <div className="toolbar-root">
         <ToggleButton title="bold" 
@@ -256,7 +259,17 @@ export default function Toolbar(props: ToolbarProps) {
             onChange={active => props.onFormatChange('showTitleBar', {...formatState, showTitleBar: active})}>
             <MdTitle className='react-icons'/>
         </ToggleButton>}
-        <div className='toolbar-right-side'>
+        <div className='toolbar-right-side' 
+            title={photosphereCount > 8 ? `Photosphere count over 8 doesn't work on phones` : `Photosphere count ${photosphereCount}`}
+            >
+            <div style={{display: 'flex', marginRight: '5px', color: photosphereCount > 8 ? 'rgb(175,0,0)' : 'black'}}>
+                <PiSphere 
+                    style={{}}
+                    className='react-icon-small'/>
+                <div style={{fontSize: '12px', marginLeft: '-3px'}}>
+                    {photosphereCount}
+                </div>
+            </div>
             <button onClick={() => {
                 setPreviewLoading(true)
                 props.previewHook(verifyPreview).then(success => {
@@ -279,6 +292,7 @@ export type ToolbarProps = {
     setWaitingPopup: (popup: WaitingPopup) => void
     insertLinkClearTrigger: () => void
     getSelectedText: () => string
+    getPhotosphereCount: () => number
     insertText: (text: string) => void
     insertMediaBox: () => void
     bulkInsertMedia: (media: Media[]) => void
