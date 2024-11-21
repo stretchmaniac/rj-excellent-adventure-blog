@@ -508,6 +508,15 @@ app.post('/search-cached-image-folders', cors(corsOptions), function(req, res){
     res.send(JSON.stringify({success: absPath !== '', path: absPath}))
 })
 
+app.post('/file-exists', cors(corsOptions), function(req, res){
+    const fileName = JSON.parse(req.body).fileName 
+    if(fs.existsSync(fileName)){
+        res.send(JSON.stringify({success: true, result: true}))
+    } else {
+        res.send(JSON.stringify({success: true, result: false}))
+    }
+})
+
 const IMAGE_SIZE_NAMES = ['small', 'medium', 'large', 'x-large']
 const IMAGE_SIZE_WIDTHS = [700, 1200, 1800, 2400]
 app.post('/copy-resource', cors(corsOptions), function(req, res){
@@ -555,6 +564,10 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
                     rootDir + '/' + targetFolder + '/' + name + '_' + uuid + '_' + sizeName + '.' + ext
                 spawn('magick', [
                     rootDir + '/' + newPath, 
+                    // Without -auto-orient, images with rotation metadata (e.g. in exif orientation)
+                    // are resized according to their native buffer orientation. This 
+                    // has the effect of resizing to 10000 x width when the orientation is 90deg.
+                    '-auto-orient',
                     '-resize', 
                     width + 'x10000',
                     '-quality',
