@@ -142,5 +142,5 @@ export type PageEditorProps = {
     previewHook: (verify: boolean) => Promise<boolean>
     setImportPopup: (popup: ImportPopup) => void
     setWaitingPopup: (popup: WaitingPopup) => void
-    showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
+    showConfirmPopup: (header: string, body: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

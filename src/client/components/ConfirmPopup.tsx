@@ -7,6 +7,9 @@ export default function ConfirmPopup(props: ConfirmPopupProps) {
             <div className='popup-header'>
                     {props.header}
             </div>
+            <div className='popup-content'>
+                {props.body}
+            </div>
             <div className='popup-buttons'>
                 <button 
                     onClick={() => props.choiceCallback(false)}
@@ -22,6 +25,7 @@ export default function ConfirmPopup(props: ConfirmPopupProps) {
 
 export type ConfirmPopupProps = {
     header: string
+    body: string
     confirmString: string
     confirmColor: string
     choiceCallback: (confirmed: boolean) => void

@@ -27,6 +27,7 @@ type NewPagePopupInfo = {
 type ConfirmPopup = {
     popupOpen: boolean
     popupHeader: string
+    popupBody: string
     confirmString: string
     confirmColor: string
     popupCallback: (confirmed: boolean) => void
@@ -149,6 +150,7 @@ export function Main() {
     const [confirmPopup, setConfirmPopup] = React.useState<ConfirmPopup>({
         popupOpen: false,
         popupHeader: '',
+        popupBody: '',
         confirmString: '',
         confirmColor: '',
         popupCallback: () => {}
@@ -262,9 +264,10 @@ export function Main() {
                     }
                     setPages(newPages)
                 }}
-                showConfirmPopup={(header, confirmStr, confirmColor, callback) => setConfirmPopup({
+                showConfirmPopup={(header, body, confirmStr, confirmColor, callback) => setConfirmPopup({
                     popupOpen: true,
                     popupHeader: header,
+                    popupBody: body,
                     confirmString: confirmStr,
                     confirmColor: confirmColor,
                     popupCallback: callback
@@ -317,6 +320,7 @@ export function Main() {
         {confirmPopup.popupOpen ? 
             <ConfirmPopup 
                 header={confirmPopup.popupHeader}
+                body={confirmPopup.popupBody}
                 confirmString={confirmPopup.confirmString}
                 confirmColor={confirmPopup.confirmColor}
                 choiceCallback={confirmed => {
