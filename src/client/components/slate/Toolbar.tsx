@@ -259,10 +259,9 @@ export default function Toolbar(props: ToolbarProps) {
             onChange={active => props.onFormatChange('showTitleBar', {...formatState, showTitleBar: active})}>
             <MdTitle className='react-icons'/>
         </ToggleButton>}
-        <div className='toolbar-right-side' 
-            title={photosphereCount > 8 ? `Photosphere count over 8 doesn't work on phones` : `Photosphere count ${photosphereCount}`}
-            >
-            <div style={{display: 'flex', marginRight: '5px', color: photosphereCount > 8 ? 'rgb(175,0,0)' : 'black'}}>
+        <div className='toolbar-right-side'>
+            <div style={{display: 'flex', marginRight: '5px', color: photosphereCount > 8 ? 'rgb(175,0,0)' : 'black'}}
+                title={photosphereCount > 8 ? `Photosphere count over 8 doesn't work on phones` : `Photosphere count ${photosphereCount}`}>
                 <PiSphere 
                     style={{}}
                     className='react-icon-small'/>
