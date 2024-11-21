@@ -4,16 +4,33 @@ import './../assets/stylesheets/page-settings.scss'
 import './../assets/stylesheets/form-common.scss'
 import React from 'react'
 import { chooseFiles } from '../tools/http'
-import { Media, registerMedia } from '../tools/media'
+import { Media, registerMedia, ReimportImageResult, reimportImages } from '../tools/media'
 import { IoIosWarning } from "react-icons/io";
 import { getSummaryImg, getSummaryText } from '../tools/empty-page'
 import { BiImport } from 'react-icons/bi'
 import { ImportPopup } from '../Main'
+import { VscDebugRestart } from 'react-icons/vsc'
+import { FaRegCircleCheck } from 'react-icons/fa6'
 
 export default function PageSettings(props: PageSettingsProps) {
     let dateStr = ''
     const date = props.page.date
     dateStr = getDateInputStr(date)
+
+    type ReimportState = {
+        pending: boolean, 
+        totalToProcess: number,
+        totalProcessed: number,
+        failures: string[],
+        completed: boolean
+    }
+    const [reimportState, setReimportState] = React.useState<ReimportState>({
+        pending: false,
+        completed: false,
+        totalToProcess: 0,
+        totalProcessed: 0,
+        failures: []
+    })
 
     return <div className='page-settings-root'>
         <div className='input-row-checkbox'>
@@ -150,9 +167,76 @@ export default function PageSettings(props: PageSettingsProps) {
             }}>
             <BiImport /> Import from Blogger
         </button>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+            <button className="import-button"
+                onClick={() => props.showConfirmPopup(
+                    "Reimport all images on this page?",
+                    "This will regenerate all image-type media present in the page, from the originally-supplied file locations. " + 
+                    "If the image no longer exists in your local file system, you will be notified and the image will not be regenerated. " +
+                    "Photospheres and videos will not be affected. Be sure to tidy the media folder (in \"more tools\") after.",
+                    "Reimport",
+                    "",
+                    confirmed => {
+                        if(confirmed){
+                            const pageDesignOriginal = props.page.design
+                            // get rid of read-only properties in page.design
+                            const pageDesignCopy = JSON.parse(JSON.stringify(pageDesignOriginal))
+                            const results = reimportImages(pageDesignCopy)
+                            setReimportState({
+                                pending: true,
+                                completed: false,
+                                totalToProcess: results.length,
+                                totalProcessed: 0,
+                                failures: []
+                            })
+                            const failures: string[] = []
+                            let processed = 0
+                            for(const res of results){
+                                res.then(value => {
+                                    if(!value.fileStillExists){
+                                        failures.push(value.originalFileName)
+                                    }
+                                    processed++
+                                    setReimportState({
+                                        pending: true,
+                                        completed: processed === results.length,
+                                        totalToProcess: results.length,
+                                        totalProcessed: processed,
+                                        failures: failures
+                                    })
+                                })
+                            }
+                            Promise.all(results).then(() => {
+                                props.editPage({...props.page, design: pageDesignCopy})
+                                setReimportState({...reimportState, failures: failures, pending: false, completed: true})
+                            })
+                        }
+                    }
+                )}>
+                <VscDebugRestart /> Reimport all Images
+            </button>
+            {reimportState.completed && reimportState.failures.length === 0 && 
+                <FaRegCircleCheck style={{color: 'green', marginLeft: '5px'}}/>
+            }
+        </div>
+        {reimportState.pending && 
+            <div style={{margin: '5px'}}>
+                {reimportState.totalProcessed} / {reimportState.totalToProcess} completed
+            </div>
+        }
+        {!reimportState.pending && reimportState.completed && reimportState.failures.length > 0 && 
+            <div style={{
+                margin: '5px', display: 'flex', flexDirection: 'column', border: '2px solid rgb(220, 0, 0)',
+                borderRadius: '5px', padding: '5px', backgroundColor: 'rgba(0,0,0,.05)'
+            }}>
+                <div>Failed reimport image locations:</div>
+                {reimportState.failures.map(f => <div>{f}</div>)}
+            </div>
+        }
         <button className="delete-button"
             onClick={() => props.showConfirmPopup(
                 'Are you sure you want to delete this page?',
+                'This cannot be undone.',
                 'Delete',
                 'rgb(215, 71, 71)',
                 confirmed => {
@@ -170,5 +254,5 @@ export type PageSettingsProps = {
     editPage: (newPage: Page) => void
     deletePage: () => void
     setImportPopup: (popup: ImportPopup) => void
-    showConfirmPopup: (header: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
+    showConfirmPopup: (header: string, body: string, confirmString: string, confirmColor: string, choiceCallBack: (confirmed:boolean) => void) => void
 }

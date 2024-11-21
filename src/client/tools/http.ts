@@ -3,6 +3,22 @@ import { SimpleDate } from "./date"
 import { ReferencedMedia, sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
+export function fileExists(filePath: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/file-exists', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: JSON.stringify({fileName: filePath})
+        })
+        .then(response => response.text())
+        .then(data => resolve(JSON.parse(data).result))
+        .then(error => {})
+    })
+}
+
 export function isPhotosphere(stableRelativePath: string): Promise<boolean> {
     const lastSlash = stableRelativePath.lastIndexOf('/')
     return new Promise((resolve, reject) => {

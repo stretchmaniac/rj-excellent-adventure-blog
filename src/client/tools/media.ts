@@ -1,4 +1,5 @@
-import { copyResource, isPhotosphere } from "./http"
+import { MediaChild } from "../components/PageDesign"
+import { copyResource, fileExists, isPhotosphere } from "./http"
 
 export enum MediaType {
     IMAGE = 'IMAGE',
@@ -19,6 +20,50 @@ export type Media = {
     photosphereOptions?: PhotosphereOptions
     unstableAbsoluteOriginalPath: string, // may become obsolete at any point, do NOT use for building website
     stableRelativePath: string // path of copied resource within save folder
+}
+
+export type ReimportImageResult = {
+    originalFileName: string, 
+    fileStillExists: boolean
+}
+
+// returns the file names of images unable to be located by their original (unstable) location
+export function reimportImages(design: any[]): Promise<ReimportImageResult>[] {
+    return reimportImagesInternal(design)
+}
+
+function reimportImagesInternal(obj: any): Promise<ReimportImageResult>[] {
+    const results: Promise<ReimportImageResult>[] = []
+    if(obj.type && obj.type === 'media-child'){
+        const md = obj as MediaChild
+        if(md.content){
+            const m = md.content as Media
+            if(m.type === MediaType.IMAGE){
+                // check if original file exists
+                results.push(new Promise((resolve, reject) => {
+                    fileExists(m.unstableAbsoluteOriginalPath).then(exists => {
+                        if(!exists){
+                            resolve({originalFileName: m.unstableAbsoluteOriginalPath, fileStillExists: false})
+                        } else {
+                            // do the re-import
+                            registerMedia(m.unstableAbsoluteOriginalPath).then(newMedia => {
+                                m.stableRelativePath = newMedia.stableRelativePath
+                                resolve({originalFileName: m.unstableAbsoluteOriginalPath, fileStillExists: true})
+                            })
+                        }
+                    })
+                }))
+            }
+        }
+    } else {
+        // iterate through lower objects
+        for(const prop in obj){
+            if(obj[prop] && (typeof obj[prop]) === 'object'){
+                results.push(...reimportImagesInternal(obj[prop]))
+            }
+        }
+    }
+    return results
 }
 
 export function registerMedia(unstableAbsoluteOriginalPath: string): Promise<Media> {
