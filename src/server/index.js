@@ -287,7 +287,7 @@ app.get('/preview', cors(corsOptions), function(req, res){
 
 app.get('/test-resources', cors(corsOptions), function(req, res){
     const found = []
-    const missing = ['pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt', 'aws', 'aws creds']
+    const missing = ['yad', 'pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt', 'aws', 'aws creds']
     // test for powershell 7
     try {
         if(!isLinux){
@@ -296,6 +296,16 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
             found.push('powershell')
         }
         missing.splice(missing.indexOf('powershell'), 1)
+    }
+    catch(e) { }
+    try {
+        if(isLinux){
+            const res = spawnSync('yad', ['--version'], { encoding: 'utf-8' })
+            if(res.stdout.match(/GTK/g)){
+                found.push('yad')
+            }
+        }
+        missing.splice(missing.indexOf('yad'), 1)
     }
     catch(e) { }
     // test for image magick

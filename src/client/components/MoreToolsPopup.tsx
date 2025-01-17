@@ -18,6 +18,7 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
     const [footerParsed, setFooterParsed] = React.useState<any[]>(props.config.fixedBlogPostFooterDesign)
 
     const testResourceNameMap = {
+        'yad': 'yad (Yet Another Dialog)',
         'powershell': 'Powershell 7',
         'image magick': 'Image Magick',
         'pannellum': 'Pannellum',
@@ -34,6 +35,9 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
     if(props.isLinux){
         // linux does not require powershell
         delete testResourceNameMap['powershell']
+    } else {
+        // windows does not need yad
+        delete testResourceNameMap['yad']
     }
     let testResourceExtraDescription = {
         'aws creds': 'Run \"aws configure\" in a CMD window, and provide the access tokens received from Alan. ' +
