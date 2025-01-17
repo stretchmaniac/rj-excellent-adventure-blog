@@ -21,7 +21,7 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'powershell': 'Powershell 7',
         'image magick': 'Image Magick',
         'pannellum': 'Pannellum',
-        'hugin': 'nona on PATH through Hugin',
+        'hugin': props.isLinux? 'hugin/nona' : 'nona on PATH through Hugin',
         'python': 'Python 3',
         'pillow': 'Pillow for Python',
         'numpy': 'numpy for Python',

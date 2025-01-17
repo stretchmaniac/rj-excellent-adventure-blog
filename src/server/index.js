@@ -293,8 +293,8 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
         if(!isLinux){
             // linux does need powershell 7
             spawnSync('pwsh', ['-version'])
+            found.push('powershell')
         }
-        found.push('powershell')
         missing.splice(missing.indexOf('powershell'), 1)
     }
     catch(e) { }
