@@ -821,7 +821,7 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
             '--add-preview',
             '--large-preview',
             `--filename="${cachedChooseFileDirectory}"`,
-            'separator="\\n"'
+            '--separator="\\n"'
         ], { encoding: 'utf-8'}) :
         spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)], {
             encoding: 'utf-8',
