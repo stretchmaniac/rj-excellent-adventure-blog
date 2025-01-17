@@ -3,6 +3,21 @@ import { SimpleDate } from "./date"
 import { ReferencedMedia, sortPages } from "./empty-page"
 import { GeneratedPreview } from "./preview"
 
+export function platformIsLinux(): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        fetch('http://localhost:3000/is-linux', {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                "Content-Type": 'text/plain'
+            }
+        })
+        .then(response => response.text())
+        .then(data => resolve(JSON.parse(data).isLinux))
+        .then(error => {})
+    })
+}
+
 export function fileExists(filePath: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         fetch('http://localhost:3000/file-exists', {

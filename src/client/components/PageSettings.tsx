@@ -38,7 +38,7 @@ export default function PageSettings(props: PageSettingsProps) {
                 onChange={e => props.editPage({...props.page, isBlogPost: !e.target.checked})}
                 />
             <span className='input-label-checkbox'>
-                Static page (default blog post)
+                Static page (unchecked is blog post)
             </span>
         </div>
         {!props.page.isBlogPost && <div className='input-row-checkbox'>

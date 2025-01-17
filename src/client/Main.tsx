@@ -9,7 +9,7 @@ import { emptyBlogPostWithTitleDate, emptyStaticPageWithTitleDate, sortPages } f
 import ConfirmPopup from './components/ConfirmPopup'
 import { BlogConfig } from './types/blog-config'
 import { UnsavedLoadPopup } from './components/UnsavedLoadPopup'
-import { loadData, mergeData, setData, setMirrorDirectory, setPreview } from './tools/http'
+import { loadData, mergeData, platformIsLinux, setData, setMirrorDirectory, setPreview } from './tools/http'
 import { WaitingPopup } from './components/WaitingPopup'
 import { makePreview } from './tools/preview'
 import { MoreToolsPopup } from './components/MoreToolsPopup'
@@ -68,6 +68,7 @@ export function Main() {
         localSaveFolder: null,
         fixedBlogPostFooterDesign: defaultFooter()
     })
+    const [isLinux, setIsLinux] = React.useState(false)
 
     // mergeBehavior one of "load", "merge"
     const setLocalSaveFolderWithSideEffects = (newConfig: BlogConfig, mergeBehavior: string) => {
@@ -109,6 +110,8 @@ export function Main() {
             setMirrorDirectory('')
         }
         setConfigInit(true)
+
+        platformIsLinux().then(linux => setIsLinux(linux))
     }, [])
 
     const [pagesDirty, setPagesDirty] = React.useState(false)
@@ -284,7 +287,7 @@ export function Main() {
                 }}
             />
         </div>
-        {moreToolsPopupOpen && <MoreToolsPopup pages={pages} config={config} 
+        {moreToolsPopupOpen && <MoreToolsPopup pages={pages} config={config} isLinux={isLinux}
             setConfig={setConfigWithSideEffects} close={() => setMoreToolsPopupOpen(false)}/>}
         {waitingPopup.popupOpen && <WaitingPopup message={waitingPopup.message}/>}
         {publishPopupOpen && <PublishPopup close={() => setPublishPopupOpen(false)} 

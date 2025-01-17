@@ -31,7 +31,11 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'aws': 'AWS Command Line Interface (CLI)',
         'aws creds': 'AWS CLI Credentials ("aws sts get-caller-identity")'
     } as any
-    const testResourceExtraDescription = {
+    if(props.isLinux){
+        // linux does not require powershell
+        delete testResourceNameMap['powershell']
+    }
+    let testResourceExtraDescription = {
         'aws creds': 'Run \"aws configure\" in a CMD window, and provide the access tokens received from Alan. ' +
             'For \"Default region name\", type \"us-east-1\". For \"Default output format\" type \"table\".'
     } as any
@@ -46,6 +50,13 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
         'rock salt': 'https://gwfh.mranftl.com/api/fonts/rock-salt?download=zip&subsets=latin&variants=regular&formats=woff2',
         'aws': 'https://awscli.amazonaws.com/AWSCLIV2.msi'
     } as any
+    if(props.isLinux){
+        delete testResourceDownloadLinkMap['powershell']
+        delete testResourceDownloadLinkMap['image magick']
+        delete testResourceDownloadLinkMap['hugin']
+        delete testResourceDownloadLinkMap['python']
+        delete testResourceDownloadLinkMap['aws']
+    }
     const testResourcesExtraActions = {
         'pillow': {
             title: 'Run "pip install Pillow" (requires python)',
@@ -125,6 +136,10 @@ export function MoreToolsPopup(props: MoreToolsPopupProps) {
             }
         }
     } as any
+    if(props.isLinux){
+        delete testResourcesExtraActions['pillow']
+        delete testResourcesExtraActions['numpy']
+    }
 
     return <div className='popup-fullscreen'>
             <div className='popup-root'>
@@ -246,5 +261,6 @@ export type MoreToolsPopupProps = {
     close: () => void
     pages: Page[]
     config: BlogConfig
+    isLinux: boolean
     setConfig: (newConfig: BlogConfig) => void
 }

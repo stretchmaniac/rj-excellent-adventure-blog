@@ -12,6 +12,8 @@ app.use(express.text({limit: '100mb'}))
 
 const port = 3000
 
+const isLinux = (process.platform === 'linux')
+
 // only accept requests from localhost client
 const corsOptions = {
     origin: 'http://localhost:8080'
@@ -21,18 +23,22 @@ app.use(cors(corsOptions))
 console.log('starting server on port ' + port)
 let rootDir = null
 
+app.get('/is-linux', cors(corsOptions), function(req, res){
+    res.send(JSON.stringify({success: true, isLinux: isLinux}))
+})
+
 app.post('/cmd-task', cors(corsOptions), function (req, res){
     const type = req.body
     if(type === 'install pillow'){
-        spawnSync('python', ['-m', 'pip', 'install', 'Pillow'])
+        spawnSync(isLinux ? 'python3' : 'python', ['-m', 'pip', 'install', 'Pillow'])
         res.send(JSON.stringify({success: true}))
     }
     else if(type === 'install numpy'){
-        spawnSync('python', ['-m', 'pip', 'install', 'numpy'])
+        spawnSync(isLinux ? 'python3' : 'python', ['-m', 'pip', 'install', 'numpy'])
         res.send(JSON.stringify({success: true}))
     }
     else if(type === 'aws sync dryrun'){
-        const output = spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--dryrun', '--delete'], { encoding: 'utf-8' })
+        const output = spawnSync('aws', ['s3', 'sync', `${rootDir}/preview`, 's3://wherearerickandjulie.alankoval.com', '--dryrun', '--delete'], { encoding: 'utf-8' })
         if(output.stderr.trim().length > 0){
             res.send(JSON.stringify({success: false, output: output.stderr.trim()}))
         } else {
@@ -40,7 +46,7 @@ app.post('/cmd-task', cors(corsOptions), function (req, res){
         }
     }
     else if(type === 'aws sync'){
-        spawnSync('aws', ['s3', 'sync', `${rootDir}\\preview`, 's3://wherearerickandjulie.alankoval.com', '--delete'], { encoding: 'utf-8' })
+        spawnSync('aws', ['s3', 'sync', `${rootDir}/preview`, 's3://wherearerickandjulie.alankoval.com', '--delete'], { encoding: 'utf-8' })
         res.send(JSON.stringify({success: true}))
     }
     else if(type === 'aws invalidate'){
@@ -284,21 +290,26 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
     const missing = ['pannellum', 'powershell', 'image magick', 'hugin', 'python', 'pillow', 'numpy', 'open sans', 'lora', 'rock salt', 'aws', 'aws creds']
     // test for powershell 7
     try {
-        spawnSync('pwsh', ['-version'])
+        if(!isLinux){
+            // linux does need powershell 7
+            spawnSync('pwsh', ['-version'])
+        }
         found.push('powershell')
         missing.splice(missing.indexOf('powershell'), 1)
     }
     catch(e) { }
     // test for image magick
     try {
-        spawnSync('magick', ['-version'])
-        found.push('image magick')
-        missing.splice(missing.indexOf('image magick'), 1)
+        const res = spawnSync(isLinux ? 'convert' : 'magick', ['-version'], { encoding: 'utf-8' })
+        if(res.stdout.match(/Version/g)){
+            found.push('image magick')
+            missing.splice(missing.indexOf('image magick'), 1)
+        }
     }
     catch(e) { }
     // test for python 3
     try {
-        const res = spawnSync('python', ['--version'], { encoding: 'utf-8' })
+        const res = spawnSync(isLinux ? 'python3' : 'python', ['--version'], { encoding: 'utf-8' })
         if(res.stdout.match(/Python 3/g)){
             found.push('python')
             missing.splice(missing.indexOf('python'), 1)
@@ -307,16 +318,16 @@ app.get('/test-resources', cors(corsOptions), function(req, res){
     catch(e) { }
     // test for pillow
     if(found.indexOf('python') !== -1){
-        const res = spawnSync('python', ['-m', 'pip', 'show', 'Pillow'], { encoding: 'utf-8' })
-        if(res.stderr.trim().length === 0){
+        const res = spawnSync(isLinux ? 'python3' : 'python', ['-m', 'pip', 'show', 'Pillow'], { encoding: 'utf-8' })
+        if(res.stderr.trim().length === 0 && res.stdout.match(/Version: /g)){
             found.push('pillow')
             missing.splice(missing.indexOf('pillow'), 1)
         }
     }
     // test for numpy
     if(found.indexOf('python') !== -1){
-        const res = spawnSync('python', ['-m', 'pip', 'show', 'numpy'], { encoding: 'utf-8' })
-        if(res.stderr.trim().length === 0){
+        const res = spawnSync(isLinux ? 'python3' : 'python', ['-m', 'pip', 'show', 'numpy'], { encoding: 'utf-8' })
+        if(res.stderr.trim().length === 0 && res.stdout.match(/Version: /g)){
             found.push('numpy')
             missing.splice(missing.indexOf('numpy'), 1)
         }
@@ -562,7 +573,7 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
                 const dest = renameQ ? 
                     rootDir + '/' + targetFolder + '/' + rename + '_' + sizeName + '.' + ext :
                     rootDir + '/' + targetFolder + '/' + name + '_' + uuid + '_' + sizeName + '.' + ext
-                spawn('magick', [
+                spawn(isLinux ? 'convert' : 'magick', [
                     rootDir + '/' + newPath, 
                     // Without -auto-orient, images with rotation metadata (e.g. in exif orientation)
                     // are resized according to their native buffer orientation. This 
@@ -584,7 +595,7 @@ app.post('/copy-resource', cors(corsOptions), function(req, res){
             const dest = renameQ ? 
                     rootDir + '/' + targetFolder + '/' + rename + '_ps' :
                     rootDir + '/' + targetFolder + '/' + name + '_' + uuid + '_ps'
-            spawn('python', [
+            spawn(isLinux ? 'python3' : 'python', [
                 './src/server/photosphere_generate.py',
                 '-n',
                 'nona',
@@ -759,7 +770,9 @@ app.post('/set-root-directory', cors(corsOptions), function(req, res){
 
 
 app.get('/choose-folder', cors(corsOptions), function(req, res){
-    const child = spawn('powershell.exe', ['-Command', './src/server/openFolder.ps1'])
+    const child = isLinux ? 
+        spawn('yad',['--file', '--directory', '--maximized']) : 
+        spawn('powershell.exe', ['-Command', './src/server/openFolder.ps1'])
 
     let consoleOut = ''
     child.stdout.setEncoding('utf-8')
@@ -774,6 +787,9 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
     })
 })
 
+// Windows file picker will save your last opened folder;
+// linux does not. So we manually keep track of it here (for linux)
+let cachedChooseFileDirectory
 /*
     Query (url) parameters:
       multiple=('true'|'false;)
@@ -781,13 +797,36 @@ app.get('/choose-folder', cors(corsOptions), function(req, res){
 app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
-    const child = spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)], {
-        encoding: 'utf-8',
-        shell: 'pwsh.exe'
-    })
+    if(!cachedChooseFileDirectory && isLinux){
+        // Default to root directory (trailing slash is fine for yad).
+        // Backslashes are not ok though.
+        cachedChooseFileDirectory = rootDir.replaceAll('\\', '/')
+    }
+
+    const child = isLinux ? 
+        spawnSync('yad', [
+            '--file',
+            ...(multiple ? ['--multiple'] : []),
+            '--maximized',
+            '--add-preview',
+            '--large-preview',
+            `--filename="${cachedChooseFileDirectory}"`,
+            'separator="\\n"'
+        ], { encoding: 'utf-8'}) :
+        spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)], {
+            encoding: 'utf-8',
+            shell: 'pwsh.exe'
+        })
+
+    const result = child.stdout.trim()
+    if(result !== '' && isLinux){
+        // save the folder as cachedChooseFileDirectory
+        const chosenFile = result.split('\n')[0]
+        cachedChooseFileDirectory = chosenFile.substring(0, chosenFile.lastIndexOf('/'))
+    }
 
     res.type('txt')
-    res.send(child.stdout.trim())
+    res.send(result)
 })
 
 app.listen(port)
