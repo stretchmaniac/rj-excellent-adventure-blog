@@ -808,11 +808,25 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
     const multiple = req.query.multiple === 'true'
 
     if(!cachedChooseFileDirectory && isLinux){
-        // Default to root directory (trailing slash is fine for yad).
+        // Default to directory above root directory
         // Backslashes are not ok though.
         cachedChooseFileDirectory = rootDir.replaceAll('\\', '/')
+        // (rootDir does not end in a slash)
+        const lastIndex = cachedChooseFileDirectory.lastIndexOf('/')
+        // just in case rootDir is the empty string (root directory of computer)
+        if(lastIndex >= 0){
+            cachedChooseFileDirectory = cachedChooseFileDirectory.substring(0, lastIndex)
+        }
     }
 
+    // shell: true keeps the built-in shell parsing step that usually occurs 
+    // when you type a command in a terminal. Without it, --separator="\\n" is interpreted
+    // as having separator actually equal to <quotation><newline><quotation>. And while we could do shell: false
+    // with --separator=\n and --filename=${cachedChooseFileDirectory}, I think this one is 
+    // more consistent with how one ought to write it from a terminal, and makes it clear
+    // that spaces are accounted for in cachedChooseFileDirectory.
+    //
+    // See https://stackoverflow.com/questions/48014957/quotes-in-node-js-spawn-arguments
     const child = isLinux ? 
         spawnSync('yad', [
             '--file',
@@ -822,7 +836,7 @@ app.get('/choose-files', cors(corsOptions), function(req, res){
             '--large-preview',
             `--filename="${cachedChooseFileDirectory}"`,
             '--separator="\\n"'
-        ], { encoding: 'utf-8'}) :
+        ], { encoding: 'utf-8', shell: true }) :
         spawnSync('pwsh.exe', ['-Command', './src/server/openFile.ps1', '' + (multiple ? 1 : 0)], {
             encoding: 'utf-8',
             shell: 'pwsh.exe'
