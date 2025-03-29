@@ -181,7 +181,7 @@ app.post('/serve-preview', cors(corsOptions), async function(req, res){
 
 	 // copy fixed-assets folder
     rootDirExpectedFiles.push(...fs.readdirSync(rootDir + '/fixed-assets'))
-    fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true})
+    fs.cpSync(rootDir + '/fixed-assets', rootDir + '/preview', {recursive: true, preserveTimestamps: true})
 
     // copy page html, css and js files to page folder
     const orderedIds = previewData.pagesHtmlIds
